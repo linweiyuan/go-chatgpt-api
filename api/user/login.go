@@ -116,14 +116,17 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	var cookieStrings []string
-	for _, cookie := range resp.Cookies() {
-		cookieStrings = append(cookieStrings, cookie.Name+"="+cookie.Value)
-	}
-
 	var authSession AuthSession
 	json.Unmarshal(body, &authSession)
-	authSession.Cookies = strings.Join(cookieStrings, ":")
+	authSession.Cookies = GetCookiesString(resp.Cookies())
 
 	c.JSON(http.StatusOK, authSession)
+}
+
+func GetCookiesString(cookies []*http.Cookie) string {
+	var cookieStrings []string
+	for _, cookie := range cookies {
+		cookieStrings = append(cookieStrings, cookie.Name+"="+cookie.Value)
+	}
+	return strings.Join(cookieStrings, ":")
 }
