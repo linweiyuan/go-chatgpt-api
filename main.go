@@ -22,7 +22,14 @@ func main() {
 
 	authMiddleware := middleware.AuthMiddleware()
 
-	router.GET("/conversations", authMiddleware, conversation.GetConversations)
+	conversationsGroup := router.Group("/conversations", authMiddleware)
+	{
+		conversationsGroup.GET("", conversation.GetConversations)
+
+		// PATCH is official method, POST is added for Java support
+		conversationsGroup.PATCH("", conversation.ClearConversations)
+		conversationsGroup.POST("", conversation.ClearConversations)
+	}
 
 	conversationGroup := router.Group("/conversation", authMiddleware)
 	{
@@ -30,7 +37,6 @@ func main() {
 		conversationGroup.POST("/gen_title/:id", conversation.GenConversationTitle)
 		conversationGroup.GET("/:id", conversation.GetConversation)
 
-		// PATCH is official method, POST is added for Java
 		// rename or delete conversation use a same API with different parameters
 		conversationGroup.PATCH("/:id", conversation.PatchConversation)
 		conversationGroup.POST("/:id", conversation.PatchConversation)

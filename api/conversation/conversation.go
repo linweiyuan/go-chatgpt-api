@@ -215,7 +215,26 @@ func FeedbackMessage(c *gin.Context) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		c.JSON(resp.StatusCode, api.ReturnMessage(resp.Status))
+		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to make a message feedback."))
+		return
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	c.Writer.Write([]byte(body))
+}
+
+func ClearConversations(c *gin.Context) {
+	jsonBytes, _ := json.Marshal(PatchConversationRequest{
+		IsVisible: false,
+	})
+	req, _ := http.NewRequest("PATCH", "https://apps.openai.com/api/conversations", bytes.NewBuffer(jsonBytes))
+	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
+
+	resp, err := client.Do(req)
+	api.CheckError(c, err)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to clear conversations."))
 		return
 	}
 
