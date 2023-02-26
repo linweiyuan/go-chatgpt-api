@@ -24,7 +24,11 @@ func main() {
 
 	router.GET("/conversations", authMiddleware, conversation.GetConversations)
 
-	router.POST("/conversation", authMiddleware, conversation.MakeConversation)
+	conversationGroup := router.Group("/conversation", authMiddleware)
+	{
+		conversationGroup.POST("", conversation.MakeConversation)
+		conversationGroup.POST("/gen_title/:id", conversation.GenConversationTitle)
+	}
 
 	router.Run(":8080")
 }

@@ -110,3 +110,30 @@ func MakeConversation(c *gin.Context) {
 
 	io.Copy(c.Writer, resp.Body)
 }
+
+func GenConversationTitle(c *gin.Context) {
+	var request struct {
+		MessageId string `json:"message_id"`
+	}
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse gen conversation title request."))
+		return
+	}
+
+	jsonBytes, _ := json.Marshal(map[string]string{
+		"message_id": request.MessageId,
+		"model":      "text-davinci-002-render-sha",
+	})
+	req, _ := http.NewRequest("POST", "https://apps.openai.com/api/conversation/gen_title/"+c.Param("id"), bytes.NewBuffer(jsonBytes))
+	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
+
+	resp, err := client.Do(req)
+	api.CheckError(c, err)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to gen conversation title."))
+		return
+	}
+
+	io.Copy(c.Writer, resp.Body)
+}
