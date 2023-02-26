@@ -24,5 +24,7 @@ func main() {
 
 	router.GET("/conversations", authMiddleware, conversation.GetConversations)
 
+	router.POST("/conversation", authMiddleware, conversation.MakeConversation)
+
 	router.Run(":8080")
 }
