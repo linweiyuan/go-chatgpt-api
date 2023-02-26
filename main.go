@@ -29,6 +29,11 @@ func main() {
 		conversationGroup.POST("", conversation.MakeConversation)
 		conversationGroup.POST("/gen_title/:id", conversation.GenConversationTitle)
 		conversationGroup.GET("/:id", conversation.GetConversation)
+
+		// PATCH is official method, POST is added for Java
+		// rename or delete conversation use a same API with different parameters
+		conversationGroup.PATCH("/:id", conversation.PatchConversation)
+		conversationGroup.POST("/:id", conversation.PatchConversation)
 	}
 
 	router.Run(":8080")

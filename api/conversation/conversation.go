@@ -153,3 +153,38 @@ func GetConversation(c *gin.Context) {
 	body, _ := io.ReadAll(resp.Body)
 	c.Writer.Write([]byte(body))
 }
+
+type PatchConversationRequest struct {
+	Title     *string `json:"title"`
+	IsVisible bool    `json:"is_visible"`
+}
+
+func PatchConversation(c *gin.Context) {
+	var patchConversationRequest PatchConversationRequest
+	if err := c.ShouldBindJSON(&patchConversationRequest); err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse conversation patch request."))
+		return
+	}
+
+	// bool default to false, then will hide (delete) the conversation
+	if patchConversationRequest.Title != nil {
+		patchConversationRequest.IsVisible = true
+	}
+
+	conversationId := c.Param("id")
+
+	jsonBytes, _ := json.Marshal(patchConversationRequest)
+	req, _ := http.NewRequest("PATCH", "https://apps.openai.com/api/conversation/"+conversationId, bytes.NewBuffer(jsonBytes))
+	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
+
+	resp, err := client.Do(req)
+	api.CheckError(c, err)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to update conversation."))
+		return
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	c.Writer.Write([]byte(body))
+}
