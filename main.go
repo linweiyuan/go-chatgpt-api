@@ -28,6 +28,7 @@ func main() {
 	{
 		conversationGroup.POST("", conversation.MakeConversation)
 		conversationGroup.POST("/gen_title/:id", conversation.GenConversationTitle)
+		conversationGroup.GET("/:id", conversation.GetConversation)
 	}
 
 	router.Run(":8080")

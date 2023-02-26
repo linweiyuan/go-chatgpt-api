@@ -137,3 +137,19 @@ func GenConversationTitle(c *gin.Context) {
 
 	io.Copy(c.Writer, resp.Body)
 }
+
+func GetConversation(c *gin.Context) {
+	req, _ := http.NewRequest("GET", "https://apps.openai.com/api/conversation/"+c.Param("id"), nil)
+	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
+
+	resp, err := client.Do(req)
+	api.CheckError(c, err)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to get conversation."))
+		return
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	c.Writer.Write([]byte(body))
+}
