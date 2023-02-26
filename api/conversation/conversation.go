@@ -66,15 +66,15 @@ type MakeConversationRequest struct {
 }
 
 func MakeConversation(c *gin.Context) {
-	var makeConversationRequest MakeConversationRequest
-	if err := c.ShouldBindJSON(&makeConversationRequest); err != nil {
+	var request MakeConversationRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse make conversation request."))
 		return
 	}
 
 	jsonBytes, _ := json.Marshal(Conversation{
 		Action:         "next",
-		ConversationID: makeConversationRequest.ConversationId,
+		ConversationID: request.ConversationId,
 		Messages: []Message{
 			{
 				Author: Author{
@@ -82,14 +82,14 @@ func MakeConversation(c *gin.Context) {
 				},
 				Content: Content{
 					ContentType: "text",
-					Parts:       []string{makeConversationRequest.Content},
+					Parts:       []string{request.Content},
 				},
-				ID:   makeConversationRequest.MessageId,
+				ID:   request.MessageId,
 				Role: "user",
 			},
 		},
 		Model:           "text-davinci-002-render-sha",
-		ParentMessageID: makeConversationRequest.ParentMessageId,
+		ParentMessageID: request.ParentMessageId,
 	})
 	req, _ := http.NewRequest("POST", "https://apps.openai.com/api/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
@@ -160,20 +160,20 @@ type PatchConversationRequest struct {
 }
 
 func PatchConversation(c *gin.Context) {
-	var patchConversationRequest PatchConversationRequest
-	if err := c.ShouldBindJSON(&patchConversationRequest); err != nil {
-		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse conversation patch request."))
+	var request PatchConversationRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse update conversation request."))
 		return
 	}
 
 	// bool default to false, then will hide (delete) the conversation
-	if patchConversationRequest.Title != nil {
-		patchConversationRequest.IsVisible = true
+	if request.Title != nil {
+		request.IsVisible = true
 	}
 
 	conversationId := c.Param("id")
 
-	jsonBytes, _ := json.Marshal(patchConversationRequest)
+	jsonBytes, _ := json.Marshal(request)
 	req, _ := http.NewRequest("PATCH", "https://apps.openai.com/api/conversation/"+conversationId, bytes.NewBuffer(jsonBytes))
 	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
 
@@ -182,6 +182,40 @@ func PatchConversation(c *gin.Context) {
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to update conversation."))
+		return
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	c.Writer.Write([]byte(body))
+}
+
+type FeedbackMessageRequest struct {
+	MessageID      string `json:"message_id"`
+	ConversationID string `json:"conversation_id"`
+	Rating         string `json:"rating"`
+}
+
+func FeedbackMessage(c *gin.Context) {
+	var request FeedbackMessageRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse feedback conversation request."))
+		return
+	}
+
+	jsonBytes, _ := json.Marshal(request)
+	req, _ := http.NewRequest("POST", "https://apps.openai.com/api/conversation/message_feedback", bytes.NewBuffer(jsonBytes))
+	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
+
+	resp, err := client.Do(req)
+	api.CheckError(c, err)
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusInternalServerError {
+		c.JSON(resp.StatusCode, api.ReturnMessage("Your how selected another one before."))
+		return
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		c.JSON(resp.StatusCode, api.ReturnMessage(resp.Status))
 		return
 	}
 

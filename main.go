@@ -34,6 +34,8 @@ func main() {
 		// rename or delete conversation use a same API with different parameters
 		conversationGroup.PATCH("/:id", conversation.PatchConversation)
 		conversationGroup.POST("/:id", conversation.PatchConversation)
+
+		conversationGroup.POST("/message_feedback", conversation.FeedbackMessage)
 	}
 
 	router.Run(":8080")
