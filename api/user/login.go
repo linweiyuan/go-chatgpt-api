@@ -43,7 +43,7 @@ func Login(c *gin.Context) {
 
 	jar, _ := cookiejar.New(nil)
 	client := &http.Client{
-		Timeout: 0,
+		Timeout: time.Second * api.ConnectTimeOutInSeconds,
 		Jar:     jar,
 	}
 

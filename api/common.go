@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const ConnectTimeOutInSeconds = 10
+
 const defaultErrorMessageKey = "errorMessage"
 
 func ReturnMessage(msg string) gin.H {
@@ -14,18 +16,10 @@ func ReturnMessage(msg string) gin.H {
 	}
 }
 
-func handleError(err error) gin.H {
-	return gin.H{
-		defaultErrorMessageKey: err.Error(),
-	}
-}
-
-func returnError(c *gin.Context, err error) {
-	c.JSON(http.StatusInternalServerError, handleError(err))
-}
-
 func CheckError(c *gin.Context, err error) {
 	if err != nil {
-		returnError(c, err)
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			defaultErrorMessageKey: "ChatGPT is at capacity right now, please try again later.",
+		})
 	}
 }

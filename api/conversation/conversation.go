@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -14,7 +15,7 @@ var client *http.Client
 
 func init() {
 	client = &http.Client{
-		Timeout: 0,
+		Timeout: time.Second * api.ConnectTimeOutInSeconds,
 	}
 }
 
