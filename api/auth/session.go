@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -13,7 +12,7 @@ import (
 
 func RenewAccessToken(c *gin.Context) {
 	client := &http.Client{
-		Timeout: time.Second * api.ConnectTimeOutInSeconds,
+		Timeout: 0,
 	}
 
 	req, _ := http.NewRequest("GET", "https://explorer.api.openai.com/api/auth/session", nil)

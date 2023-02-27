@@ -6,8 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const ConnectTimeOutInSeconds = 10
-
 const defaultErrorMessageKey = "errorMessage"
 
 func ReturnMessage(msg string) gin.H {
