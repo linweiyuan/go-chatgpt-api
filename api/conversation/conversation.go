@@ -59,10 +59,10 @@ type Content struct {
 }
 
 type MakeConversationRequest struct {
-	MessageId       string  `json:"message_id"`
-	ParentMessageId string  `json:"parent_message_id"`
-	ConversationId  *string `json:"conversation_id"`
-	Content         string  `json:"content"`
+	MessageID       string `json:"message_id"`
+	ParentMessageID string `json:"parent_message_id"`
+	ConversationID  string `json:"conversation_id"`
+	Content         string `json:"content"`
 }
 
 func MakeConversation(c *gin.Context) {
@@ -72,9 +72,8 @@ func MakeConversation(c *gin.Context) {
 		return
 	}
 
-	jsonBytes, _ := json.Marshal(Conversation{
-		Action:         "next",
-		ConversationID: request.ConversationId,
+	conversation := Conversation{
+		Action: "next",
 		Messages: []Message{
 			{
 				Author: Author{
@@ -84,13 +83,19 @@ func MakeConversation(c *gin.Context) {
 					ContentType: "text",
 					Parts:       []string{request.Content},
 				},
-				ID:   request.MessageId,
+				ID:   request.MessageID,
 				Role: "user",
 			},
 		},
 		Model:           "text-davinci-002-render-sha",
-		ParentMessageID: request.ParentMessageId,
-	})
+		ParentMessageID: request.ParentMessageID,
+	}
+
+	if request.ConversationID != "" {
+		conversation.ConversationID = &request.ConversationID
+	}
+
+	jsonBytes, _ := json.Marshal(conversation)
 	req, _ := http.NewRequest("POST", "https://apps.openai.com/api/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
 	req.Header.Set("Accept", "text/event-stream")
@@ -113,7 +118,7 @@ func MakeConversation(c *gin.Context) {
 
 func GenConversationTitle(c *gin.Context) {
 	var request struct {
-		MessageId string `json:"message_id"`
+		MessageID string `json:"message_id"`
 	}
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse gen conversation title request."))
@@ -121,7 +126,7 @@ func GenConversationTitle(c *gin.Context) {
 	}
 
 	jsonBytes, _ := json.Marshal(map[string]string{
-		"message_id": request.MessageId,
+		"message_id": request.MessageID,
 		"model":      "text-davinci-002-render-sha",
 	})
 	req, _ := http.NewRequest("POST", "https://apps.openai.com/api/conversation/gen_title/"+c.Param("id"), bytes.NewBuffer(jsonBytes))
@@ -171,10 +176,10 @@ func PatchConversation(c *gin.Context) {
 		request.IsVisible = true
 	}
 
-	conversationId := c.Param("id")
+	conversationID := c.Param("id")
 
 	jsonBytes, _ := json.Marshal(request)
-	req, _ := http.NewRequest("PATCH", "https://apps.openai.com/api/conversation/"+conversationId, bytes.NewBuffer(jsonBytes))
+	req, _ := http.NewRequest("PATCH", "https://apps.openai.com/api/conversation/"+conversationID, bytes.NewBuffer(jsonBytes))
 	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
 
 	resp, err := client.Do(req)
