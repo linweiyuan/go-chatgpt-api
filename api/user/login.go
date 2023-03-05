@@ -34,6 +34,7 @@ type AuthSession struct {
 	Cookies     string    `json:"cookies"`
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func Login(c *gin.Context) {
 	var loginInfo LoginInfo
 	if err := c.ShouldBindJSON(&loginInfo); err != nil {

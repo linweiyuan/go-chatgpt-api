@@ -18,6 +18,7 @@ func init() {
 	}
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func GetConversations(c *gin.Context) {
 	req, _ := http.NewRequest("GET", "https://apps.openai.com/api/conversations?offset=0&limit=100", nil)
 	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
@@ -65,6 +66,7 @@ type MakeConversationRequest struct {
 	Content         string `json:"content"`
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func MakeConversation(c *gin.Context) {
 	var request MakeConversationRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -116,6 +118,7 @@ func MakeConversation(c *gin.Context) {
 	io.Copy(c.Writer, resp.Body)
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func GenConversationTitle(c *gin.Context) {
 	var request struct {
 		MessageID string `json:"message_id"`
@@ -143,6 +146,7 @@ func GenConversationTitle(c *gin.Context) {
 	io.Copy(c.Writer, resp.Body)
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func GetConversation(c *gin.Context) {
 	req, _ := http.NewRequest("GET", "https://apps.openai.com/api/conversation/"+c.Param("id"), nil)
 	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
@@ -164,6 +168,7 @@ type PatchConversationRequest struct {
 	IsVisible bool    `json:"is_visible"`
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func PatchConversation(c *gin.Context) {
 	var request PatchConversationRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -200,6 +205,7 @@ type FeedbackMessageRequest struct {
 	Rating         string `json:"rating"`
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func FeedbackMessage(c *gin.Context) {
 	var request FeedbackMessageRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
@@ -228,6 +234,7 @@ func FeedbackMessage(c *gin.Context) {
 	c.Writer.Write([]byte(body))
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func ClearConversations(c *gin.Context) {
 	jsonBytes, _ := json.Marshal(PatchConversationRequest{
 		IsVisible: false,

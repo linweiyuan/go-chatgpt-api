@@ -10,6 +10,7 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/api/user"
 )
 
+//goland:noinspection GoUnhandledErrorResult
 func RenewAccessToken(c *gin.Context) {
 	client := &http.Client{
 		Timeout: 0,

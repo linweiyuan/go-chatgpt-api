@@ -2,7 +2,9 @@
 
 Unofficial ChatGPT API (web based, not the GPT-3 API).
 
-Java Swing GUI client: [ChatGPT-Swing](https://github.com/linweiyuan/ChatGPT-Swing)
+Java Swing GUI application: [ChatGPT-Swing](https://github.com/linweiyuan/ChatGPT-Swing)
+
+Golang TUI application: [go-chatgpt](https://github.com/linweiyuan/go-chatgpt)
 
 ---
 

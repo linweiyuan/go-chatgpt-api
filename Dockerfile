@@ -8,4 +8,4 @@ WORKDIR /app
 COPY --from=builder /app/go-chatgpt-api .
 
 EXPOSE 8080
-CMD [ "/app/go-chatgpt-api" ]
+CMD ["/app/go-chatgpt-api"]
