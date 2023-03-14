@@ -1,0 +1,12 @@
+services:
+  go-chatgpt-api:
+    build: .
+    container_name: go-chatgpt-api
+    image: gochatgptapi
+    ports:
+      - 8080:8080
+    environment:
+      - GIN_MODE=release
+      - WEB_DRIVER_URL=http://172.17.0.1:9515
+      - PROXY_SERVER=socks5://172.17.0.1:20170
+    restart: unless-stopped

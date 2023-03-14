@@ -1,46 +1,40 @@
 package conversation
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
-	"net/http"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
+	"github.com/linweiyuan/go-chatgpt-api/webdriver"
 )
-
-var client *http.Client
-
-func init() {
-	client = &http.Client{
-		Timeout: 0,
-	}
-}
 
 //goland:noinspection GoUnhandledErrorResult
 func GetConversations(c *gin.Context) {
-	req, _ := http.NewRequest("GET", "https://apps.openai.com/api/conversations?offset=0&limit=100", nil)
-	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
-
-	resp, err := client.Do(req)
-	api.CheckError(c, err)
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to get conversations."))
-		return
+	offset := c.Param("offset")
+	if offset == "" {
+		offset = "0"
 	}
-
-	body, _ := io.ReadAll(resp.Body)
-	c.Writer.Write([]byte(body))
+	limit := c.Param("limit")
+	if limit == "" {
+		limit = "20"
+	}
+	url := "https://chat.openai.com/backend-api/conversations?offset=" + offset + "&limit=" + limit
+	accessToken := c.GetHeader(api.Authorization)
+	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
+		const xhr = new XMLHttpRequest();
+		xhr.open('GET', '%s', false);
+		xhr.setRequestHeader('Authorization', '%s');
+		xhr.send();
+		return xhr.responseText;`, url, accessToken), nil)
+	c.Writer.Write([]byte(responseText.(string)))
 }
 
-type Conversation struct {
+type StartConversationRequest struct {
 	Action          string    `json:"action"`
-	ConversationID  *string   `json:"conversation_id"`
 	Messages        []Message `json:"messages"`
 	Model           string    `json:"model"`
 	ParentMessageID string    `json:"parent_message_id"`
+	ConversationID  *string   `json:"conversation_id"`
 }
 
 type Message struct {
@@ -59,108 +53,111 @@ type Content struct {
 	Parts       []string `json:"parts"`
 }
 
-type MakeConversationRequest struct {
-	MessageID       string `json:"message_id"`
-	ParentMessageID string `json:"parent_message_id"`
-	ConversationID  string `json:"conversation_id"`
-	Content         string `json:"content"`
+//goland:noinspection GoUnhandledErrorResult
+func StartConversation(c *gin.Context) {
+	var request StartConversationRequest
+	c.BindJSON(&request)
+	if request.ConversationID == nil || *request.ConversationID == "" {
+		request.ConversationID = nil
+	}
+	jsonBytes, _ := json.Marshal(request)
+	url := "https://chat.openai.com/backend-api/conversation"
+	accessToken := c.GetHeader(api.Authorization)
+	webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', '%s', true);
+		xhr.setRequestHeader('Accept', 'text/event-stream');
+		xhr.setRequestHeader('Authorization', 'Bearer %s');
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === xhr.LOADING && xhr.status === 200) {
+				window.postMessage(xhr.responseText);
+			} else if (xhr.status === 429) {
+				window.postMessage("429");
+			} if (xhr.readyState === xhr.DONE) {
+
+			}
+		};
+		xhr.send('%s');
+		return xhr.responseText;`, url, accessToken, string(jsonBytes)), nil)
+
+	var callbackChannel = make(chan string)
+
+	go func() {
+		for {
+			eventData, _ := webdriver.WebDriver.ExecuteScriptAsync(`
+				const callback = arguments[arguments.length - 1];
+				const handleFunction = function(event) {
+					const list = event.data.split('\n\n');
+					list.pop();
+					const eventData = list.pop();
+					if (eventData.startsWith('event')) {
+						callback(eventData.substring(55));
+					} else {
+						callback(eventData.substring(6));
+					}
+				};
+				window.removeEventListener('message', handleFunction);
+				window.addEventListener('message', handleFunction);`, nil)
+
+			// sometimes callback will not return the final data
+			if eventData == nil {
+				callbackChannel <- api.DoneFlag
+				close(callbackChannel)
+				break
+			}
+
+			eventDataString := eventData.(string)
+			if eventDataString == "429" || eventDataString == api.DoneFlag {
+				callbackChannel <- eventDataString
+				close(callbackChannel)
+				break
+			}
+
+			callbackChannel <- eventDataString
+		}
+	}()
+
+	// TODO: have no idea how to handle SSE in Go
+	for eventDataString := range callbackChannel {
+		c.Writer.Write([]byte("data:" + eventDataString + "\n"))
+		c.Writer.Flush()
+	}
+}
+
+type GenerateTitleRequest struct {
+	MessageID string `json:"message_id"`
+	Model     string `json:"model"`
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func MakeConversation(c *gin.Context) {
-	var request MakeConversationRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse make conversation request."))
-		return
-	}
-
-	conversation := Conversation{
-		Action: "next",
-		Messages: []Message{
-			{
-				Author: Author{
-					Role: "user",
-				},
-				Content: Content{
-					ContentType: "text",
-					Parts:       []string{request.Content},
-				},
-				ID:   request.MessageID,
-				Role: "user",
-			},
-		},
-		Model:           "text-davinci-002-render-sha",
-		ParentMessageID: request.ParentMessageID,
-	}
-
-	if request.ConversationID != "" {
-		conversation.ConversationID = &request.ConversationID
-	}
-
-	jsonBytes, _ := json.Marshal(conversation)
-	req, _ := http.NewRequest("POST", "https://apps.openai.com/api/conversation", bytes.NewBuffer(jsonBytes))
-	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
-	req.Header.Set("Accept", "text/event-stream")
-
-	resp, err := client.Do(req)
-	api.CheckError(c, err)
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusTooManyRequests {
-		c.JSON(resp.StatusCode, api.ReturnMessage("Too many requests in 1 hour, please try again later."))
-		return
-	}
-
-	if resp.StatusCode == http.StatusInternalServerError {
-		c.JSON(resp.StatusCode, api.ReturnMessage("Server error, please try again later."))
-		return
-	}
-
-	io.Copy(c.Writer, resp.Body)
-}
-
-//goland:noinspection GoUnhandledErrorResult
-func GenConversationTitle(c *gin.Context) {
-	var request struct {
-		MessageID string `json:"message_id"`
-	}
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse gen conversation title request."))
-		return
-	}
-
-	jsonBytes, _ := json.Marshal(map[string]string{
-		"message_id": request.MessageID,
-		"model":      "text-davinci-002-render-sha",
-	})
-	req, _ := http.NewRequest("POST", "https://apps.openai.com/api/conversation/gen_title/"+c.Param("id"), bytes.NewBuffer(jsonBytes))
-	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
-
-	resp, err := client.Do(req)
-	api.CheckError(c, err)
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to gen conversation title."))
-		return
-	}
-
-	io.Copy(c.Writer, resp.Body)
+func GenerateTitle(c *gin.Context) {
+	var request GenerateTitleRequest
+	c.BindJSON(&request)
+	jsonBytes, _ := json.Marshal(request)
+	url := "https://chat.openai.com/backend-api/conversation/gen_title/" + c.Param("id")
+	accessToken := c.GetHeader(api.Authorization)
+	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', '%s', false);
+		xhr.setRequestHeader('Authorization', '%s');
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.send('%s');
+		return xhr.responseText;`, url, accessToken, string(jsonBytes)), nil)
+	c.Writer.Write([]byte(responseText.(string)))
 }
 
 //goland:noinspection GoUnhandledErrorResult
 func GetConversation(c *gin.Context) {
-	req, _ := http.NewRequest("GET", "https://apps.openai.com/api/conversation/"+c.Param("id"), nil)
-	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
-
-	resp, err := client.Do(req)
-	api.CheckError(c, err)
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to get conversation."))
-		return
-	}
-
-	body, _ := io.ReadAll(resp.Body)
-	c.Writer.Write([]byte(body))
+	url := "https://chat.openai.com/backend-api/conversation/" + c.Param("id")
+	accessToken := c.GetHeader("Authorization")
+	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
+		const xhr = new XMLHttpRequest();
+		xhr.open('GET', '%s', false);
+		xhr.setRequestHeader('Authorization', '%s');
+		xhr.send();
+		return xhr.responseText;`, url, accessToken), nil)
+	c.Writer.Write([]byte(responseText.(string)))
 }
 
 type PatchConversationRequest struct {
@@ -169,34 +166,24 @@ type PatchConversationRequest struct {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func PatchConversation(c *gin.Context) {
+func UpdateConversation(c *gin.Context) {
 	var request PatchConversationRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse update conversation request."))
-		return
-	}
-
+	c.BindJSON(&request)
 	// bool default to false, then will hide (delete) the conversation
 	if request.Title != nil {
 		request.IsVisible = true
 	}
-
-	conversationID := c.Param("id")
-
 	jsonBytes, _ := json.Marshal(request)
-	req, _ := http.NewRequest("PATCH", "https://apps.openai.com/api/conversation/"+conversationID, bytes.NewBuffer(jsonBytes))
-	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
-
-	resp, err := client.Do(req)
-	api.CheckError(c, err)
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to update conversation."))
-		return
-	}
-
-	body, _ := io.ReadAll(resp.Body)
-	c.Writer.Write([]byte(body))
+	url := "https://chat.openai.com/backend-api/conversation/" + c.Param("id")
+	accessToken := c.GetHeader("Authorization")
+	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
+		const xhr = new XMLHttpRequest();
+		xhr.open('PATCH', '%s', false);
+		xhr.setRequestHeader('Authorization', '%s');
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.send('%s');
+		return xhr.responseText;`, url, accessToken, string(jsonBytes)), nil)
+	c.Writer.Write([]byte(responseText.(string)))
 }
 
 type FeedbackMessageRequest struct {
@@ -208,30 +195,18 @@ type FeedbackMessageRequest struct {
 //goland:noinspection GoUnhandledErrorResult
 func FeedbackMessage(c *gin.Context) {
 	var request FeedbackMessageRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse feedback conversation request."))
-		return
-	}
-
+	c.BindJSON(&request)
 	jsonBytes, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", "https://apps.openai.com/api/conversation/message_feedback", bytes.NewBuffer(jsonBytes))
-	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
-
-	resp, err := client.Do(req)
-	api.CheckError(c, err)
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusInternalServerError {
-		c.JSON(resp.StatusCode, api.ReturnMessage("Your how selected another one before."))
-		return
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to make a message feedback."))
-		return
-	}
-
-	body, _ := io.ReadAll(resp.Body)
-	c.Writer.Write([]byte(body))
+	url := "https://chat.openai.com/backend-api/conversation/message_feedback"
+	accessToken := c.GetHeader("Authorization")
+	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', '%s', false);
+		xhr.setRequestHeader('Authorization', '%s');
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.send('%s');
+		return xhr.responseText;`, url, accessToken, string(jsonBytes)), nil)
+	c.Writer.Write([]byte(responseText.(string)))
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -239,17 +214,14 @@ func ClearConversations(c *gin.Context) {
 	jsonBytes, _ := json.Marshal(PatchConversationRequest{
 		IsVisible: false,
 	})
-	req, _ := http.NewRequest("PATCH", "https://apps.openai.com/api/conversations", bytes.NewBuffer(jsonBytes))
-	req.Header.Set("Authorization", "Bearer "+c.GetHeader("Authorization"))
-
-	resp, err := client.Do(req)
-	api.CheckError(c, err)
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		c.JSON(resp.StatusCode, api.ReturnMessage("Failed to clear conversations."))
-		return
-	}
-
-	body, _ := io.ReadAll(resp.Body)
-	c.Writer.Write([]byte(body))
+	url := "https://chat.openai.com/backend-api/conversations"
+	accessToken := c.GetHeader("Authorization")
+	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', '%s', false);
+		xhr.setRequestHeader('Authorization', '%s');
+		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.send('%s');
+		return xhr.responseText;`, url, accessToken, string(jsonBytes)), nil)
+	c.Writer.Write([]byte(responseText.(string)))
 }

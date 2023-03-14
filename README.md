@@ -1,119 +1,19 @@
 # go-chatgpt-api
 
-Unofficial ChatGPT API (web based, not the GPT-3 API).
+[中文](https://linweiyuan.github.io//2023/03/14/%E4%B8%80%E7%A7%8D%E5%8F%96%E5%B7%A7%E7%9A%84%E6%96%B9%E5%BC%8F%E7%BB%95%E8%BF%87Cloudflare-v2%E9%AA%8C%E8%AF%81.html)
+
+Unofficial API in Go (bypass Cloudflare v2 challenge CAPTCHA
+using [undetected_chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver)).
+
+### Environment variables
+
+| key            | value            | remark                                         |
+|----------------|------------------|------------------------------------------------|
+| WEB_DRIVER_URL | http://host:9515 | The undetected chrome driver.                  |
+| PROXY_SERVER   | host:port        | 127.0.0.1:12345 / **socks5**://127.0.0.1:12345 |
+
+### Client
 
 Java Swing GUI application: [ChatGPT-Swing](https://github.com/linweiyuan/ChatGPT-Swing)
 
 Golang TUI application: [go-chatgpt](https://github.com/linweiyuan/go-chatgpt)
-
----
-
-## APIs
-
-If not mentioned, the `Authorization: accessToken` header is mandatory (no need to pass Bearer, API will do).
-
-### POST /user/login
-
-```json
-{
-  "username": "",
-  "password": ""
-}
-```
-
-This is different from the official API which uses form data in login, all in JSON in this project.
-
-No need accessToken.
-
----
-
-### GET /auth/session
-
-Renew accessToken.
-
-No need accessToken, but need cookies from login API.
-
----
-
-### GET /conversations
-
-Return a list of conversations, currently hard-coded 100 (max) and only return these, good enough for normal use cases.
-
----
-
-### POST /conversation
-
-```json
-{
-  "message_id": "",
-  "parent_message_id": "",
-  "conversation_id": "",
-  "content": ""
-}
-```
-
-`message_id`: always a new UUID.
-
-`parent_message_id`: if you start a new conversation, pass a new UUID, otherwise, get this id from response.
-
-`conversation_id`: if you start a new conversation, pass null, otherwise, get this id from response.
-
----
-
-### POST /conversation/gen_title/:id
-
-If you start a new conversation, the conversation id will be returned, then pass this returned id to gen title.
-
----
-
-### GET /conversation/:id
-
-Get all messages of this conversation.
-
----
-
-### PATCH (POST) /conversation/:id
-
-Rename or delete this conversation.
-
-If rename:
-
-```json
-{
-  "title": ""
-}
-```
-
-If delete:
-
-```json
-{
-  "is_visible": false
-}
-```
-
----
-
-### POST /conversation/message_feedback
-
-```json
-{
-  "message_id": "",
-  "conversation_id": "",
-  "rating": ""
-}
-```
-
-If like, pass "thumbsUp" for `rating`, otherwise, "thumbsDown".
-
----
-
-### PATCH (POST) /conversations
-
-Clear all conversations.
-
-```json
-{
-  "is_visible": false
-}
-```

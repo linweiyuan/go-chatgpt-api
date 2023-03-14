@@ -1,23 +1,23 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 )
 
 const defaultErrorMessageKey = "errorMessage"
 
+const (
+	ChatGPTUrl             = "https://chat.openai.com/chat"
+	PreCheckUrl            = "https://chat.openai.com/auth/login?next=/chat"
+	ScriptExecutionTimeout = 10
+
+	Authorization = "Authorization"
+
+	DoneFlag = "[DONE]"
+)
+
 func ReturnMessage(msg string) gin.H {
 	return gin.H{
 		defaultErrorMessageKey: msg,
-	}
-}
-
-func CheckError(c *gin.Context, err error) {
-	if err != nil {
-		c.JSON(http.StatusServiceUnavailable, gin.H{
-			defaultErrorMessageKey: "ChatGPT is at capacity right now, please try again later.",
-		})
 	}
 }

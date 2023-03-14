@@ -3,12 +3,12 @@ module github.com/linweiyuan/go-chatgpt-api
 go 1.20
 
 require (
-	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/gin-gonic/gin v1.9.0
+	github.com/tebeka/selenium v0.9.9
 )
 
 require (
-	github.com/andybalholm/cascadia v1.3.1 // indirect
+	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect

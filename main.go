@@ -1,28 +1,17 @@
 package main
 
 import (
-	"io"
-	"os"
-
 	"github.com/gin-gonic/gin"
-	"github.com/linweiyuan/go-chatgpt-api/api/auth"
 	"github.com/linweiyuan/go-chatgpt-api/api/conversation"
-	"github.com/linweiyuan/go-chatgpt-api/api/user"
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
 )
 
 func main() {
-	f, _ := os.Create("api.log")
-	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
-
 	router := gin.Default()
+	router.Use(gin.Recovery())
+	router.Use(middleware.PreCheckMiddleware())
 
-	router.POST("/user/login", user.Login)
-	router.GET("/auth/session", auth.RenewAccessToken)
-
-	authMiddleware := middleware.AuthMiddleware()
-
-	conversationsGroup := router.Group("/conversations", authMiddleware)
+	conversationsGroup := router.Group("/conversations")
 	{
 		conversationsGroup.GET("", conversation.GetConversations)
 
@@ -31,18 +20,19 @@ func main() {
 		conversationsGroup.POST("", conversation.ClearConversations)
 	}
 
-	conversationGroup := router.Group("/conversation", authMiddleware)
+	conversationGroup := router.Group("/conversation")
 	{
-		conversationGroup.POST("", conversation.MakeConversation)
-		conversationGroup.POST("/gen_title/:id", conversation.GenConversationTitle)
+		conversationGroup.POST("", conversation.StartConversation)
+		conversationGroup.POST("/gen_title/:id", conversation.GenerateTitle)
 		conversationGroup.GET("/:id", conversation.GetConversation)
 
 		// rename or delete conversation use a same API with different parameters
-		conversationGroup.PATCH("/:id", conversation.PatchConversation)
-		conversationGroup.POST("/:id", conversation.PatchConversation)
+		conversationGroup.PATCH("/:id", conversation.UpdateConversation)
+		conversationGroup.POST("/:id", conversation.UpdateConversation)
 
 		conversationGroup.POST("/message_feedback", conversation.FeedbackMessage)
 	}
 
+	//goland:noinspection GoUnhandledErrorResult
 	router.Run(":8080")
 }
