@@ -19,13 +19,13 @@ func init() {
 		"--no-sandbox",
 		"--disable-blink-features=AutomationControlled",
 	}
-	proxyServer := os.Getenv("PROXY_SERVER")
+	proxyServer := os.Getenv("HTTP_PROXY_SERVER")
 	if proxyServer != "" {
 		chromeArgs = append(chromeArgs, "--proxy-server="+proxyServer)
 	}
-	webDriverUrl := os.Getenv("WEB_DRIVER_URL")
-	if webDriverUrl == "" {
-		log.Fatal("Please set web driver url first.")
+	chatgptProxyServer := os.Getenv("CHATGPT_PROXY_SERVER")
+	if chatgptProxyServer == "" {
+		log.Fatal("Please set ChatGPT proxy server first.")
 	}
 
 	WebDriver, _ = selenium.NewRemote(selenium.Capabilities{
@@ -33,7 +33,7 @@ func init() {
 			Args:            chromeArgs,
 			ExcludeSwitches: []string{"enable-automation"},
 		},
-	}, webDriverUrl)
+	}, chatgptProxyServer)
 
 	WebDriver.Get(api.ChatGPTUrl)
 
