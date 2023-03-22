@@ -33,5 +33,7 @@ func init() {
 
 	WebDriver.Get(api.ChatGPTUrl)
 
+	HandleCaptcha(WebDriver)
+
 	WebDriver.SetAsyncScriptTimeout(time.Second * api.ScriptExecutionTimeout)
 }
