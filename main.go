@@ -6,6 +6,10 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
 )
 
+func init() {
+	gin.ForceConsoleColor()
+}
+
 func main() {
 	router := gin.Default()
 	router.Use(gin.Recovery())
