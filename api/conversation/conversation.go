@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/webdriver"
+	"github.com/sirupsen/logrus"
 )
 
 //goland:noinspection GoUnhandledErrorResult
@@ -55,6 +56,8 @@ type Content struct {
 
 //goland:noinspection GoUnhandledErrorResult
 func StartConversation(c *gin.Context) {
+	logrus.Info("Start conversations...")
+
 	var request StartConversationRequest
 	c.BindJSON(&request)
 	if request.ConversationID == nil || *request.ConversationID == "" {
@@ -132,6 +135,8 @@ type GenerateTitleRequest struct {
 
 //goland:noinspection GoUnhandledErrorResult
 func GenerateTitle(c *gin.Context) {
+	logrus.Info("Generate title...")
+
 	var request GenerateTitleRequest
 	c.BindJSON(&request)
 	jsonBytes, _ := json.Marshal(request)
@@ -149,6 +154,8 @@ func GenerateTitle(c *gin.Context) {
 
 //goland:noinspection GoUnhandledErrorResult
 func GetConversation(c *gin.Context) {
+	logrus.Info("Get conversation...")
+
 	url := "https://chat.openai.com/backend-api/conversation/" + c.Param("id")
 	accessToken := c.GetHeader("Authorization")
 	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
@@ -167,6 +174,8 @@ type PatchConversationRequest struct {
 
 //goland:noinspection GoUnhandledErrorResult
 func UpdateConversation(c *gin.Context) {
+	logrus.Info("Update conversation...")
+
 	var request PatchConversationRequest
 	c.BindJSON(&request)
 	// bool default to false, then will hide (delete) the conversation
@@ -194,6 +203,8 @@ type FeedbackMessageRequest struct {
 
 //goland:noinspection GoUnhandledErrorResult
 func FeedbackMessage(c *gin.Context) {
+	logrus.Info("Feedback message...")
+
 	var request FeedbackMessageRequest
 	c.BindJSON(&request)
 	jsonBytes, _ := json.Marshal(request)
@@ -211,6 +222,8 @@ func FeedbackMessage(c *gin.Context) {
 
 //goland:noinspection GoUnhandledErrorResult
 func ClearConversations(c *gin.Context) {
+	logrus.Info("Clear conversations...")
+
 	jsonBytes, _ := json.Marshal(PatchConversationRequest{
 		IsVisible: false,
 	})

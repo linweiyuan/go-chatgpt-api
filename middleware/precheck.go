@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/webdriver"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -12,6 +13,7 @@ import (
 func PreCheckMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader(api.Authorization) == "" {
+			logrus.Info("Missing access token.")
 			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage("Missing accessToken."))
 			return
 		}
@@ -24,6 +26,7 @@ func PreCheckMiddleware() gin.HandlerFunc {
 			return xhr.status;`, url), nil)
 
 		if xhrStatus == float64(http.StatusForbidden) {
+			logrus.Info("Session timeout, need to refresh.")
 			refreshDoneChannel := make(chan bool)
 
 			go func() {
@@ -35,6 +38,7 @@ func PreCheckMiddleware() gin.HandlerFunc {
 			}()
 
 			<-refreshDoneChannel
+			logrus.Info("Refresh is done.")
 		}
 
 		c.Next()
