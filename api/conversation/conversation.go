@@ -218,7 +218,7 @@ func ClearConversations(c *gin.Context) {
 	accessToken := c.GetHeader("Authorization")
 	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
 		const xhr = new XMLHttpRequest();
-		xhr.open('POST', '%s', false);
+		xhr.open('PATCH', '%s', false);
 		xhr.setRequestHeader('Authorization', '%s');
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.send('%s');
