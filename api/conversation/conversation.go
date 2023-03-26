@@ -10,12 +10,12 @@ import (
 
 //goland:noinspection GoUnhandledErrorResult
 func GetConversations(c *gin.Context) {
-	offset := c.Param("offset")
-	if offset == "" {
+	offset, ok := c.GetQuery("offset")
+	if !ok {
 		offset = "0"
 	}
-	limit := c.Param("limit")
-	if limit == "" {
+	limit, ok := c.GetQuery("limit")
+	if !ok {
 		limit = "20"
 	}
 	url := "https://chat.openai.com/backend-api/conversations?offset=" + offset + "&limit=" + limit
