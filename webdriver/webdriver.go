@@ -14,14 +14,15 @@ var WebDriver selenium.WebDriver
 //goland:noinspection GoUnhandledErrorResult
 func init() {
 	chromeArgs := []string{
-		"--headless=new",
-		"--disable-gpu",
 		"--no-sandbox",
+		"--disable-gpu",
+		"--disable-dev-shm-usage",
 		"--disable-blink-features=AutomationControlled",
+		"--headless=new",
 	}
 	chatgptProxyServer := os.Getenv("CHATGPT_PROXY_SERVER")
 	if chatgptProxyServer == "" {
-		log.Fatal("Please set ChatGPT proxy server first.")
+		log.Fatal("Please set ChatGPT proxy server first")
 	}
 
 	WebDriver, _ = selenium.NewRemote(selenium.Capabilities{
