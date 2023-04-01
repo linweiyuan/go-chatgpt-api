@@ -3,6 +3,7 @@ package conversation
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/webdriver"
@@ -118,11 +119,16 @@ func StartConversation(c *gin.Context) {
 		}
 	}()
 
-	// TODO: have no idea how to handle SSE in Go
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+
 	for eventDataString := range callbackChannel {
-		c.Writer.Write([]byte("data:" + eventDataString + "\n"))
+		c.Writer.Write([]byte("data:" + eventDataString + "\n\n"))
 		c.Writer.Flush()
 	}
+
+	c.Writer.Write([]byte("event: close\ndata: close\n\n"))
 }
 
 type GenerateTitleRequest struct {
