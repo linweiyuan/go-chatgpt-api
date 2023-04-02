@@ -3,10 +3,22 @@ package conversation
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/webdriver"
+)
+
+const (
+	apiPrefix                      = "https://chat.openai.com/backend-api"
+	defaultRole                    = "user"
+	getConversationsErrorMessage   = "Failed to get conversations."
+	generateTitleErrorMessage      = "Failed to generate title."
+	getContentErrorMessage         = "Failed to get content."
+	updateConversationErrorMessage = "Failed to update conversation."
+	clearConversationsErrorMessage = "Failed to clear conversations."
+	feedbackMessageErrorMessage    = "Failed to add feedback."
 )
 
 //goland:noinspection GoUnhandledErrorResult
@@ -19,14 +31,13 @@ func GetConversations(c *gin.Context) {
 	if !ok {
 		limit = "20"
 	}
-	url := "https://chat.openai.com/backend-api/conversations?offset=" + offset + "&limit=" + limit
+	url := apiPrefix + "/conversations?offset=" + offset + "&limit=" + limit
 	accessToken := c.GetHeader(api.Authorization)
-	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
-		const xhr = new XMLHttpRequest();
-		xhr.open('GET', '%s', false);
-		xhr.setRequestHeader('Authorization', '%s');
-		xhr.send();
-		return xhr.responseText;`, url, accessToken), nil)
+	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getGetScript(url, accessToken, getConversationsErrorMessage), nil)
+	if responseText == getConversationsErrorMessage {
+		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getConversationsErrorMessage))
+		return
+	}
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
@@ -42,7 +53,6 @@ type Message struct {
 	Author  Author  `json:"author"`
 	Content Content `json:"content"`
 	ID      string  `json:"id"`
-	Role    string  `json:"role"`
 }
 
 type Author struct {
@@ -61,45 +71,19 @@ func StartConversation(c *gin.Context) {
 	if request.ConversationID == nil || *request.ConversationID == "" {
 		request.ConversationID = nil
 	}
+	if request.Messages[0].Author.Role == "" {
+		request.Messages[0].Author.Role = defaultRole
+	}
 	jsonBytes, _ := json.Marshal(request)
-	url := "https://chat.openai.com/backend-api/conversation"
+	url := apiPrefix + "/conversation"
 	accessToken := c.GetHeader(api.Authorization)
-	webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
-		const xhr = new XMLHttpRequest();
-		xhr.open('POST', '%s', true);
-		xhr.setRequestHeader('Accept', 'text/event-stream');
-		xhr.setRequestHeader('Authorization', '%s');
-		xhr.setRequestHeader('Content-Type', 'application/json');
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState === xhr.LOADING && xhr.status === 200) {
-				window.postMessage(xhr.responseText);
-			} else if (xhr.status === 429) {
-				window.postMessage("429");
-			} if (xhr.readyState === xhr.DONE) {
-
-			}
-		};
-		xhr.send('%s');
-		return xhr.responseText;`, url, accessToken, string(jsonBytes)), nil)
+	webdriver.WebDriver.ExecuteScript(getPostScriptForStartConversation(url, accessToken, string(jsonBytes)), nil)
 
 	var callbackChannel = make(chan string)
 
 	go func() {
 		for {
-			eventData, _ := webdriver.WebDriver.ExecuteScriptAsync(`
-				const callback = arguments[arguments.length - 1];
-				const handleFunction = function(event) {
-					const list = event.data.split('\n\n');
-					list.pop();
-					const eventData = list.pop();
-					if (eventData.startsWith('event')) {
-						callback(eventData.substring(55));
-					} else {
-						callback(eventData.substring(6));
-					}
-				};
-				window.removeEventListener('message', handleFunction);
-				window.addEventListener('message', handleFunction);`, nil)
+			eventData, _ := webdriver.WebDriver.ExecuteScriptAsync(getCallbackScriptForStartConversation(), nil)
 
 			// sometimes callback will not return the final data
 			if eventData == nil {
@@ -141,28 +125,25 @@ func GenerateTitle(c *gin.Context) {
 	var request GenerateTitleRequest
 	c.BindJSON(&request)
 	jsonBytes, _ := json.Marshal(request)
-	url := "https://chat.openai.com/backend-api/conversation/gen_title/" + c.Param("id")
+	url := apiPrefix + "/conversation/gen_title/" + c.Param("id")
 	accessToken := c.GetHeader(api.Authorization)
-	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
-		const xhr = new XMLHttpRequest();
-		xhr.open('POST', '%s', false);
-		xhr.setRequestHeader('Authorization', '%s');
-		xhr.setRequestHeader('Content-Type', 'application/json');
-		xhr.send('%s');
-		return xhr.responseText;`, url, accessToken, string(jsonBytes)), nil)
+	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getPostScript(url, accessToken, string(jsonBytes), generateTitleErrorMessage), nil)
+	if responseText == generateTitleErrorMessage {
+		c.JSON(http.StatusInternalServerError, api.ReturnMessage(generateTitleErrorMessage))
+		return
+	}
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
 //goland:noinspection GoUnhandledErrorResult
 func GetConversation(c *gin.Context) {
-	url := "https://chat.openai.com/backend-api/conversation/" + c.Param("id")
+	url := apiPrefix + "/conversation/" + c.Param("id")
 	accessToken := c.GetHeader("Authorization")
-	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
-		const xhr = new XMLHttpRequest();
-		xhr.open('GET', '%s', false);
-		xhr.setRequestHeader('Authorization', '%s');
-		xhr.send();
-		return xhr.responseText;`, url, accessToken), nil)
+	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getGetScript(url, accessToken, getContentErrorMessage), nil)
+	if responseText == getContentErrorMessage {
+		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getContentErrorMessage))
+		return
+	}
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
@@ -180,15 +161,13 @@ func UpdateConversation(c *gin.Context) {
 		request.IsVisible = true
 	}
 	jsonBytes, _ := json.Marshal(request)
-	url := "https://chat.openai.com/backend-api/conversation/" + c.Param("id")
+	url := apiPrefix + "/conversation/" + c.Param("id")
 	accessToken := c.GetHeader("Authorization")
-	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
-		const xhr = new XMLHttpRequest();
-		xhr.open('PATCH', '%s', false);
-		xhr.setRequestHeader('Authorization', '%s');
-		xhr.setRequestHeader('Content-Type', 'application/json');
-		xhr.send('%s');
-		return xhr.responseText;`, url, accessToken, string(jsonBytes)), nil)
+	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getPatchScript(url, accessToken, string(jsonBytes), updateConversationErrorMessage), nil)
+	if responseText == updateConversationErrorMessage {
+		c.JSON(http.StatusInternalServerError, api.ReturnMessage(updateConversationErrorMessage))
+		return
+	}
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
@@ -203,15 +182,13 @@ func FeedbackMessage(c *gin.Context) {
 	var request FeedbackMessageRequest
 	c.BindJSON(&request)
 	jsonBytes, _ := json.Marshal(request)
-	url := "https://chat.openai.com/backend-api/conversation/message_feedback"
+	url := apiPrefix + "/conversation/message_feedback"
 	accessToken := c.GetHeader("Authorization")
-	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
-		const xhr = new XMLHttpRequest();
-		xhr.open('POST', '%s', false);
-		xhr.setRequestHeader('Authorization', '%s');
-		xhr.setRequestHeader('Content-Type', 'application/json');
-		xhr.send('%s');
-		return xhr.responseText;`, url, accessToken, string(jsonBytes)), nil)
+	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getPostScript(url, accessToken, string(jsonBytes), feedbackMessageErrorMessage), nil)
+	if responseText == feedbackMessageErrorMessage {
+		c.JSON(http.StatusInternalServerError, api.ReturnMessage(feedbackMessageErrorMessage))
+		return
+	}
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
@@ -220,14 +197,122 @@ func ClearConversations(c *gin.Context) {
 	jsonBytes, _ := json.Marshal(PatchConversationRequest{
 		IsVisible: false,
 	})
-	url := "https://chat.openai.com/backend-api/conversations"
+	url := apiPrefix + "/conversations"
 	accessToken := c.GetHeader("Authorization")
-	responseText, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
+	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getPatchScript(url, accessToken, string(jsonBytes), clearConversationsErrorMessage), nil)
+	if responseText == clearConversationsErrorMessage {
+		c.JSON(http.StatusInternalServerError, api.ReturnMessage(clearConversationsErrorMessage))
+		return
+	}
+	c.Writer.Write([]byte(responseText.(string)))
+}
+
+func getGetScript(url string, accessToken string, errorMessage string) string {
+	return fmt.Sprintf(`
+		fetch('%s', {
+			headers: {
+				'Authorization': '%s'
+			}
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('%s');
+			}
+			return response.text();
+		})
+		.then(text => {
+			arguments[0](text);
+		})
+		.catch(err => {
+			arguments[0](err.message);
+		});
+	`, url, accessToken, errorMessage)
+}
+
+func getPostScriptForStartConversation(url string, accessToken string, jsonString string) string {
+	return fmt.Sprintf(`
 		const xhr = new XMLHttpRequest();
-		xhr.open('PATCH', '%s', false);
+		xhr.open('POST', '%s', true);
+		xhr.setRequestHeader('Accept', 'text/event-stream');
 		xhr.setRequestHeader('Authorization', '%s');
 		xhr.setRequestHeader('Content-Type', 'application/json');
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === xhr.LOADING && xhr.status === 200) {
+				window.postMessage(xhr.responseText);
+			} else if (xhr.status === 429) {
+				window.postMessage("429");
+			} if (xhr.readyState === xhr.DONE) {
+
+			}
+		};
 		xhr.send('%s');
-		return xhr.responseText;`, url, accessToken, string(jsonBytes)), nil)
-	c.Writer.Write([]byte(responseText.(string)))
+		return xhr.responseText;
+	`, url, accessToken, jsonString)
+}
+
+func getCallbackScriptForStartConversation() string {
+	return `
+		const callback = arguments[0];
+		const handleFunction = function(event) {
+			const list = event.data.split('\n\n');
+			list.pop();
+			const eventData = list.pop();
+			if (eventData.startsWith('event')) {
+				callback(eventData.substring(55));
+			} else {
+				callback(eventData.substring(6));
+			}
+		};
+		window.removeEventListener('message', handleFunction);
+		window.addEventListener('message', handleFunction);
+	`
+}
+
+func getPostScript(url string, accessToken string, jsonString string, errorMessage string) string {
+	return fmt.Sprintf(`
+		fetch('%s', {
+			method: 'POST',
+			headers: {
+				'Authorization': '%s',
+				'Content-Type': 'application/json'
+			},
+			body: '%s'
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('%s');
+			}
+			return response.text();
+		})
+		.then(text => {
+			arguments[0](text);
+		})
+		.catch(err => {
+			arguments[0](err.message);
+		});
+	`, url, accessToken, jsonString, errorMessage)
+}
+func getPatchScript(url string, accessToken string, jsonString string, errorMessage string) string {
+	return fmt.Sprintf(`
+		fetch('%s', {
+			method: 'PATCH',
+			headers: {
+				'Authorization': '%s',
+				'Content-Type': 'application/json'
+			},
+			body: '%s'
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('%s');
+			}
+			return response.text();
+		})
+		.then(text => {
+			arguments[0](text);
+		})
+		.catch(err => {
+			arguments[0](err.message);
+		});
+	`, url, accessToken, jsonString, errorMessage)
 }
