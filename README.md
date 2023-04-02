@@ -17,6 +17,8 @@ services:
     environment:
       - GIN_MODE=release
       - CHATGPT_PROXY_SERVER=http://chatgpt-proxy-server:9515
+#      - NETWORK_PROXY_SERVER=http://host:port
+#      - NETWORK_PROXY_SERVER=socks5://host:port
     depends_on:
       - chatgpt-proxy-server
     restart: unless-stopped

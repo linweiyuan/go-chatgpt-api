@@ -20,6 +20,12 @@ func init() {
 		"--disable-blink-features=AutomationControlled",
 		"--headless=new",
 	}
+
+	networkProxyServer := os.Getenv("NETWORK_PROXY_SERVER")
+	if networkProxyServer != "" {
+		chromeArgs = append(chromeArgs, "--proxy-server="+networkProxyServer)
+	}
+
 	chatgptProxyServer := os.Getenv("CHATGPT_PROXY_SERVER")
 	if chatgptProxyServer == "" {
 		log.Fatal("Please set ChatGPT proxy server first")
