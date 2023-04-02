@@ -13,7 +13,6 @@ const (
 
 //goland:noinspection GoUnhandledErrorResult
 func HandleCaptcha(webDriver selenium.WebDriver) {
-
 	err := webDriver.WaitWithTimeoutAndInterval(func(driver selenium.WebDriver) (bool, error) {
 		element, err := driver.FindElement(selenium.ByClassName, "mb-2")
 		if err != nil {

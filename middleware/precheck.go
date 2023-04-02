@@ -18,27 +18,15 @@ func PreCheckMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		url := api.PreCheckUrl
 		xhrStatus, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
 			const xhr = new XMLHttpRequest();
 			xhr.open('GET', '%s', false);
 			xhr.send();
-			return xhr.status;`, url), nil)
+			return xhr.status;`, api.PreCheckUrl), nil)
 
 		if xhrStatus == float64(http.StatusForbidden) {
 			logger.Warn("Session timeout, need to refresh")
-			refreshDoneChannel := make(chan bool)
-
-			go func() {
-				webdriver.WebDriver.Refresh()
-
-				webdriver.HandleCaptcha(webdriver.WebDriver)
-
-				refreshDoneChannel <- true
-			}()
-
-			<-refreshDoneChannel
-			logger.Info("Refresh is done")
+			webdriver.Refresh()
 		}
 
 		c.Next()

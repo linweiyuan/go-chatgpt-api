@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/webdriver"
+	"github.com/tebeka/selenium"
 )
 
 const (
@@ -33,11 +34,18 @@ func GetConversations(c *gin.Context) {
 	}
 	url := apiPrefix + "/conversations?offset=" + offset + "&limit=" + limit
 	accessToken := c.GetHeader(api.Authorization)
-	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getGetScript(url, accessToken, getConversationsErrorMessage), nil)
+
+	script := getGetScript(url, accessToken, getConversationsErrorMessage)
+	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if handleSeleniumError(err, script, c) {
+		return
+	}
+
 	if responseText == getConversationsErrorMessage {
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getConversationsErrorMessage))
 		return
 	}
+
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
@@ -77,12 +85,17 @@ func StartConversation(c *gin.Context) {
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation"
 	accessToken := c.GetHeader(api.Authorization)
-	webdriver.WebDriver.ExecuteScript(getPostScriptForStartConversation(url, accessToken, string(jsonBytes)), nil)
+	script := getPostScriptForStartConversation(url, accessToken, string(jsonBytes))
+	_, err := webdriver.WebDriver.ExecuteScript(script, nil)
+	if handleSeleniumError(err, script, c) {
+		return
+	}
 
 	var callbackChannel = make(chan string)
 
 	go func() {
 		for {
+			// this one's selenium error handling should be covered above
 			eventData, _ := webdriver.WebDriver.ExecuteScriptAsync(getCallbackScriptForStartConversation(), nil)
 
 			// sometimes callback will not return the final data
@@ -127,11 +140,17 @@ func GenerateTitle(c *gin.Context) {
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation/gen_title/" + c.Param("id")
 	accessToken := c.GetHeader(api.Authorization)
-	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getPostScript(url, accessToken, string(jsonBytes), generateTitleErrorMessage), nil)
+	script := getPostScript(url, accessToken, string(jsonBytes), generateTitleErrorMessage)
+	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if handleSeleniumError(err, script, c) {
+		return
+	}
+
 	if responseText == generateTitleErrorMessage {
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(generateTitleErrorMessage))
 		return
 	}
+
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
@@ -139,11 +158,17 @@ func GenerateTitle(c *gin.Context) {
 func GetConversation(c *gin.Context) {
 	url := apiPrefix + "/conversation/" + c.Param("id")
 	accessToken := c.GetHeader("Authorization")
-	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getGetScript(url, accessToken, getContentErrorMessage), nil)
+	script := getGetScript(url, accessToken, getContentErrorMessage)
+	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if handleSeleniumError(err, script, c) {
+		return
+	}
+
 	if responseText == getContentErrorMessage {
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getContentErrorMessage))
 		return
 	}
+
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
@@ -163,11 +188,17 @@ func UpdateConversation(c *gin.Context) {
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation/" + c.Param("id")
 	accessToken := c.GetHeader("Authorization")
-	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getPatchScript(url, accessToken, string(jsonBytes), updateConversationErrorMessage), nil)
+	script := getPatchScript(url, accessToken, string(jsonBytes), updateConversationErrorMessage)
+	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if handleSeleniumError(err, script, c) {
+		return
+	}
+
 	if responseText == updateConversationErrorMessage {
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(updateConversationErrorMessage))
 		return
 	}
+
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
@@ -184,11 +215,17 @@ func FeedbackMessage(c *gin.Context) {
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation/message_feedback"
 	accessToken := c.GetHeader("Authorization")
-	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getPostScript(url, accessToken, string(jsonBytes), feedbackMessageErrorMessage), nil)
+	script := getPostScript(url, accessToken, string(jsonBytes), feedbackMessageErrorMessage)
+	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if handleSeleniumError(err, script, c) {
+		return
+	}
+
 	if responseText == feedbackMessageErrorMessage {
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(feedbackMessageErrorMessage))
 		return
 	}
+
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
@@ -199,11 +236,17 @@ func ClearConversations(c *gin.Context) {
 	})
 	url := apiPrefix + "/conversations"
 	accessToken := c.GetHeader("Authorization")
-	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(getPatchScript(url, accessToken, string(jsonBytes), clearConversationsErrorMessage), nil)
+	script := getPatchScript(url, accessToken, string(jsonBytes), clearConversationsErrorMessage)
+	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if handleSeleniumError(err, script, c) {
+		return
+	}
+
 	if responseText == clearConversationsErrorMessage {
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(clearConversationsErrorMessage))
 		return
 	}
+
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
@@ -315,4 +358,18 @@ func getPatchScript(url string, accessToken string, jsonString string, errorMess
 			arguments[0](err.message);
 		});
 	`, url, accessToken, jsonString, errorMessage)
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func handleSeleniumError(err error, script string, c *gin.Context) bool {
+	if err != nil {
+		if seleniumError, ok := err.(*selenium.Error); ok {
+			webdriver.NewSessionAndRefresh(seleniumError.Message)
+			responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+			c.Writer.Write([]byte(responseText.(string)))
+			return true
+		}
+	}
+
+	return false
 }

@@ -4,15 +4,26 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api/conversation"
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
+	"github.com/linweiyuan/go-chatgpt-api/webdriver"
 )
 
 func init() {
 	gin.ForceConsoleColor()
 }
 
+func Recover() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		defer func() {
+			if r := recover(); r != nil {
+				webdriver.NewSessionAndRefresh("panic")
+			}
+		}()
+		c.Next()
+	}
+}
 func main() {
 	router := gin.Default()
-	router.Use(gin.Recovery())
+	router.Use(Recover())
 	router.Use(middleware.PreCheckMiddleware())
 
 	conversationsGroup := router.Group("/conversations")
