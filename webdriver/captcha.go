@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+const (
+	checkCaptchaTimeout  = 20
+	checkCaptchaInterval = 2
+)
+
 //goland:noinspection GoUnhandledErrorResult
 func HandleCaptcha(webDriver selenium.WebDriver) {
 
@@ -19,7 +24,7 @@ func HandleCaptcha(webDriver selenium.WebDriver) {
 		welcomeText, _ := element.Text()
 		logger.Info(welcomeText)
 		return welcomeText == "Welcome to ChatGPT", nil
-	}, time.Second*10, time.Second*2)
+	}, time.Second*checkCaptchaTimeout, time.Second*checkCaptchaInterval)
 
 	if err != nil {
 		logger.Info("Switch frame")
