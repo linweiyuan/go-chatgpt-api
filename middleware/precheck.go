@@ -22,7 +22,7 @@ func PreCheckMiddleware() gin.HandlerFunc {
 			const xhr = new XMLHttpRequest();
 			xhr.open('GET', '%s', false);
 			xhr.send();
-			return xhr.status;`, api.PreCheckUrl), nil)
+			return xhr.status;`, api.ChatGPTUrl), nil)
 
 		if xhrStatus == float64(http.StatusForbidden) {
 			logger.Warn("Session timeout, need to refresh")
