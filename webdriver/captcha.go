@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	checkWelcomeTextTimeout = 3
-	checkCaptchaTimeout     = 8
+	checkWelcomeTextTimeout = 5
+	checkCaptchaTimeout     = 15
 	checkCaptchaInterval    = 1
+	checkNextInterval       = 5
 )
 
 //goland:noinspection GoUnhandledErrorResult
@@ -30,7 +31,7 @@ func HandleCaptcha(webDriver selenium.WebDriver) {
 
 		logger.Info("Checking captcha")
 		err := webDriver.WaitWithTimeoutAndInterval(func(driver selenium.WebDriver) (bool, error) {
-			element, err := driver.FindElement(selenium.ByCSSSelector, "input")
+			element, err := driver.FindElement(selenium.ByCSSSelector, "input[type=checkbox]")
 			if err != nil {
 				return false, nil
 			}
@@ -43,7 +44,20 @@ func HandleCaptcha(webDriver selenium.WebDriver) {
 		if err != nil {
 			logger.Error("Failed to handle captcha: " + err.Error())
 			if pageSource, err := webDriver.PageSource(); err == nil {
+				title, _ := webDriver.Title()
+				logger.Error(title)
 				logger.Error(pageSource)
+			}
+			webDriver.Refresh()
+		} else {
+			time.Sleep(time.Second * checkNextInterval)
+
+			title, _ := webDriver.Title()
+			logger.Info(title)
+			if title == "Just a moment..." {
+				logger.Info("Still get a captcha")
+
+				HandleCaptcha(webDriver)
 			}
 		}
 	}
