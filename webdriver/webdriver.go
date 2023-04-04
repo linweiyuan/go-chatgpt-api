@@ -39,7 +39,7 @@ func init() {
 	}, chatgptProxyServer)
 
 	WebDriver.Get(api.ChatGPTUrl)
-	if !isAccessDenied(WebDriver) {
+	if !isAccessDenied(WebDriver) && !isAtCapacity(WebDriver) {
 		HandleCaptcha(WebDriver)
 		WebDriver.SetAsyncScriptTimeout(time.Second * api.ScriptExecutionTimeout)
 	}

@@ -10,6 +10,7 @@ const (
 	checkWelcomeTextTimeout  = 5
 	checkCaptchaTimeout      = 60
 	checkAccessDeniedTimeout = 3
+	checkAvailabilityTimeout = 3
 	checkCaptchaInterval     = 1
 	checkNextInterval        = 5
 )
@@ -76,6 +77,25 @@ func isAccessDenied(webDriver selenium.WebDriver) bool {
 		logger.Error(accessDeniedText)
 		return true, nil
 	}, time.Second*checkAccessDeniedTimeout, time.Second*checkCaptchaInterval)
+
+	if err != nil {
+		return true
+	}
+
+	return false
+}
+
+func isAtCapacity(webDriver selenium.WebDriver) bool {
+	err := webDriver.WaitWithTimeoutAndInterval(func(driver selenium.WebDriver) (bool, error) {
+		element, err := driver.FindElement(selenium.ByClassName, "text-3xl")
+		if err != nil {
+			return false, nil
+		}
+
+		atCapacityText, _ := element.Text()
+		logger.Error(atCapacityText)
+		return true, nil
+	}, time.Second*checkAvailabilityTimeout, time.Second*checkCaptchaInterval)
 
 	if err != nil {
 		return true
