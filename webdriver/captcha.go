@@ -7,10 +7,11 @@ import (
 )
 
 const (
-	checkWelcomeTextTimeout = 5
-	checkCaptchaTimeout     = 15
-	checkCaptchaInterval    = 1
-	checkNextInterval       = 5
+	checkWelcomeTextTimeout  = 5
+	checkCaptchaTimeout      = 60
+	checkAccessDeniedTimeout = 3
+	checkCaptchaInterval     = 1
+	checkNextInterval        = 5
 )
 
 //goland:noinspection GoUnhandledErrorResult
@@ -49,6 +50,7 @@ func HandleCaptcha(webDriver selenium.WebDriver) {
 				logger.Error(pageSource)
 			}
 			webDriver.Refresh()
+			HandleCaptcha(webDriver)
 		} else {
 			time.Sleep(time.Second * checkNextInterval)
 
@@ -61,4 +63,23 @@ func HandleCaptcha(webDriver selenium.WebDriver) {
 			}
 		}
 	}
+}
+
+func isAccessDenied(webDriver selenium.WebDriver) bool {
+	err := webDriver.WaitWithTimeoutAndInterval(func(driver selenium.WebDriver) (bool, error) {
+		element, err := driver.FindElement(selenium.ByClassName, "cf-error-details")
+		if err != nil {
+			return false, nil
+		}
+
+		accessDeniedText, _ := element.Text()
+		logger.Error(accessDeniedText)
+		return true, nil
+	}, time.Second*checkAccessDeniedTimeout, time.Second*checkCaptchaInterval)
+
+	if err != nil {
+		return true
+	}
+
+	return false
 }

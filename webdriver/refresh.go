@@ -1,6 +1,7 @@
 package webdriver
 
 import (
+	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 )
 
@@ -29,7 +30,8 @@ func NewSessionAndRefresh(errorMessage string) {
 			WebDriver.NewSession()
 			logger.Info("new session id: " + WebDriver.SessionID())
 
-			LoadPageAndHandleCaptcha()
+			WebDriver.Get(api.ChatGPTUrl)
+			HandleCaptcha(WebDriver)
 		}
 	}
 }

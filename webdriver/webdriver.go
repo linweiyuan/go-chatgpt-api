@@ -38,13 +38,9 @@ func init() {
 		},
 	}, chatgptProxyServer)
 
-	LoadPageAndHandleCaptcha()
-
-	WebDriver.SetAsyncScriptTimeout(time.Second * api.ScriptExecutionTimeout)
-}
-
-//goland:noinspection GoUnhandledErrorResult
-func LoadPageAndHandleCaptcha() {
 	WebDriver.Get(api.ChatGPTUrl)
-	HandleCaptcha(WebDriver)
+	if !isAccessDenied(WebDriver) {
+		HandleCaptcha(WebDriver)
+		WebDriver.SetAsyncScriptTimeout(time.Second * api.ScriptExecutionTimeout)
+	}
 }
