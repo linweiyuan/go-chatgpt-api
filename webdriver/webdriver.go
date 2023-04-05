@@ -11,7 +11,7 @@ import (
 
 var WebDriver selenium.WebDriver
 
-//goland:noinspection GoUnhandledErrorResult
+//goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
 func init() {
 	chromeArgs := []string{
 		"--no-sandbox",

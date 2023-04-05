@@ -57,7 +57,7 @@ func HandleCaptcha(webDriver selenium.WebDriver) {
 
 			title, _ := webDriver.Title()
 			logger.Info(title)
-			if title == "Just a moment..." {
+			if title == "Just a moment..." || title == "" {
 				logger.Info("Still get a captcha")
 
 				HandleCaptcha(webDriver)
@@ -79,10 +79,10 @@ func isAccessDenied(webDriver selenium.WebDriver) bool {
 	}, time.Second*checkAccessDeniedTimeout, time.Second*checkCaptchaInterval)
 
 	if err != nil {
-		return true
+		return false
 	}
 
-	return false
+	return true
 }
 
 func isAtCapacity(webDriver selenium.WebDriver) bool {
@@ -98,8 +98,8 @@ func isAtCapacity(webDriver selenium.WebDriver) bool {
 	}, time.Second*checkAvailabilityTimeout, time.Second*checkCaptchaInterval)
 
 	if err != nil {
-		return true
+		return false
 	}
 
-	return false
+	return true
 }

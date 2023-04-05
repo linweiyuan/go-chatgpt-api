@@ -12,12 +12,6 @@ import (
 //goland:noinspection GoUnhandledErrorResult
 func PreCheckMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.GetHeader(api.Authorization) == "" {
-			logger.Info("Missing access token")
-			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage("Missing accessToken."))
-			return
-		}
-
 		xhrStatus, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf(`
 			const xhr = new XMLHttpRequest();
 			xhr.open('GET', '%s', false);

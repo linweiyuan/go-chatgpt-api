@@ -1,4 +1,4 @@
-package conversation
+package chatgpt
 
 import (
 	"encoding/json"
