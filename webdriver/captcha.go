@@ -3,12 +3,13 @@ package webdriver
 import (
 	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 	"github.com/tebeka/selenium"
+	"log"
 	"time"
 )
 
 const (
 	checkWelcomeTextTimeout  = 5
-	checkCaptchaTimeout      = 60
+	checkCaptchaTimeout      = 15
 	checkAccessDeniedTimeout = 3
 	checkAvailabilityTimeout = 3
 	checkCaptchaInterval     = 1
@@ -56,8 +57,12 @@ func HandleCaptcha(webDriver selenium.WebDriver) {
 			time.Sleep(time.Second * checkNextInterval)
 
 			title, _ := webDriver.Title()
+			if title == "" {
+				log.Fatal("Failed to handle captcha, looks like infinite loop, please remove CHATGPT_PROXY_SERVER to use API mode first until I find a way to fix it.")
+			}
+
 			logger.Info(title)
-			if title == "Just a moment..." || title == "" {
+			if title == "Just a moment..." {
 				logger.Info("Still get a captcha")
 
 				HandleCaptcha(webDriver)

@@ -4,7 +4,6 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/tebeka/selenium"
 	"github.com/tebeka/selenium/chrome"
-	"log"
 	"os"
 	"time"
 )
@@ -13,8 +12,8 @@ var WebDriver selenium.WebDriver
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
 func init() {
-	apiOnly := os.Getenv("API_ONLY")
-	if apiOnly != "" {
+	chatgptProxyServer := os.Getenv("CHATGPT_PROXY_SERVER")
+	if chatgptProxyServer == "" {
 		return
 	}
 
@@ -29,11 +28,6 @@ func init() {
 	networkProxyServer := os.Getenv("NETWORK_PROXY_SERVER")
 	if networkProxyServer != "" {
 		chromeArgs = append(chromeArgs, "--proxy-server="+networkProxyServer)
-	}
-
-	chatgptProxyServer := os.Getenv("CHATGPT_PROXY_SERVER")
-	if chatgptProxyServer == "" {
-		log.Fatal("Please set ChatGPT proxy server first")
 	}
 
 	WebDriver, _ = selenium.NewRemote(selenium.Capabilities{
