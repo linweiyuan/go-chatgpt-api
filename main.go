@@ -54,6 +54,8 @@ func main() {
 	{
 		apiGroup.POST("/chat/completions", official.ChatCompletions)
 	}
+	router.GET("/dashboard/billing/credit_grants", official.CheckUsage)
+
 	//goland:noinspection GoUnhandledErrorResult
 	router.Run(":8080")
 }

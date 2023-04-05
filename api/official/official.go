@@ -5,12 +5,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"io"
 	"net/http"
 	"strings"
 )
 
 const (
-	apiUrl = "https://api.openai.com"
+	apiUrl             = "https://api.openai.com"
+	apiChatCompletions = apiUrl + "/v1/chat/completions"
+	apiCheckUsage      = apiUrl + "/dashboard/billing/credit_grants"
 )
 
 var client *http.Client
@@ -37,7 +40,7 @@ func ChatCompletions(c *gin.Context) {
 	var chatCompletionsRequest ChatCompletionsRequest
 	c.ShouldBindJSON(&chatCompletionsRequest)
 	data, _ := json.Marshal(chatCompletionsRequest)
-	req, _ := http.NewRequest("POST", apiUrl+"/v1/chat/completions", bytes.NewBuffer(data))
+	req, _ := http.NewRequest("POST", apiChatCompletions, bytes.NewBuffer(data))
 	req.Header.Set("Authorization", getHeader(c.GetHeader("Authorization")))
 	req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Content-Type", "application/json")
@@ -54,6 +57,17 @@ func ChatCompletions(c *gin.Context) {
 			c.Writer.Flush()
 		}
 	}
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func CheckUsage(c *gin.Context) {
+	req, _ := http.NewRequest("GET", apiCheckUsage, nil)
+	req.Header.Set("Authorization", getHeader(c.GetHeader("Authorization")))
+	resp, _ := client.Do(req)
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	c.Writer.Write([]byte(body))
 }
 
 func getHeader(header string) string {
