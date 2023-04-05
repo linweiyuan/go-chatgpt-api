@@ -13,6 +13,11 @@ var WebDriver selenium.WebDriver
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
 func init() {
+	apiOnly := os.Getenv("API_ONLY")
+	if apiOnly != "" {
+		return
+	}
+
 	chromeArgs := []string{
 		"--no-sandbox",
 		"--disable-gpu",
