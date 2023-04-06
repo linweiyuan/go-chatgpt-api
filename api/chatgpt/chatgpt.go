@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -94,25 +95,44 @@ func StartConversation(c *gin.Context) {
 	var callbackChannel = make(chan string)
 
 	go func() {
+		webdriver.WebDriver.ExecuteScript("delete window.conversationResponseData;", nil)
+		temp := ""
 		for {
-			// this one's selenium error handling should be covered above
-			eventData, _ := webdriver.WebDriver.ExecuteScriptAsync(getCallbackScriptForStartConversation(), nil)
+			conversationResponseData, _ := webdriver.WebDriver.ExecuteScript("return window.conversationResponseData;", nil)
+			if conversationResponseData == nil || conversationResponseData == "" {
+				continue
+			}
 
-			// sometimes callback will not return the final data
-			if eventData == nil {
-				callbackChannel <- api.DoneFlag
+			conversationResponseDataString := conversationResponseData.(string)
+			conversationResponseDataStrings := strings.Split(conversationResponseDataString, "\n")
+			result := "[DONE]"
+			for _, s := range conversationResponseDataStrings {
+				s = strings.TrimSpace(s)
+				if s != "" && !strings.HasPrefix(s, "event") && !strings.HasPrefix(s, "data: 2023") {
+					result = s
+				}
+			}
+
+			if temp != "" {
+				if temp == result {
+					continue
+				}
+			}
+			temp = result
+
+			if result == "429" || result == "[DONE]" {
+				callbackChannel <- result
 				close(callbackChannel)
 				break
 			}
 
-			eventDataString := eventData.(string)
-			if eventDataString == "429" || eventDataString == api.DoneFlag {
-				callbackChannel <- eventDataString
+			result = result[5:]
+			callbackChannel <- result
+
+			if strings.Contains(result, "<|im_end|>") {
 				close(callbackChannel)
 				break
 			}
-
-			callbackChannel <- eventDataString
 		}
 	}()
 
@@ -274,6 +294,8 @@ func getGetScript(url string, accessToken string, errorMessage string) string {
 
 func getPostScriptForStartConversation(url string, accessToken string, jsonString string) string {
 	return fmt.Sprintf(`
+		let conversationResponseData;
+	
 		const xhr = new XMLHttpRequest();
 		xhr.open('POST', '%s', true);
 		xhr.setRequestHeader('Accept', 'text/event-stream');
@@ -281,34 +303,15 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === xhr.LOADING && xhr.status === 200) {
-				window.postMessage(xhr.responseText);
+				window.conversationResponseData = xhr.responseText;
 			} else if (xhr.status === 429) {
-				window.postMessage("429");
+				window.conversationResponseData = '429';
 			} if (xhr.readyState === xhr.DONE) {
-
+				window.conversationResponseData = '[DONE]';
 			}
 		};
-		xhr.send('%s');
-		return xhr.responseText;
+		xhr.send(JSON.stringify(%s));
 	`, url, accessToken, jsonString)
-}
-
-func getCallbackScriptForStartConversation() string {
-	return `
-		const callback = arguments[0];
-		const handleFunction = function(event) {
-			const list = event.data.split('\n\n');
-			list.pop();
-			const eventData = list.pop();
-			if (eventData.startsWith('event')) {
-				callback(eventData.substring(55));
-			} else {
-				callback(eventData.substring(6));
-			}
-		};
-		window.removeEventListener('message', handleFunction);
-		window.addEventListener('message', handleFunction);
-	`
 }
 
 func getPostScript(url string, accessToken string, jsonString string, errorMessage string) string {
@@ -319,7 +322,7 @@ func getPostScript(url string, accessToken string, jsonString string, errorMessa
 				'Authorization': '%s',
 				'Content-Type': 'application/json'
 			},
-			body: '%s'
+			body: JSON.stringify(%s)
 		})
 		.then(response => {
 			if (!response.ok) {
@@ -343,7 +346,7 @@ func getPatchScript(url string, accessToken string, jsonString string, errorMess
 				'Authorization': '%s',
 				'Content-Type': 'application/json'
 			},
-			body: '%s'
+			body: JSON.stringify(%s)
 		})
 		.then(response => {
 			if (!response.ok) {
