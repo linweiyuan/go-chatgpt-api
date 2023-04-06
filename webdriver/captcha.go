@@ -1,10 +1,11 @@
 package webdriver
 
 import (
-	"github.com/linweiyuan/go-chatgpt-api/util/logger"
-	"github.com/tebeka/selenium"
 	"log"
 	"time"
+
+	"github.com/linweiyuan/go-chatgpt-api/util/logger"
+	"github.com/tebeka/selenium"
 )
 
 const (

@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 )
 
 const (

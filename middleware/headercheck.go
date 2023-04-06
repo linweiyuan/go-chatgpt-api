@@ -1,10 +1,11 @@
 package middleware
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/util/logger"
-	"net/http"
 )
 
 //goland:noinspection GoUnhandledErrorResult

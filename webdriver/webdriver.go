@@ -1,11 +1,12 @@
 package webdriver
 
 import (
+	"os"
+	"time"
+
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/tebeka/selenium"
 	"github.com/tebeka/selenium/chrome"
-	"os"
-	"time"
 )
 
 var WebDriver selenium.WebDriver

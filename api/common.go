@@ -12,7 +12,8 @@ const (
 
 	Authorization = "Authorization"
 
-	DoneFlag = "[DONE]"
+	DoneFlag            = "[DONE]"
+	RefreshEveryMinutes = 3
 )
 
 func ReturnMessage(msg string) gin.H {

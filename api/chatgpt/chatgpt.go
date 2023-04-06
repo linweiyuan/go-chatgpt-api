@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
+	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 	"github.com/linweiyuan/go-chatgpt-api/webdriver"
 	"github.com/tebeka/selenium"
 )
@@ -22,6 +25,33 @@ const (
 	clearConversationsErrorMessage = "Failed to clear conversations."
 	feedbackMessageErrorMessage    = "Failed to add feedback."
 )
+
+var mutex sync.Mutex
+
+func init() {
+	go func() {
+		ticker := time.NewTicker(api.RefreshEveryMinutes * time.Minute)
+
+		for {
+			select {
+			case <-ticker.C:
+				func() {
+					defer func() {
+						if err := recover(); err != nil {
+							logger.Error("Failed to refresh page")
+							mutex.Unlock()
+						}
+					}()
+
+					if mutex.TryLock() {
+						webdriver.Refresh()
+						mutex.Unlock()
+					}
+				}()
+			}
+		}
+	}()
+}
 
 //goland:noinspection GoUnhandledErrorResult
 func GetConversations(c *gin.Context) {
@@ -95,6 +125,9 @@ func StartConversation(c *gin.Context) {
 	var callbackChannel = make(chan string)
 
 	go func() {
+		mutex.Lock()
+		defer mutex.Unlock()
+
 		webdriver.WebDriver.ExecuteScript("delete window.conversationResponseData;", nil)
 		temp := ""
 		for {
@@ -105,7 +138,7 @@ func StartConversation(c *gin.Context) {
 
 			conversationResponseDataString := conversationResponseData.(string)
 			conversationResponseDataStrings := strings.Split(conversationResponseDataString, "\n")
-			result := "[DONE]"
+			result := api.DoneFlag
 			for _, s := range conversationResponseDataStrings {
 				s = strings.TrimSpace(s)
 				if s != "" && !strings.HasPrefix(s, "event") && !strings.HasPrefix(s, "data: 2023") {
@@ -120,7 +153,7 @@ func StartConversation(c *gin.Context) {
 			}
 			temp = result
 
-			if result == "429" || result == "[DONE]" {
+			if result == "429" || result == api.DoneFlag {
 				callbackChannel <- result
 				close(callbackChannel)
 				break
