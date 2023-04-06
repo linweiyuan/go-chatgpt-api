@@ -177,8 +177,6 @@ func StartConversation(c *gin.Context) {
 		c.Writer.Write([]byte("data:" + eventDataString + "\n\n"))
 		c.Writer.Flush()
 	}
-
-	c.Writer.Write([]byte("event: close\ndata: close\n\n"))
 }
 
 type GenerateTitleRequest struct {
