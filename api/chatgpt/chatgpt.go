@@ -160,11 +160,6 @@ func StartConversation(c *gin.Context) {
 
 			result = result[5:]
 			callbackChannel <- result
-
-			if strings.Contains(result, "<|im_end|>") {
-				close(callbackChannel)
-				break
-			}
 		}
 	}()
 
