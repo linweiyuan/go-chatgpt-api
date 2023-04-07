@@ -28,7 +28,6 @@ func main() {
 	router.Use(middleware.HeaderCheckMiddleware())
 	conversationsGroup := router.Group("/conversations")
 	{
-		conversationsGroup.Use(middleware.PreCheckMiddleware())
 		conversationsGroup.GET("", chatgpt.GetConversations)
 
 		// PATCH is official method, POST is added for Java support
@@ -38,7 +37,6 @@ func main() {
 
 	conversationGroup := router.Group("/conversation")
 	{
-		conversationGroup.Use(middleware.PreCheckMiddleware())
 		conversationGroup.POST("", chatgpt.StartConversation)
 		conversationGroup.POST("/gen_title/:id", chatgpt.GenerateTitle)
 		conversationGroup.GET("/:id", chatgpt.GetConversation)

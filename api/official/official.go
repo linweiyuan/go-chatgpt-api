@@ -68,5 +68,5 @@ func CheckUsage(c *gin.Context) {
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
-	c.Writer.Write([]byte(body))
+	c.Writer.Write(body)
 }

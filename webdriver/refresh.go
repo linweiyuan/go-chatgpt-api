@@ -18,7 +18,6 @@ func Refresh() {
 	}()
 
 	<-refreshDoneChannel
-	logger.Info("Refresh is done")
 }
 
 //goland:noinspection GoUnhandledErrorResult

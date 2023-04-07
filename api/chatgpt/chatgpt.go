@@ -28,6 +28,7 @@ const (
 
 var mutex sync.Mutex
 
+//goland:noinspection GoUnhandledErrorResult
 func init() {
 	go func() {
 		ticker := time.NewTicker(api.RefreshEveryMinutes * time.Minute)
@@ -104,6 +105,9 @@ type Content struct {
 
 //goland:noinspection GoUnhandledErrorResult
 func StartConversation(c *gin.Context) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	var request StartConversationRequest
 	c.BindJSON(&request)
 	if request.ConversationID == nil || *request.ConversationID == "" {
@@ -124,9 +128,6 @@ func StartConversation(c *gin.Context) {
 	var callbackChannel = make(chan string)
 
 	go func() {
-		mutex.Lock()
-		defer mutex.Unlock()
-
 		webdriver.WebDriver.ExecuteScript("delete window.conversationResponseData;", nil)
 		temp := ""
 		for {

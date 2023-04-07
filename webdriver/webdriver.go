@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/linweiyuan/go-chatgpt-api/api"
+	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 	"github.com/tebeka/selenium"
 	"github.com/tebeka/selenium/chrome"
 )
@@ -38,9 +39,15 @@ func init() {
 		},
 	}, chatgptProxyServer)
 
+	if WebDriver == nil {
+		logger.Error("Please make sure chatgpt proxy service is running")
+		return
+	}
+
+	WebDriver.SetAsyncScriptTimeout(time.Second * api.ScriptExecutionTimeout)
+
 	WebDriver.Get(api.ChatGPTUrl)
 	if !isAccessDenied(WebDriver) && !isAtCapacity(WebDriver) {
 		HandleCaptcha(WebDriver)
-		WebDriver.SetAsyncScriptTimeout(time.Second * api.ScriptExecutionTimeout)
 	}
 }

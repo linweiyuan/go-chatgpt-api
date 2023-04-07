@@ -17,6 +17,8 @@ const (
 	checkNextInterval        = 5
 )
 
+var isFirstTimeRun = true
+
 //goland:noinspection GoUnhandledErrorResult
 func HandleCaptcha(webDriver selenium.WebDriver) {
 	err := webDriver.WaitWithTimeoutAndInterval(func(driver selenium.WebDriver) (bool, error) {
@@ -26,32 +28,30 @@ func HandleCaptcha(webDriver selenium.WebDriver) {
 		}
 
 		welcomeText, _ := element.Text()
-		logger.Info(welcomeText)
-		return welcomeText == "Welcome to ChatGPT", nil
+		isWelcomed := welcomeText == "Welcome to ChatGPT"
+		if isFirstTimeRun && isWelcomed {
+			logger.Info(welcomeText)
+			isFirstTimeRun = false
+		}
+		return isWelcomed, nil
 	}, time.Second*checkWelcomeTextTimeout, time.Second*checkCaptchaInterval)
 
 	if err != nil {
 		webDriver.SwitchFrame(0)
 
-		logger.Info("Checking captcha")
 		err := webDriver.WaitWithTimeoutAndInterval(func(driver selenium.WebDriver) (bool, error) {
-			element, err := driver.FindElement(selenium.ByCSSSelector, "input[type=checkbox]")
+			element, err := driver.FindElement(selenium.ByCSSSelector, "input")
 			if err != nil {
 				return false, nil
 			}
 
 			element.Click()
-			logger.Info("Captcha is clicked!")
 			return true, nil
 		}, time.Second*checkCaptchaTimeout, time.Second*checkCaptchaInterval)
 
 		if err != nil {
 			logger.Error("Failed to handle captcha: " + err.Error())
-			if pageSource, err := webDriver.PageSource(); err == nil {
-				title, _ := webDriver.Title()
-				logger.Error(title)
-				logger.Error(pageSource)
-			}
+
 			webDriver.Refresh()
 			HandleCaptcha(webDriver)
 		} else {
@@ -62,10 +62,7 @@ func HandleCaptcha(webDriver selenium.WebDriver) {
 				log.Fatal("Failed to handle captcha, looks like infinite loop, please remove CHATGPT_PROXY_SERVER to use API mode first until I find a way to fix it.")
 			}
 
-			logger.Info(title)
 			if title == "Just a moment..." {
-				logger.Info("Still get a captcha")
-
 				HandleCaptcha(webDriver)
 			}
 		}
