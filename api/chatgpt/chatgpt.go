@@ -64,8 +64,7 @@ func GetConversations(c *gin.Context) {
 		limit = "20"
 	}
 	url := apiPrefix + "/conversations?offset=" + offset + "&limit=" + limit
-	accessToken := c.GetHeader(api.Authorization)
-
+	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
 	script := getGetScript(url, accessToken, getConversationsErrorMessage)
 	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
 	if handleSeleniumError(err, script, c) {
@@ -115,7 +114,7 @@ func StartConversation(c *gin.Context) {
 	}
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation"
-	accessToken := c.GetHeader(api.Authorization)
+	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
 	script := getPostScriptForStartConversation(url, accessToken, string(jsonBytes))
 	_, err := webdriver.WebDriver.ExecuteScript(script, nil)
 	if handleSeleniumError(err, script, c) {
@@ -190,7 +189,7 @@ func GenerateTitle(c *gin.Context) {
 	c.BindJSON(&request)
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation/gen_title/" + c.Param("id")
-	accessToken := c.GetHeader(api.Authorization)
+	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
 	script := getPostScript(url, accessToken, string(jsonBytes), generateTitleErrorMessage)
 	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
 	if handleSeleniumError(err, script, c) {
@@ -208,7 +207,7 @@ func GenerateTitle(c *gin.Context) {
 //goland:noinspection GoUnhandledErrorResult
 func GetConversation(c *gin.Context) {
 	url := apiPrefix + "/conversation/" + c.Param("id")
-	accessToken := c.GetHeader("Authorization")
+	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
 	script := getGetScript(url, accessToken, getContentErrorMessage)
 	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
 	if handleSeleniumError(err, script, c) {
@@ -238,7 +237,7 @@ func UpdateConversation(c *gin.Context) {
 	}
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation/" + c.Param("id")
-	accessToken := c.GetHeader("Authorization")
+	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
 	script := getPatchScript(url, accessToken, string(jsonBytes), updateConversationErrorMessage)
 	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
 	if handleSeleniumError(err, script, c) {
@@ -265,7 +264,7 @@ func FeedbackMessage(c *gin.Context) {
 	c.BindJSON(&request)
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation/message_feedback"
-	accessToken := c.GetHeader("Authorization")
+	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
 	script := getPostScript(url, accessToken, string(jsonBytes), feedbackMessageErrorMessage)
 	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
 	if handleSeleniumError(err, script, c) {
@@ -286,7 +285,7 @@ func ClearConversations(c *gin.Context) {
 		IsVisible: false,
 	})
 	url := apiPrefix + "/conversations"
-	accessToken := c.GetHeader("Authorization")
+	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
 	script := getPatchScript(url, accessToken, string(jsonBytes), clearConversationsErrorMessage)
 	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
 	if handleSeleniumError(err, script, c) {

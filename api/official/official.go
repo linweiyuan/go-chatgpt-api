@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/linweiyuan/go-chatgpt-api/api"
 )
 
 const (
@@ -42,7 +42,7 @@ func ChatCompletions(c *gin.Context) {
 	c.ShouldBindJSON(&chatCompletionsRequest)
 	data, _ := json.Marshal(chatCompletionsRequest)
 	req, _ := http.NewRequest("POST", apiChatCompletions, bytes.NewBuffer(data))
-	req.Header.Set("Authorization", getHeader(c.GetHeader("Authorization")))
+	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Content-Type", "application/json")
 	resp, _ := client.Do(req)
@@ -63,17 +63,10 @@ func ChatCompletions(c *gin.Context) {
 //goland:noinspection GoUnhandledErrorResult
 func CheckUsage(c *gin.Context) {
 	req, _ := http.NewRequest("GET", apiCheckUsage, nil)
-	req.Header.Set("Authorization", getHeader(c.GetHeader("Authorization")))
+	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	resp, _ := client.Do(req)
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)
 	c.Writer.Write([]byte(body))
-}
-
-func getHeader(header string) string {
-	if !strings.HasPrefix("Bearer", header) {
-		return "Bearer " + header
-	}
-	return header
 }
