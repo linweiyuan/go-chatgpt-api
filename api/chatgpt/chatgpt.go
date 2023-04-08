@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 	"github.com/linweiyuan/go-chatgpt-api/webdriver"
@@ -104,17 +105,27 @@ type Content struct {
 }
 
 type ConversationResponse struct {
-	ConversationResponseMessage ConversationResponseMessage `json:"message"`
-}
-
-type ConversationResponseMessage struct {
-	EndTurn bool `json:"end_turn"`
+	Message struct {
+		ID      string `json:"id"`
+		Content struct {
+			Parts []string `json:"parts"`
+		} `json:"content"`
+		EndTurn  bool `json:"end_turn"`
+		Metadata struct {
+			FinishDetails struct {
+				Type string `json:"type"`
+			} `json:"finish_details"`
+		} `json:"metadata"`
+	} `json:"message"`
+	ConversationID string `json:"conversation_id"`
 }
 
 //goland:noinspection GoUnhandledErrorResult
 func StartConversation(c *gin.Context) {
 	mutex.Lock()
 	defer mutex.Unlock()
+
+	var callbackChannel = make(chan string)
 
 	var request StartConversationRequest
 	c.BindJSON(&request)
@@ -124,20 +135,38 @@ func StartConversation(c *gin.Context) {
 	if request.Messages[0].Author.Role == "" {
 		request.Messages[0].Author.Role = defaultRole
 	}
+
+	oldContentToResponse := ""
+	if !sendConversationRequest(c, callbackChannel, request, oldContentToResponse) {
+		return
+	}
+
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+
+	for eventDataString := range callbackChannel {
+		c.Writer.Write([]byte("data:" + eventDataString + "\n\n"))
+		c.Writer.Flush()
+	}
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func sendConversationRequest(c *gin.Context, callbackChannel chan string, request StartConversationRequest, oldContent string) bool {
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation"
 	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
 	script := getPostScriptForStartConversation(url, accessToken, string(jsonBytes))
 	_, err := webdriver.WebDriver.ExecuteScript(script, nil)
 	if handleSeleniumError(err, script, c) {
-		return
+		return false
 	}
-
-	var callbackChannel = make(chan string)
 
 	go func() {
 		webdriver.WebDriver.ExecuteScript("delete window.conversationResponseData;", nil)
 		temp := ""
+		var conversationResponse ConversationResponse
+		maxTokens := false
 		for {
 			conversationResponseData, _ := webdriver.WebDriver.ExecuteScript("return window.conversationResponseData;", nil)
 			if conversationResponseData == nil || conversationResponseData == "" {
@@ -165,27 +194,57 @@ func StartConversation(c *gin.Context) {
 			temp = conversationResponseDataString
 
 			conversationResponseDataString = conversationResponseDataString[6:]
-			callbackChannel <- conversationResponseDataString
 
-			var conversationResponse ConversationResponse
 			json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
-			endTurn := conversationResponse.ConversationResponseMessage.EndTurn
+			message := conversationResponse.Message
+			if oldContent == "" {
+				callbackChannel <- conversationResponseDataString
+			} else {
+				message.Content.Parts[0] = oldContent + (message.Content.Parts[0])
+				withOldContentJsonString, _ := json.Marshal(conversationResponse)
+				callbackChannel <- string(withOldContentJsonString)
+			}
+
+			maxTokens = message.Metadata.FinishDetails.Type == "max_tokens"
+			if maxTokens {
+				oldContent = message.Content.Parts[0]
+				break
+			}
+
+			endTurn := message.EndTurn
 			if endTurn {
 				callbackChannel <- "[DONE]"
 				close(callbackChannel)
 				break
 			}
 		}
+		if maxTokens {
+			parentMessageID := conversationResponse.Message.ID
+			conversationID := conversationResponse.ConversationID
+			requestBodyJson := fmt.Sprintf(`
+			{
+				"action": "next",
+				"messages": [{
+					"id": "%s",
+					"author": {
+						"role": "%s"
+					},
+					"role": "%s",
+					"content": {
+						"content_type": "text",
+						"parts": ["continue"]
+					}
+				}],
+				"parent_message_id": "%s",
+				"model": "%s",
+				"conversation_id": "%s"
+			}`, uuid.NewString(), defaultRole, defaultRole, parentMessageID, request.Model, conversationID)
+			var request StartConversationRequest
+			json.Unmarshal([]byte(requestBodyJson), &request)
+			sendConversationRequest(c, callbackChannel, request, oldContent)
+		}
 	}()
-
-	c.Writer.Header().Set("Content-Type", "text/event-stream")
-	c.Writer.Header().Set("Cache-Control", "no-cache")
-	c.Writer.Header().Set("Connection", "keep-alive")
-
-	for eventDataString := range callbackChannel {
-		c.Writer.Write([]byte("data:" + eventDataString + "\n\n"))
-		c.Writer.Flush()
-	}
+	return true
 }
 
 type GenerateTitleRequest struct {

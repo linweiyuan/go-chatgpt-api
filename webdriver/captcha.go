@@ -60,9 +60,9 @@ func HandleCaptcha(webDriver selenium.WebDriver) {
 			title, _ := webDriver.Title()
 			if title == "" {
 				log.Fatal("Failed to handle captcha, looks like infinite loop, please remove CHATGPT_PROXY_SERVER to use API mode first until I find a way to fix it.")
-			}
-
-			if title == "Just a moment..." {
+			} else if title == "Just a moment..." {
+				HandleCaptcha(webDriver)
+			} else if title == "ChatGPT | OpenAI" {
 				HandleCaptcha(webDriver)
 			}
 		}
