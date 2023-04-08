@@ -14,7 +14,6 @@ const (
 
 	AuthorizationHeader = "Authorization"
 
-	DoneFlag            = "[DONE]"
 	RefreshEveryMinutes = 3
 )
 

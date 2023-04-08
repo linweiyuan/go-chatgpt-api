@@ -103,6 +103,14 @@ type Content struct {
 	Parts       []string `json:"parts"`
 }
 
+type ConversationResponse struct {
+	ConversationResponseMessage ConversationResponseMessage `json:"message"`
+}
+
+type ConversationResponseMessage struct {
+	EndTurn bool `json:"end_turn"`
+}
+
 //goland:noinspection GoUnhandledErrorResult
 func StartConversation(c *gin.Context) {
 	mutex.Lock()
@@ -137,30 +145,36 @@ func StartConversation(c *gin.Context) {
 			}
 
 			conversationResponseDataString := conversationResponseData.(string)
-			conversationResponseDataStrings := strings.Split(conversationResponseDataString, "\n")
-			result := api.DoneFlag
+			conversationResponseDataStrings := strings.Split(conversationResponseDataString, "\n\n")
+
 			for _, s := range conversationResponseDataStrings {
 				s = strings.TrimSpace(s)
-				if s != "" && !strings.HasPrefix(s, "event") && !strings.HasPrefix(s, "data: 2023") {
-					result = s
+				if s != "" &&
+					!strings.HasPrefix(s, "event") &&
+					!strings.HasPrefix(s, "data: 2023") &&
+					s != "data: [DONE]" {
+					conversationResponseDataString = s
 				}
 			}
 
 			if temp != "" {
-				if temp == result {
+				if temp == conversationResponseDataString {
 					continue
 				}
 			}
-			temp = result
+			temp = conversationResponseDataString
 
-			if result == "429" || result == api.DoneFlag {
-				callbackChannel <- result
+			conversationResponseDataString = conversationResponseDataString[6:]
+			callbackChannel <- conversationResponseDataString
+
+			var conversationResponse ConversationResponse
+			json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
+			endTurn := conversationResponse.ConversationResponseMessage.EndTurn
+			if endTurn {
+				callbackChannel <- "[DONE]"
 				close(callbackChannel)
 				break
 			}
-
-			result = result[5:]
-			callbackChannel <- result
 		}
 	}()
 
@@ -328,13 +342,7 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 		xhr.setRequestHeader('Authorization', '%s');
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.onreadystatechange = function() {
-			if (xhr.readyState === xhr.LOADING && xhr.status === 200) {
-				window.conversationResponseData = xhr.responseText;
-			} else if (xhr.status === 429) {
-				window.conversationResponseData = '429';
-			} if (xhr.readyState === xhr.DONE) {
-				window.conversationResponseData = '[DONE]';
-			}
+			window.conversationResponseData = xhr.responseText;
 		};
 		xhr.send(JSON.stringify(%s));
 	`, url, accessToken, jsonString)
