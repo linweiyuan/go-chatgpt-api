@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
 	"github.com/linweiyuan/go-chatgpt-api/api/official"
@@ -54,6 +56,8 @@ func main() {
 	}
 	router.GET("/dashboard/billing/credit_grants", official.CheckUsage)
 
-	//goland:noinspection GoUnhandledErrorResult
-	router.Run(":8080")
+	err := router.Run(":8080")
+	if err != nil {
+		log.Fatal("Failed to start server:" + err.Error())
+	}
 }
