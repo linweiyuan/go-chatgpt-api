@@ -195,7 +195,12 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 
 			conversationResponseDataString = conversationResponseDataString[6:]
 
-			json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
+			err := json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
+			if err != nil {
+				logger.Info(conversationResponseDataString)
+				logger.Error(err.Error())
+				continue
+			}
 			message := conversationResponse.Message
 			if oldContent == "" {
 				callbackChannel <- conversationResponseDataString
