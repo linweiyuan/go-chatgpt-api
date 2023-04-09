@@ -174,15 +174,19 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 			}
 
 			conversationResponseDataString := conversationResponseData.(string)
-			conversationResponseDataStrings := strings.Split(conversationResponseDataString, "\n\n")
-
-			for _, s := range conversationResponseDataStrings {
-				s = strings.TrimSpace(s)
-				if s != "" &&
-					!strings.HasPrefix(s, "event") &&
-					!strings.HasPrefix(s, "data: 2023") &&
-					s != "data: [DONE]" {
-					conversationResponseDataString = s
+			datas := strings.Split(conversationResponseDataString, "}\n\n")
+			// reverse list to get the last one
+			for i := len(datas) - 1; i > 0; i-- {
+				data := datas[i]
+				if strings.HasPrefix(data, "event") {
+					// ping event and time response -> message json
+					data = data[49:]
+				}
+				if !(data == "" ||
+					strings.HasPrefix(data, "data: [DONE]")) {
+					// add "}" back which is split above with "\n\n"
+					conversationResponseDataString = data + "}"
+					break
 				}
 			}
 
