@@ -86,6 +86,7 @@ type StartConversationRequest struct {
 	Model           string    `json:"model"`
 	ParentMessageID string    `json:"parent_message_id"`
 	ConversationID  *string   `json:"conversation_id"`
+	ContinueText    string    `json:"continue_text"`
 }
 
 type Message struct {
@@ -200,7 +201,12 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 
 			maxTokens = message.Metadata.FinishDetails.Type == "max_tokens"
 			if maxTokens {
-				oldContent = message.Content.Parts[0]
+				if request.ContinueText == "" {
+					callbackChannel <- "[DONE]"
+					close(callbackChannel)
+				} else {
+					oldContent = message.Content.Parts[0]
+				}
 				break
 			}
 
@@ -211,7 +217,9 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 				break
 			}
 		}
-		if maxTokens {
+		if maxTokens && request.ContinueText != "" {
+			time.Sleep(time.Second)
+
 			parentMessageID := conversationResponse.Message.ID
 			conversationID := conversationResponse.ConversationID
 			requestBodyJson := fmt.Sprintf(`
@@ -225,13 +233,14 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 					"role": "%s",
 					"content": {
 						"content_type": "text",
-						"parts": ["continue"]
+						"parts": ["%s"]
 					}
 				}],
 				"parent_message_id": "%s",
 				"model": "%s",
-				"conversation_id": "%s"
-			}`, uuid.NewString(), defaultRole, defaultRole, parentMessageID, request.Model, conversationID)
+				"conversation_id": "%s",
+				"continue_text": "%s"
+			}`, uuid.NewString(), defaultRole, defaultRole, request.ContinueText, parentMessageID, request.Model, conversationID, request.ContinueText)
 			var request StartConversationRequest
 			json.Unmarshal([]byte(requestBodyJson), &request)
 			sendConversationRequest(c, callbackChannel, request, oldContent)
