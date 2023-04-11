@@ -2,7 +2,6 @@ package webdriver
 
 import (
 	"os"
-	"time"
 
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/util/logger"
@@ -44,10 +43,15 @@ func init() {
 		return
 	}
 
-	WebDriver.SetAsyncScriptTimeout(time.Second * api.ScriptExecutionTimeout)
-
 	WebDriver.Get(api.ChatGPTUrl)
-	if !isAccessDenied(WebDriver) && !isAtCapacity(WebDriver) {
-		HandleCaptcha(WebDriver)
+
+	if isReady(WebDriver) {
+		logger.Info(api.ChatGPTWelcomeText)
+	} else {
+		if !isAccessDenied(WebDriver) {
+			if HandleCaptcha(WebDriver) {
+				logger.Info(api.ChatGPTWelcomeText)
+			}
+		}
 	}
 }
