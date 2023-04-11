@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 
@@ -170,34 +169,18 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 		for {
 			conversationResponseData, _ := webdriver.WebDriver.ExecuteScript("return window.conversationResponseData;", nil)
 			if conversationResponseData == nil || conversationResponseData == "" {
+				time.Sleep(time.Second)
 				continue
 			}
 
 			conversationResponseDataString := conversationResponseData.(string)
-			datas := strings.Split(conversationResponseDataString, "}\n\n")
-			// reverse list to get the last one
-			for i := len(datas) - 1; i > 0; i-- {
-				data := datas[i]
-				if strings.HasPrefix(data, "event") {
-					// ping event and time response -> message json
-					data = data[49:]
-				}
-				if !(data == "" ||
-					strings.HasPrefix(data, "data: [DONE]")) {
-					// add "}" back which is split above with "\n\n"
-					conversationResponseDataString = data + "}"
-					break
-				}
-			}
-
 			if temp != "" {
 				if temp == conversationResponseDataString {
+					time.Sleep(time.Millisecond * 10)
 					continue
 				}
 			}
 			temp = conversationResponseDataString
-
-			conversationResponseDataString = conversationResponseDataString[6:]
 
 			err := json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
 			if err != nil {
@@ -205,6 +188,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 				logger.Error(err.Error())
 				continue
 			}
+
 			message := conversationResponse.Message
 			if oldContent == "" {
 				callbackChannel <- conversationResponseDataString
@@ -403,14 +387,40 @@ func getGetScript(url string, accessToken string, errorMessage string) string {
 func getPostScriptForStartConversation(url string, accessToken string, jsonString string) string {
 	return fmt.Sprintf(`
 		let conversationResponseData;
-	
+		let temp;
+
 		const xhr = new XMLHttpRequest();
-		xhr.open('POST', '%s', true);
+		xhr.open('POST', '%s');
 		xhr.setRequestHeader('Accept', 'text/event-stream');
 		xhr.setRequestHeader('Authorization', '%s');
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.onreadystatechange = function() {
-			window.conversationResponseData = xhr.responseText;
+			if (xhr.readyState === xhr.LOADING || xhr.readyState === xhr.DONE) {
+				const dataArray = xhr.responseText.substr(xhr.seenBytes).split("\n\n");
+				dataArray.pop(); // empty string
+				if (dataArray.length) {
+					let data = dataArray.pop(); // target data
+					if (data === 'data: [DONE]') { // this DONE will break the ending handling
+						if (dataArray.length) {
+							data = dataArray.pop();
+						} else {
+							data = temp;
+						}
+					} else if (data.startsWith('event')) {
+						data = data.substring(49);
+						if (!data) {
+							data = temp;
+						}
+					}
+					if (data) {
+						if (!temp || temp !== data) {
+							temp = data;
+							window.conversationResponseData = data.substring(6);
+						}
+					}
+				}
+			}
+			xhr.seenBytes = xhr.responseText.length;
 		};
 		xhr.send(JSON.stringify(%s));
 	`, url, accessToken, jsonString)
