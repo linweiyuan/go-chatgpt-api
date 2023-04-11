@@ -73,6 +73,7 @@ func GetConversations(c *gin.Context) {
 	}
 
 	if responseText == getConversationsErrorMessage {
+		webdriver.Refresh()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getConversationsErrorMessage))
 		return
 	}
@@ -170,14 +171,12 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 		for {
 			conversationResponseData, _ := webdriver.WebDriver.ExecuteScript("return window.conversationResponseData;", nil)
 			if conversationResponseData == nil || conversationResponseData == "" {
-				time.Sleep(time.Second)
 				continue
 			}
 
 			conversationResponseDataString := conversationResponseData.(string)
 			if temp != "" {
 				if temp == conversationResponseDataString {
-					time.Sleep(time.Millisecond * 10)
 					continue
 				}
 			}
@@ -268,6 +267,7 @@ func GenerateTitle(c *gin.Context) {
 	}
 
 	if responseText == generateTitleErrorMessage {
+		webdriver.Refresh()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(generateTitleErrorMessage))
 		return
 	}
@@ -286,6 +286,7 @@ func GetConversation(c *gin.Context) {
 	}
 
 	if responseText == getContentErrorMessage {
+		webdriver.Refresh()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getContentErrorMessage))
 		return
 	}
@@ -316,6 +317,7 @@ func UpdateConversation(c *gin.Context) {
 	}
 
 	if responseText == updateConversationErrorMessage {
+		webdriver.Refresh()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(updateConversationErrorMessage))
 		return
 	}
@@ -343,6 +345,7 @@ func FeedbackMessage(c *gin.Context) {
 	}
 
 	if responseText == feedbackMessageErrorMessage {
+		webdriver.Refresh()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(feedbackMessageErrorMessage))
 		return
 	}
@@ -364,6 +367,7 @@ func ClearConversations(c *gin.Context) {
 	}
 
 	if responseText == clearConversationsErrorMessage {
+		webdriver.Refresh()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(clearConversationsErrorMessage))
 		return
 	}
