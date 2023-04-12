@@ -427,45 +427,54 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 		xhr.setRequestHeader('Authorization', '%s');
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.onreadystatechange = function() {
-			if (xhr.readyState === xhr.LOADING || xhr.readyState === xhr.DONE) {
-				switch (xhr.status) {
-					case 200: {
-						const dataArray = xhr.responseText.substr(xhr.seenBytes).split("\n\n");
-						dataArray.pop(); // empty string
-						if (dataArray.length) {
-							let data = dataArray.pop(); // target data
-							if (data === 'data: [DONE]') { // this DONE will break the ending handling
-								if (dataArray.length) {
-									data = dataArray.pop();
+			switch (xhr.readyState) {
+				case xhr.LOADING: {
+					switch (xhr.status) {
+						case 200: {
+							const dataArray = xhr.responseText.substr(xhr.seenBytes).split("\n\n");
+							dataArray.pop(); // empty string
+							if (dataArray.length) {
+								let data = dataArray.pop(); // target data
+								if (data === 'data: [DONE]') { // this DONE will break the ending handling
+									if (dataArray.length) {
+										data = dataArray.pop();
+									}
+								} else if (data.startsWith('event')) {
+									data = data.substring(49);
 								}
-							} else if (data.startsWith('event')) {
-								data = data.substring(49);
+								if (data) {
+									window.conversationResponseData = data.substring(6);
+								}
 							}
-							if (data) {
-								window.conversationResponseData = data.substring(6);
-							}
+							break;
 						}
-						break;
+						case 403: {
+							window.conversationResponseData = xhr.status + 'Please retry (403).';
+							break;
+						}
+						case 413: {
+							window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail.message;
+							break;
+						}
+						case 422: {
+							const detail = JSON.parse(xhr.responseText).detail[0];
+							window.conversationResponseData = xhr.status + detail.loc + ' -> ' + detail.msg;
+							break;
+						}
+						case 429: {
+							window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail;
+							break;
+						}
 					}
-					case 403: {
-						window.conversationResponseData = xhr.status + 'Please retry (403).';
-						break;
-					}
-					case 413: {
-						window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail.message;
-						break;
-					}
-					case 422: {
-						const detail = JSON.parse(xhr.responseText).detail[0];
-						window.conversationResponseData = xhr.status + detail.loc + ' -> ' + detail.msg;
-						break;
-					}
-					case 429: {
-						window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail;
-						break;
-					}
+					xhr.seenBytes = xhr.responseText.length;
+					break;
 				}
-				xhr.seenBytes = xhr.responseText.length;
+				case xhr.DONE:
+					// keep exception handling
+					if (!window.conversationResponseData.startsWith('4')) {
+						window.conversationResponseData = '[DONE]';
+					}
+					break;
 			}
 		};
 		xhr.send(JSON.stringify(%s));
