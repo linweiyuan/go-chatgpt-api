@@ -181,6 +181,9 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 			conversationResponseDataString := conversationResponseData.(string)
 			if conversationResponseDataString[0:1] == strconv.Itoa(4) {
 				statusCode, _ := strconv.Atoi(conversationResponseDataString[0:3])
+				if statusCode == http.StatusForbidden {
+					webdriver.Refresh()
+				}
 				c.AbortWithStatusJSON(statusCode, api.ReturnMessage(conversationResponseDataString[3:]))
 				close(callbackChannel)
 				break
@@ -442,6 +445,10 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 								window.conversationResponseData = data.substring(6);
 							}
 						}
+						break;
+					}
+					case 403: {
+						window.conversationResponseData = xhr.status + 'Please retry (403).';
 						break;
 					}
 					case 413: {

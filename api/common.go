@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-const defaultErrorMessageKey = "detail"
+const defaultErrorMessageKey = "errorMessage"
 
 const (
 	ChatGPTUrl         = "https://chat.openai.com/chat"
