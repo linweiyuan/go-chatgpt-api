@@ -179,8 +179,9 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 			}
 
 			conversationResponseDataString := conversationResponseData.(string)
-			if conversationResponseDataString[0:3] == strconv.Itoa(http.StatusTooManyRequests) {
-				c.AbortWithStatusJSON(http.StatusTooManyRequests, api.ReturnMessage(conversationResponseDataString[3:]))
+			if conversationResponseDataString[0:1] == strconv.Itoa(4) {
+				statusCode, _ := strconv.Atoi(conversationResponseDataString[0:3])
+				c.AbortWithStatusJSON(statusCode, api.ReturnMessage(conversationResponseDataString[3:]))
 				close(callbackChannel)
 				break
 			}
@@ -424,23 +425,37 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === xhr.LOADING || xhr.readyState === xhr.DONE) {
-				if (xhr.status != 200) {
-					window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail; // 429 and ?
-				} else {
-					const dataArray = xhr.responseText.substr(xhr.seenBytes).split("\n\n");
-					dataArray.pop(); // empty string
-					if (dataArray.length) {
-						let data = dataArray.pop(); // target data
-						if (data === 'data: [DONE]') { // this DONE will break the ending handling
-							if (dataArray.length) {
-								data = dataArray.pop();
+				switch (xhr.status) {
+					case 200: {
+						const dataArray = xhr.responseText.substr(xhr.seenBytes).split("\n\n");
+						dataArray.pop(); // empty string
+						if (dataArray.length) {
+							let data = dataArray.pop(); // target data
+							if (data === 'data: [DONE]') { // this DONE will break the ending handling
+								if (dataArray.length) {
+									data = dataArray.pop();
+								}
+							} else if (data.startsWith('event')) {
+								data = data.substring(49);
 							}
-						} else if (data.startsWith('event')) {
-							data = data.substring(49);
+							if (data) {
+								window.conversationResponseData = data.substring(6);
+							}
 						}
-						if (data) {
-							window.conversationResponseData = data.substring(6);
-						}
+						break;
+					}
+					case 413: {
+						window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail.message;
+						break;
+					}
+					case 422: {
+						const detail = JSON.parse(xhr.responseText).detail[0];
+						window.conversationResponseData = xhr.status + detail.loc + ' -> ' + detail.msg;
+						break;
+					}
+					case 429: {
+						window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail;
+						break;
 					}
 				}
 				xhr.seenBytes = xhr.responseText.length;
