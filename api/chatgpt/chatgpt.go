@@ -196,8 +196,8 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 				if temp == conversationResponseDataString {
 					continue
 				}
-				temp = conversationResponseDataString
 			}
+			temp = conversationResponseDataString
 
 			err := json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
 			if err != nil {
