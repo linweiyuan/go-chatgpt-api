@@ -169,6 +169,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 
 	go func() {
 		webdriver.WebDriver.ExecuteScript("delete window.conversationResponseData;", nil)
+		temp := ""
 		var conversationResponse ConversationResponse
 		maxTokens := false
 		for {
@@ -188,6 +189,13 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 				callbackChannel <- doneFlag
 				close(callbackChannel)
 				break
+			}
+
+			if temp != "" {
+				if temp == conversationResponseDataString {
+					continue
+				}
+				temp = conversationResponseDataString
 			}
 
 			err := json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
