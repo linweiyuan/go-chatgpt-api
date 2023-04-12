@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -24,6 +25,7 @@ const (
 	updateConversationErrorMessage = "Failed to update conversation."
 	clearConversationsErrorMessage = "Failed to clear conversations."
 	feedbackMessageErrorMessage    = "Failed to add feedback."
+	doneFlag                       = "[DONE]"
 )
 
 var mutex sync.Mutex
@@ -36,22 +38,24 @@ func init() {
 		for {
 			select {
 			case <-ticker.C:
-				func() {
-					defer func() {
-						if err := recover(); err != nil {
-							logger.Error("Failed to refresh page")
-							mutex.Unlock()
-						}
-					}()
-
-					if mutex.TryLock() {
-						webdriver.Refresh()
-						mutex.Unlock()
-					}
-				}()
+				tryToRefreshPage()
 			}
 		}
 	}()
+}
+
+func tryToRefreshPage() {
+	defer func() {
+		if err := recover(); err != nil {
+			logger.Error("Failed to refresh page")
+			mutex.Unlock()
+		}
+	}()
+
+	if mutex.TryLock() {
+		webdriver.Refresh()
+		mutex.Unlock()
+	}
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -73,7 +77,7 @@ func GetConversations(c *gin.Context) {
 	}
 
 	if responseText == getConversationsErrorMessage {
-		webdriver.Refresh()
+		tryToRefreshPage()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getConversationsErrorMessage))
 		return
 	}
@@ -165,7 +169,6 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 
 	go func() {
 		webdriver.WebDriver.ExecuteScript("delete window.conversationResponseData;", nil)
-		temp := ""
 		var conversationResponse ConversationResponse
 		maxTokens := false
 		for {
@@ -175,12 +178,17 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 			}
 
 			conversationResponseDataString := conversationResponseData.(string)
-			if temp != "" {
-				if temp == conversationResponseDataString {
-					continue
-				}
+			if conversationResponseDataString[0:3] == strconv.Itoa(http.StatusTooManyRequests) {
+				c.AbortWithStatusJSON(http.StatusTooManyRequests, api.ReturnMessage(conversationResponseDataString[3:]))
+				close(callbackChannel)
+				break
 			}
-			temp = conversationResponseDataString
+
+			if conversationResponseDataString == doneFlag {
+				callbackChannel <- doneFlag
+				close(callbackChannel)
+				break
+			}
 
 			err := json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
 			if err != nil {
@@ -201,7 +209,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 			maxTokens = message.Metadata.FinishDetails.Type == "max_tokens"
 			if maxTokens {
 				if request.ContinueText == "" {
-					callbackChannel <- "[DONE]"
+					callbackChannel <- doneFlag
 					close(callbackChannel)
 				} else {
 					oldContent = message.Content.Parts[0]
@@ -211,7 +219,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 
 			endTurn := message.EndTurn
 			if endTurn {
-				callbackChannel <- "[DONE]"
+				callbackChannel <- doneFlag
 				close(callbackChannel)
 				break
 			}
@@ -267,7 +275,7 @@ func GenerateTitle(c *gin.Context) {
 	}
 
 	if responseText == generateTitleErrorMessage {
-		webdriver.Refresh()
+		tryToRefreshPage()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(generateTitleErrorMessage))
 		return
 	}
@@ -286,7 +294,7 @@ func GetConversation(c *gin.Context) {
 	}
 
 	if responseText == getContentErrorMessage {
-		webdriver.Refresh()
+		tryToRefreshPage()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getContentErrorMessage))
 		return
 	}
@@ -317,7 +325,7 @@ func UpdateConversation(c *gin.Context) {
 	}
 
 	if responseText == updateConversationErrorMessage {
-		webdriver.Refresh()
+		tryToRefreshPage()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(updateConversationErrorMessage))
 		return
 	}
@@ -345,7 +353,7 @@ func FeedbackMessage(c *gin.Context) {
 	}
 
 	if responseText == feedbackMessageErrorMessage {
-		webdriver.Refresh()
+		tryToRefreshPage()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(feedbackMessageErrorMessage))
 		return
 	}
@@ -367,7 +375,7 @@ func ClearConversations(c *gin.Context) {
 	}
 
 	if responseText == clearConversationsErrorMessage {
-		webdriver.Refresh()
+		tryToRefreshPage()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(clearConversationsErrorMessage))
 		return
 	}
@@ -400,7 +408,6 @@ func getGetScript(url string, accessToken string, errorMessage string) string {
 func getPostScriptForStartConversation(url string, accessToken string, jsonString string) string {
 	return fmt.Sprintf(`
 		let conversationResponseData;
-		let temp;
 
 		const xhr = new XMLHttpRequest();
 		xhr.open('POST', '%s');
@@ -409,31 +416,27 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 		xhr.setRequestHeader('Content-Type', 'application/json');
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === xhr.LOADING || xhr.readyState === xhr.DONE) {
-				const dataArray = xhr.responseText.substr(xhr.seenBytes).split("\n\n");
-				dataArray.pop(); // empty string
-				if (dataArray.length) {
-					let data = dataArray.pop(); // target data
-					if (data === 'data: [DONE]') { // this DONE will break the ending handling
-						if (dataArray.length) {
-							data = dataArray.pop();
-						} else {
-							data = temp;
+				if (xhr.status != 200) {
+					window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail; // 429 and ?
+				} else {
+					const dataArray = xhr.responseText.substr(xhr.seenBytes).split("\n\n");
+					dataArray.pop(); // empty string
+					if (dataArray.length) {
+						let data = dataArray.pop(); // target data
+						if (data === 'data: [DONE]') { // this DONE will break the ending handling
+							if (dataArray.length) {
+								data = dataArray.pop();
+							}
+						} else if (data.startsWith('event')) {
+							data = data.substring(49);
 						}
-					} else if (data.startsWith('event')) {
-						data = data.substring(49);
-						if (!data) {
-							data = temp;
-						}
-					}
-					if (data) {
-						if (!temp || temp !== data) {
-							temp = data;
+						if (data) {
 							window.conversationResponseData = data.substring(6);
 						}
 					}
 				}
+				xhr.seenBytes = xhr.responseText.length;
 			}
-			xhr.seenBytes = xhr.responseText.length;
 		};
 		xhr.send(JSON.stringify(%s));
 	`, url, accessToken, jsonString)
