@@ -189,7 +189,8 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 				break
 			}
 
-			if conversationResponseDataString == doneFlag {
+			if conversationResponseDataString[0:1] == "!" {
+				callbackChannel <- conversationResponseDataString[1:]
 				callbackChannel <- doneFlag
 				close(callbackChannel)
 				break
@@ -419,6 +420,13 @@ func getGetScript(url string, accessToken string, errorMessage string) string {
 
 func getPostScriptForStartConversation(url string, accessToken string, jsonString string) string {
 	return fmt.Sprintf(`
+		// get the whole data again to make sure get the endTurn message back
+		const getEndTurnMessage = (dataArray) => {
+			dataArray.pop(); // empty
+			dataArray.pop(); // data: [DONE]
+			return '!' + dataArray.pop().substring(6); // endTurn message
+		};
+
 		let conversationResponseData;
 
 		const xhr = new XMLHttpRequest();
@@ -436,9 +444,7 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 							if (dataArray.length) {
 								let data = dataArray.pop(); // target data
 								if (data === 'data: [DONE]') { // this DONE will break the ending handling
-									if (dataArray.length) {
-										data = dataArray.pop();
-									}
+									data = getEndTurnMessage(xhr.responseText.split("\n\n"));
 								} else if (data.startsWith('event')) {
 									data = data.substring(49);
 								}
@@ -476,7 +482,7 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 				case xhr.DONE:
 					// keep exception handling
 					if (!window.conversationResponseData.startsWith('4')) {
-						window.conversationResponseData = '[DONE]';
+						window.conversationResponseData = getEndTurnMessage(xhr.responseText.split("\n\n"));
 					}
 					break;
 			}
