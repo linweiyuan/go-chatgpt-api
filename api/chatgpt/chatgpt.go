@@ -179,7 +179,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 			}
 
 			conversationResponseDataString := conversationResponseData.(string)
-			if conversationResponseDataString[0:1] == strconv.Itoa(4) {
+			if conversationResponseDataString[0:1] == strconv.Itoa(4) || conversationResponseDataString[0:1] == strconv.Itoa(5) {
 				statusCode, _ := strconv.Atoi(conversationResponseDataString[0:3])
 				if statusCode == http.StatusForbidden {
 					webdriver.Refresh()
@@ -449,7 +449,7 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 							break;
 						}
 						case 403: {
-							window.conversationResponseData = xhr.status + 'Please retry (403).';
+							window.conversationResponseData = xhr.status + 'Something went wrong. If this issue persists please contact us through our help center at help.openai.com.';
 							break;
 						}
 						case 413: {
@@ -463,6 +463,10 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 						}
 						case 429: {
 							window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail;
+							break;
+						}
+						case 500: {
+							window.conversationResponseData = xhr.status + 'Unknown error.';
 							break;
 						}
 					}
