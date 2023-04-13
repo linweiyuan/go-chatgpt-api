@@ -17,15 +17,15 @@ const (
 
 func isReady(webDriver selenium.WebDriver) bool {
 	err := webDriver.WaitWithTimeoutAndInterval(func(driver selenium.WebDriver) (bool, error) {
-		title, err := driver.Title()
-		if err != nil || strings.Contains(title, api.ChatGPTTitleText) {
-			return false, nil
+		title, _ := driver.Title()
+		if strings.Contains(title, api.ChatGPTTitleText) {
+			return true, nil
 		}
 
-		return true, nil
+		return false, nil
 	}, time.Second*checkCaptchaTimeout, time.Second*checkCaptchaInterval)
 
-	return err != nil
+	return err == nil
 }
 
 //goland:noinspection GoUnhandledErrorResult
