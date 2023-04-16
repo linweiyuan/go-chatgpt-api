@@ -151,7 +151,7 @@ func StartConversation(c *gin.Context) {
 	c.Writer.Header().Set("Connection", "keep-alive")
 
 	for eventDataString := range callbackChannel {
-		c.Writer.Write([]byte("data:" + eventDataString + "\n\n"))
+		c.Writer.Write([]byte("data: " + eventDataString + "\n\n"))
 		c.Writer.Flush()
 	}
 }
