@@ -25,6 +25,7 @@ const (
 	updateConversationErrorMessage = "Failed to update conversation."
 	clearConversationsErrorMessage = "Failed to clear conversations."
 	feedbackMessageErrorMessage    = "Failed to add feedback."
+	getModelsErrorMessage          = "Failed to get models."
 	doneFlag                       = "[DONE]"
 )
 
@@ -560,4 +561,23 @@ func handleSeleniumError(err error, script string, c *gin.Context) bool {
 	}
 
 	return false
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func GetModels(c *gin.Context) {
+	url := apiPrefix + "/models"
+	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
+	script := getGetScript(url, accessToken, getModelsErrorMessage)
+	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if handleSeleniumError(err, script, c) {
+		return
+	}
+
+	if responseText == getModelsErrorMessage {
+		tryToRefreshPage()
+		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getModelsErrorMessage))
+		return
+	}
+
+	c.Writer.Write([]byte(responseText.(string)))
 }

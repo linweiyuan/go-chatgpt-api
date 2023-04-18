@@ -28,6 +28,8 @@ func main() {
 	router := gin.Default()
 	router.Use(Recover())
 	router.Use(middleware.HeaderCheckMiddleware())
+
+	// chatgpt
 	conversationsGroup := router.Group("/conversations")
 	{
 		conversationsGroup.GET("", chatgpt.GetConversations)
@@ -50,6 +52,9 @@ func main() {
 		conversationGroup.POST("/message_feedback", chatgpt.FeedbackMessage)
 	}
 
+	router.GET("/models", chatgpt.GetModels)
+
+	// official api
 	apiGroup := router.Group("/v1")
 	{
 		apiGroup.POST("/chat/completions", official.ChatCompletions)
