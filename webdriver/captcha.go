@@ -62,8 +62,6 @@ func HandleCaptcha(webDriver selenium.WebDriver) bool {
 	})
 
 	if err != nil {
-		logger.Error("Failed to handle captcha: " + err.Error())
-
 		webDriver.Refresh()
 		HandleCaptcha(webDriver)
 	} else {

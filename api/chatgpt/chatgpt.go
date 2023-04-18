@@ -206,8 +206,6 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 
 			err := json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
 			if err != nil {
-				logger.Info(conversationResponseDataString)
-				logger.Error(err.Error())
 				continue
 			}
 
@@ -552,8 +550,8 @@ func getPatchScript(url string, accessToken string, jsonString string, errorMess
 //goland:noinspection GoUnhandledErrorResult
 func handleSeleniumError(err error, script string, c *gin.Context) bool {
 	if err != nil {
-		if seleniumError, ok := err.(*selenium.Error); ok {
-			webdriver.NewSessionAndRefresh(seleniumError.Message)
+		if _, ok := err.(*selenium.Error); ok {
+			webdriver.NewSessionAndRefresh()
 			responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
 			c.Writer.Write([]byte(responseText.(string)))
 			return true
