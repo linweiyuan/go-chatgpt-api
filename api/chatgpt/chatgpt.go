@@ -86,46 +86,6 @@ func GetConversations(c *gin.Context) {
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
-type StartConversationRequest struct {
-	Action          string    `json:"action"`
-	Messages        []Message `json:"messages"`
-	Model           string    `json:"model"`
-	ParentMessageID string    `json:"parent_message_id"`
-	ConversationID  *string   `json:"conversation_id"`
-	ContinueText    string    `json:"continue_text"`
-}
-
-type Message struct {
-	Author  Author  `json:"author"`
-	Content Content `json:"content"`
-	ID      string  `json:"id"`
-}
-
-type Author struct {
-	Role string `json:"role"`
-}
-
-type Content struct {
-	ContentType string   `json:"content_type"`
-	Parts       []string `json:"parts"`
-}
-
-type ConversationResponse struct {
-	Message struct {
-		ID      string `json:"id"`
-		Content struct {
-			Parts []string `json:"parts"`
-		} `json:"content"`
-		EndTurn  bool `json:"end_turn"`
-		Metadata struct {
-			FinishDetails struct {
-				Type string `json:"type"`
-			} `json:"finish_details"`
-		} `json:"metadata"`
-	} `json:"message"`
-	ConversationID string `json:"conversation_id"`
-}
-
 //goland:noinspection GoUnhandledErrorResult
 func StartConversation(c *gin.Context) {
 	mutex.Lock()
@@ -268,11 +228,6 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 	return true
 }
 
-type GenerateTitleRequest struct {
-	MessageID string `json:"message_id"`
-	Model     string `json:"model"`
-}
-
 //goland:noinspection GoUnhandledErrorResult
 func GenerateTitle(c *gin.Context) {
 	var request GenerateTitleRequest
@@ -314,11 +269,6 @@ func GetConversation(c *gin.Context) {
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
-type PatchConversationRequest struct {
-	Title     *string `json:"title"`
-	IsVisible bool    `json:"is_visible"`
-}
-
 //goland:noinspection GoUnhandledErrorResult
 func UpdateConversation(c *gin.Context) {
 	var request PatchConversationRequest
@@ -343,12 +293,6 @@ func UpdateConversation(c *gin.Context) {
 	}
 
 	c.Writer.Write([]byte(responseText.(string)))
-}
-
-type FeedbackMessageRequest struct {
-	MessageID      string `json:"message_id"`
-	ConversationID string `json:"conversation_id"`
-	Rating         string `json:"rating"`
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -578,6 +522,26 @@ func GetModels(c *gin.Context) {
 	if responseText == getModelsErrorMessage {
 		tryToRefreshPage()
 		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getModelsErrorMessage))
+		return
+	}
+
+	c.Writer.Write([]byte(responseText.(string)))
+}
+
+var getAccountCheckErrorMessage string = "Check failed." // Placeholder. Never encountered.
+
+func GetAccountCheck(c *gin.Context) {
+	url := apiPrefix + "/accounts/check"
+	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
+	script := getGetScript(url, accessToken, getAccountCheckErrorMessage)
+	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if handleSeleniumError(err, script, c) {
+		return
+	}
+
+	if responseText == getAccountCheckErrorMessage {
+		tryToRefreshPage()
+		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getAccountCheckErrorMessage))
 		return
 	}
 

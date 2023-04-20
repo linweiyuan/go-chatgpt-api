@@ -54,6 +54,8 @@ func main() {
 
 	router.GET("/models", chatgpt.GetModels)
 
+	router.GET("/accounts/check", chatgpt.GetAccountCheck)
+
 	// official api
 	apiGroup := router.Group("/v1")
 	{
