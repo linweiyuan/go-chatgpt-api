@@ -528,20 +528,20 @@ func GetModels(c *gin.Context) {
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
-var getCheckErrorMessage string = "Check failed." // Placeholder. Never encountered.
+var getAccountCheckErrorMessage string = "Check failed." // Placeholder. Never encountered.
 
-func GetCheck(c *gin.Context) {
+func GetAccountCheck(c *gin.Context) {
 	url := apiPrefix + "/accounts/check"
 	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
-	script := getGetScript(url, accessToken, getCheckErrorMessage)
+	script := getGetScript(url, accessToken, getAccountCheckErrorMessage)
 	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
 	if handleSeleniumError(err, script, c) {
 		return
 	}
 
-	if responseText == getCheckErrorMessage {
+	if responseText == getAccountCheckErrorMessage {
 		tryToRefreshPage()
-		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getCheckErrorMessage))
+		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getAccountCheckErrorMessage))
 		return
 	}
 
