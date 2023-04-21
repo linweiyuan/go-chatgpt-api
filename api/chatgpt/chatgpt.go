@@ -26,6 +26,8 @@ const (
 	clearConversationsErrorMessage = "Failed to clear conversations."
 	feedbackMessageErrorMessage    = "Failed to add feedback."
 	getModelsErrorMessage          = "Failed to get models."
+	getAccountCheckErrorMessage    = "Check failed." // Placeholder. Never encountered.
+	parseJsonErrorMessage          = "Failed to parse json request body."
 	doneFlag                       = "[DONE]"
 )
 
@@ -94,7 +96,11 @@ func StartConversation(c *gin.Context) {
 	var callbackChannel = make(chan string)
 
 	var request StartConversationRequest
-	c.BindJSON(&request)
+	if err := c.BindJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage("aa"+parseJsonErrorMessage))
+		return
+	}
+
 	if request.ConversationID == nil || *request.ConversationID == "" {
 		request.ConversationID = nil
 	}
@@ -231,7 +237,11 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 //goland:noinspection GoUnhandledErrorResult
 func GenerateTitle(c *gin.Context) {
 	var request GenerateTitleRequest
-	c.BindJSON(&request)
+	if err := c.BindJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(parseJsonErrorMessage))
+		return
+	}
+
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation/gen_title/" + c.Param("id")
 	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
@@ -272,7 +282,11 @@ func GetConversation(c *gin.Context) {
 //goland:noinspection GoUnhandledErrorResult
 func UpdateConversation(c *gin.Context) {
 	var request PatchConversationRequest
-	c.BindJSON(&request)
+	if err := c.BindJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(parseJsonErrorMessage))
+		return
+	}
+
 	// bool default to false, then will hide (delete) the conversation
 	if request.Title != nil {
 		request.IsVisible = true
@@ -298,7 +312,11 @@ func UpdateConversation(c *gin.Context) {
 //goland:noinspection GoUnhandledErrorResult
 func FeedbackMessage(c *gin.Context) {
 	var request FeedbackMessageRequest
-	c.BindJSON(&request)
+	if err := c.BindJSON(&request); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(parseJsonErrorMessage))
+		return
+	}
+
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation/message_feedback"
 	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
@@ -528,8 +546,7 @@ func GetModels(c *gin.Context) {
 	c.Writer.Write([]byte(responseText.(string)))
 }
 
-var getAccountCheckErrorMessage string = "Check failed." // Placeholder. Never encountered.
-
+//goland:noinspection GoUnhandledErrorResult
 func GetAccountCheck(c *gin.Context) {
 	url := apiPrefix + "/accounts/check"
 	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
