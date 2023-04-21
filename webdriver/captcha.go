@@ -1,7 +1,6 @@
 package webdriver
 
 import (
-	"log"
 	"strings"
 	"time"
 
@@ -37,18 +36,10 @@ func HandleCaptcha(webDriver selenium.WebDriver) bool {
 			return true, nil
 		}
 
-		element, err := driver.ActiveElement()
-		if err != nil {
-			logger.Error(err.Error())
-			log.Fatal("Please make sure chatgpt-proxy-server is running and restart go-chatgpt-api")
-		}
-
-		text, _ := element.Text()
-		if text != "" {
+		if err := webDriver.SwitchFrame(0); err != nil {
 			return false, nil
 		}
 
-		webDriver.SwitchFrame(0)
 		return true, nil
 	})
 
@@ -58,6 +49,11 @@ func HandleCaptcha(webDriver selenium.WebDriver) bool {
 	}
 
 	err := webDriver.Wait(func(driver selenium.WebDriver) (bool, error) {
+		title, _ := webDriver.Title()
+		if strings.Contains(title, api.ChatGPTTitleText) {
+			return true, nil
+		}
+
 		element, err := driver.FindElement(selenium.ByCSSSelector, "input")
 		if err != nil {
 			return false, nil

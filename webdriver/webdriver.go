@@ -40,6 +40,7 @@ func init() {
 
 	if WebDriver == nil {
 		logger.Error("Please make sure chatgpt proxy service is running")
+		os.Exit(1)
 		return
 	}
 
