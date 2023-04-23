@@ -97,7 +97,7 @@ func StartConversation(c *gin.Context) {
 
 	var request StartConversationRequest
 	if err := c.BindJSON(&request); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage("aa"+parseJsonErrorMessage))
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(parseJsonErrorMessage))
 		return
 	}
 
