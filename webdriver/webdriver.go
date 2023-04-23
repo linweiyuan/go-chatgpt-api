@@ -1,6 +1,7 @@
 package webdriver
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -48,11 +49,23 @@ func init() {
 
 	if isReady(WebDriver) {
 		logger.Info(api.ChatGPTWelcomeText)
+		openNewTabAndChangeBackToOldTab()
 	} else {
 		if !isAccessDenied(WebDriver) {
 			if HandleCaptcha(WebDriver) {
 				logger.Info(api.ChatGPTWelcomeText)
+				openNewTabAndChangeBackToOldTab()
 			}
 		}
 	}
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func openNewTabAndChangeBackToOldTab() {
+	WebDriver.ExecuteScript(fmt.Sprintf("open('%s');", api.ChatGPTUrl), nil)
+	handles, _ := WebDriver.WindowHandles()
+	WebDriver.SwitchWindow(handles[0])
+
+	// to save conversations, (k,v): {"request message id": "response message data"}
+	WebDriver.ExecuteScript("window.conversationMap = new Map();", nil)
 }

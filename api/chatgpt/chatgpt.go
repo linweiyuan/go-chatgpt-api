@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/linweiyuan/go-chatgpt-api/api"
-	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 	"github.com/linweiyuan/go-chatgpt-api/webdriver"
 	"github.com/tebeka/selenium"
 )
@@ -31,13 +29,10 @@ const (
 	doneFlag                       = "[DONE]"
 )
 
-var mutex sync.Mutex
-
 //goland:noinspection GoUnhandledErrorResult
 func init() {
 	go func() {
 		ticker := time.NewTicker(api.RefreshEveryMinutes * time.Minute)
-
 		for {
 			select {
 			case <-ticker.C:
@@ -47,18 +42,12 @@ func init() {
 	}()
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func tryToRefreshPage() {
-	defer func() {
-		if err := recover(); err != nil {
-			logger.Error("Failed to refresh page")
-			mutex.Unlock()
-		}
-	}()
-
-	if mutex.TryLock() {
-		webdriver.Refresh()
-		mutex.Unlock()
-	}
+	handles, _ := webdriver.WebDriver.WindowHandles()
+	webdriver.WebDriver.SwitchWindow(handles[1]) // new tab to refresh cookies
+	webdriver.Refresh()
+	webdriver.WebDriver.SwitchWindow(handles[0]) // old tab for API handling
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -81,18 +70,14 @@ func GetConversations(c *gin.Context) {
 
 	if responseText == getConversationsErrorMessage {
 		tryToRefreshPage()
-		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getConversationsErrorMessage))
-		return
+		GetConversations(c)
+	} else {
+		c.Writer.Write([]byte(responseText.(string)))
 	}
-
-	c.Writer.Write([]byte(responseText.(string)))
 }
 
 //goland:noinspection GoUnhandledErrorResult
 func StartConversation(c *gin.Context) {
-	mutex.Lock()
-	defer mutex.Unlock()
-
 	var callbackChannel = make(chan string)
 
 	var request StartConversationRequest
@@ -109,7 +94,8 @@ func StartConversation(c *gin.Context) {
 	}
 
 	oldContentToResponse := ""
-	if !sendConversationRequest(c, callbackChannel, request, oldContentToResponse) {
+	messageID := request.Messages[0].ID
+	if !sendConversationRequest(c, callbackChannel, request, oldContentToResponse, messageID) {
 		return
 	}
 
@@ -124,23 +110,27 @@ func StartConversation(c *gin.Context) {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func sendConversationRequest(c *gin.Context, callbackChannel chan string, request StartConversationRequest, oldContent string) bool {
+func sendConversationRequest(c *gin.Context, callbackChannel chan string, request StartConversationRequest, oldContent string, messageID string) bool {
 	jsonBytes, _ := json.Marshal(request)
 	url := apiPrefix + "/conversation"
 	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
-	script := getPostScriptForStartConversation(url, accessToken, string(jsonBytes))
+	script := getPostScriptForStartConversation(url, accessToken, string(jsonBytes), messageID)
 	_, err := webdriver.WebDriver.ExecuteScript(script, nil)
 	if handleSeleniumError(err, script, c) {
 		return false
 	}
 
 	go func() {
-		webdriver.WebDriver.ExecuteScript("delete window.conversationResponseData;", nil)
+		defer func() {
+			webdriver.WebDriver.ExecuteScript(fmt.Sprintf("conversationMap.delete('%s');", messageID), nil)
+		}()
+
+		// temp for performance optimisation
 		temp := ""
 		var conversationResponse ConversationResponse
 		maxTokens := false
 		for {
-			conversationResponseData, _ := webdriver.WebDriver.ExecuteScript("return window.conversationResponseData;", nil)
+			conversationResponseData, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf("return conversationMap.get('%s');", messageID), nil)
 			if conversationResponseData == nil || conversationResponseData == "" {
 				continue
 			}
@@ -205,6 +195,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 		if maxTokens && request.ContinueText != "" {
 			time.Sleep(time.Second)
 
+			continueMessageID := uuid.NewString()
 			parentMessageID := conversationResponse.Message.ID
 			conversationID := conversationResponse.ConversationID
 			requestBodyJson := fmt.Sprintf(`
@@ -225,10 +216,10 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 				"model": "%s",
 				"conversation_id": "%s",
 				"continue_text": "%s"
-			}`, uuid.NewString(), defaultRole, defaultRole, request.ContinueText, parentMessageID, request.Model, conversationID, request.ContinueText)
+			}`, continueMessageID, defaultRole, defaultRole, request.ContinueText, parentMessageID, request.Model, conversationID, request.ContinueText)
 			var request StartConversationRequest
 			json.Unmarshal([]byte(requestBodyJson), &request)
-			sendConversationRequest(c, callbackChannel, request, oldContent)
+			sendConversationRequest(c, callbackChannel, request, oldContent, continueMessageID)
 		}
 	}()
 	return true
@@ -253,11 +244,10 @@ func GenerateTitle(c *gin.Context) {
 
 	if responseText == generateTitleErrorMessage {
 		tryToRefreshPage()
-		c.JSON(http.StatusInternalServerError, api.ReturnMessage(generateTitleErrorMessage))
-		return
+		GenerateTitle(c)
+	} else {
+		c.Writer.Write([]byte(responseText.(string)))
 	}
-
-	c.Writer.Write([]byte(responseText.(string)))
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -272,11 +262,10 @@ func GetConversation(c *gin.Context) {
 
 	if responseText == getContentErrorMessage {
 		tryToRefreshPage()
-		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getContentErrorMessage))
-		return
+		GetConversation(c)
+	} else {
+		c.Writer.Write([]byte(responseText.(string)))
 	}
-
-	c.Writer.Write([]byte(responseText.(string)))
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -302,11 +291,10 @@ func UpdateConversation(c *gin.Context) {
 
 	if responseText == updateConversationErrorMessage {
 		tryToRefreshPage()
-		c.JSON(http.StatusInternalServerError, api.ReturnMessage(updateConversationErrorMessage))
-		return
+		UpdateConversation(c)
+	} else {
+		c.Writer.Write([]byte(responseText.(string)))
 	}
-
-	c.Writer.Write([]byte(responseText.(string)))
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -328,11 +316,10 @@ func FeedbackMessage(c *gin.Context) {
 
 	if responseText == feedbackMessageErrorMessage {
 		tryToRefreshPage()
-		c.JSON(http.StatusInternalServerError, api.ReturnMessage(feedbackMessageErrorMessage))
-		return
+		FeedbackMessage(c)
+	} else {
+		c.Writer.Write([]byte(responseText.(string)))
 	}
-
-	c.Writer.Write([]byte(responseText.(string)))
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -350,167 +337,10 @@ func ClearConversations(c *gin.Context) {
 
 	if responseText == clearConversationsErrorMessage {
 		tryToRefreshPage()
-		c.JSON(http.StatusInternalServerError, api.ReturnMessage(clearConversationsErrorMessage))
-		return
+		ClearConversations(c)
+	} else {
+		c.Writer.Write([]byte(responseText.(string)))
 	}
-
-	c.Writer.Write([]byte(responseText.(string)))
-}
-
-func getGetScript(url string, accessToken string, errorMessage string) string {
-	return fmt.Sprintf(`
-		fetch('%s', {
-			headers: {
-				'Authorization': '%s'
-			}
-		})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('%s');
-			}
-			return response.text();
-		})
-		.then(text => {
-			arguments[0](text);
-		})
-		.catch(err => {
-			arguments[0](err.message);
-		});
-	`, url, accessToken, errorMessage)
-}
-
-func getPostScriptForStartConversation(url string, accessToken string, jsonString string) string {
-	return fmt.Sprintf(`
-		// get the whole data again to make sure get the endTurn message back
-		const getEndTurnMessage = (dataArray) => {
-			dataArray.pop(); // empty
-			dataArray.pop(); // data: [DONE]
-			return '!' + dataArray.pop().substring(6); // endTurn message
-		};
-
-		let conversationResponseData;
-
-		const xhr = new XMLHttpRequest();
-		xhr.open('POST', '%s');
-		xhr.setRequestHeader('Accept', 'text/event-stream');
-		xhr.setRequestHeader('Authorization', '%s');
-		xhr.setRequestHeader('Content-Type', 'application/json');
-		xhr.onreadystatechange = function() {
-			switch (xhr.readyState) {
-				case xhr.LOADING: {
-					switch (xhr.status) {
-						case 200: {
-							const dataArray = xhr.responseText.substr(xhr.seenBytes).split("\n\n");
-							dataArray.pop(); // empty string
-							if (dataArray.length) {
-								let data = dataArray.pop(); // target data
-								if (data === 'data: [DONE]') { // this DONE will break the ending handling
-									data = getEndTurnMessage(xhr.responseText.split("\n\n"));
-								} else if (data.startsWith('event')) {
-									data = data.substring(49);
-								}
-								if (data) {
-									if (data.startsWith('!')) {
-										window.conversationResponseData = data;
-									} else {
-										window.conversationResponseData = data.substring(6);
-									}
-								}
-							}
-							break;
-						}
-						case 401: {
-							window.conversationResponseData = xhr.status + 'Access token has expired.';
-							break;
-						}
-						case 403: {
-							window.conversationResponseData = xhr.status + 'Something went wrong. If this issue persists please contact us through our help center at help.openai.com.';
-							break;
-						}
-						case 404: {
-							window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail;
-							break;
-						}
-						case 413: {
-							window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail.message;
-							break;
-						}
-						case 422: {
-							const detail = JSON.parse(xhr.responseText).detail[0];
-							window.conversationResponseData = xhr.status + detail.loc + ' -> ' + detail.msg;
-							break;
-						}
-						case 429: {
-							window.conversationResponseData = xhr.status + JSON.parse(xhr.responseText).detail;
-							break;
-						}
-						case 500: {
-							window.conversationResponseData = xhr.status + 'Unknown error.';
-							break;
-						}
-					}
-					xhr.seenBytes = xhr.responseText.length;
-					break;
-				}
-				case xhr.DONE:
-					// keep exception handling
-					if (!window.conversationResponseData.startsWith('4') && !window.conversationResponseData.startsWith('5')) {
-						window.conversationResponseData = getEndTurnMessage(xhr.responseText.split("\n\n"));
-					}
-					break;
-			}
-		};
-		xhr.send(JSON.stringify(%s));
-	`, url, accessToken, jsonString)
-}
-
-func getPostScript(url string, accessToken string, jsonString string, errorMessage string) string {
-	return fmt.Sprintf(`
-		fetch('%s', {
-			method: 'POST',
-			headers: {
-				'Authorization': '%s',
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(%s)
-		})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('%s');
-			}
-			return response.text();
-		})
-		.then(text => {
-			arguments[0](text);
-		})
-		.catch(err => {
-			arguments[0](err.message);
-		});
-	`, url, accessToken, jsonString, errorMessage)
-}
-func getPatchScript(url string, accessToken string, jsonString string, errorMessage string) string {
-	return fmt.Sprintf(`
-		fetch('%s', {
-			method: 'PATCH',
-			headers: {
-				'Authorization': '%s',
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(%s)
-		})
-		.then(response => {
-			if (!response.ok) {
-				throw new Error('%s');
-			}
-			return response.text();
-		})
-		.then(text => {
-			arguments[0](text);
-		})
-		.catch(err => {
-			arguments[0](err.message);
-		});
-	`, url, accessToken, jsonString, errorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -539,11 +369,10 @@ func GetModels(c *gin.Context) {
 
 	if responseText == getModelsErrorMessage {
 		tryToRefreshPage()
-		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getModelsErrorMessage))
-		return
+		GetModels(c)
+	} else {
+		c.Writer.Write([]byte(responseText.(string)))
 	}
-
-	c.Writer.Write([]byte(responseText.(string)))
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -558,9 +387,8 @@ func GetAccountCheck(c *gin.Context) {
 
 	if responseText == getAccountCheckErrorMessage {
 		tryToRefreshPage()
-		c.JSON(http.StatusInternalServerError, api.ReturnMessage(getAccountCheckErrorMessage))
-		return
+		GetAccountCheck(c)
+	} else {
+		c.Writer.Write([]byte(responseText.(string)))
 	}
-
-	c.Writer.Write([]byte(responseText.(string)))
 }

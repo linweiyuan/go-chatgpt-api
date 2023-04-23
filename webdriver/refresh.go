@@ -9,24 +9,17 @@ import (
 
 //goland:noinspection GoUnhandledErrorResult
 func Refresh() {
-	refreshDoneChannel := make(chan bool)
-
-	go func() {
-		if err := WebDriver.Refresh(); err != nil {
-			errorMessage := err.Error()
-			if strings.HasSuffix(errorMessage, "connect: connection refused") {
-				logger.Error("Please make sure chatgpt-proxy-server is running, if running, restart it")
-			} else if strings.HasSuffix(errorMessage, "invalid session id") {
-				logger.Warn("Service chatgpt-proxy-server is detected, go-chatgpt-api is trying to resume")
-				newRefresh()
-			}
-		} else {
-			HandleCaptcha(WebDriver)
+	if err := WebDriver.Refresh(); err != nil {
+		errorMessage := err.Error()
+		if strings.HasSuffix(errorMessage, "connect: connection refused") {
+			logger.Error("Please make sure chatgpt-proxy-server is running, if running, restart it")
+		} else if strings.HasSuffix(errorMessage, "invalid session id") {
+			logger.Warn("Service chatgpt-proxy-server is detected, go-chatgpt-api is trying to resume")
+			newRefresh()
 		}
-		refreshDoneChannel <- true
-	}()
-
-	<-refreshDoneChannel
+	} else {
+		HandleCaptcha(WebDriver)
+	}
 }
 
 //goland:noinspection GoUnhandledErrorResult
