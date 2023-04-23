@@ -1,12 +1,14 @@
 package chatgpt
 
 type StartConversationRequest struct {
-	Action          string    `json:"action"`
-	Messages        []Message `json:"messages"`
-	Model           string    `json:"model"`
-	ParentMessageID string    `json:"parent_message_id"`
-	ConversationID  *string   `json:"conversation_id"`
-	ContinueText    string    `json:"continue_text"`
+	Action            string    `json:"action"`
+	Messages          []Message `json:"messages"`
+	Model             string    `json:"model"`
+	ParentMessageID   string    `json:"parent_message_id"`
+	ConversationID    *string   `json:"conversation_id"`
+	TimezoneOffsetMin int       `json:"timezone_offset_min"`
+	VariantPurpose    string    `json:"variant_purpose"`
+	ContinueText      string    `json:"continue_text"`
 }
 
 type Message struct {

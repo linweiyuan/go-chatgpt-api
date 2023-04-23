@@ -92,6 +92,9 @@ func StartConversation(c *gin.Context) {
 	if request.Messages[0].Author.Role == "" {
 		request.Messages[0].Author.Role = defaultRole
 	}
+	if request.VariantPurpose == "" {
+		request.VariantPurpose = "none"
+	}
 
 	oldContentToResponse := ""
 	messageID := request.Messages[0].ID
