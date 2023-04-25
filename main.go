@@ -2,8 +2,11 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/linweiyuan/go-chatgpt-api/env"
+
 	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
 	"github.com/linweiyuan/go-chatgpt-api/api/official"
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
@@ -63,7 +66,11 @@ func main() {
 	}
 	router.GET("/dashboard/billing/credit_grants", official.CheckUsage)
 
-	err := router.Run(":8080")
+	port := os.Getenv("CHATGPT_API_PORT")
+	if port == "" {
+		port = "8080"
+	}
+	err := router.Run(":" + port)
 	if err != nil {
 		log.Fatal("Failed to start server:" + err.Error())
 	}
