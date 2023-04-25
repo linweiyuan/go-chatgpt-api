@@ -14,6 +14,14 @@ Also support official API (the way which using API key):
 
 ---
 
+**If the `LOG_LEVEL` is set to `DEBUG` or `INFO`, more logs will be printed, but as a result, the disk usage will be much higher.**
+
+`chatgpt-proxy-server` supports `ALL`, `DEBUG`, `INFO`, `WARNING`, `SEVERE`, `OFF`. (This is officially supported.)
+
+`chatgpt-proxy-server-warp` supports `DEBUG`, `INFO`, `WARN`, `ERROR`. (This is not officially supported, just using a `grep`, so the logs may not be too precise.)
+
+---
+
 Use both ChatGPT mode and API mode:
 
 ```yaml
