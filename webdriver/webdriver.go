@@ -100,6 +100,13 @@ func OpenNewTabAndChangeBackToOldTab() {
 	handles, _ := WebDriver.WindowHandles()
 	WebDriver.SwitchWindow(handles[0])
 
+	InitConversationMap()
+}
+
+func InitConversationMap() {
 	// to save conversations, (k,v): {"request message id": "response message data"}
-	WebDriver.ExecuteScript("window.conversationMap = new Map();", nil)
+	_, err := WebDriver.ExecuteScript("window.conversationMap = new Map();", nil)
+	if err != nil {
+		logger.Error("Failed to init conversationMap, please restart go-chatgpt-api.")
+	}
 }

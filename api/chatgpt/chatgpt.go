@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -82,6 +83,11 @@ func GetConversations(c *gin.Context) {
 
 //goland:noinspection GoUnhandledErrorResult
 func StartConversation(c *gin.Context) {
+	conversationMap, _ := webdriver.WebDriver.ExecuteScript("return window.conversationMap;", nil)
+	if conversationMap == nil {
+		webdriver.InitConversationMap()
+	}
+
 	var callbackChannel = make(chan string)
 
 	var request StartConversationRequest
@@ -137,7 +143,14 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 		var conversationResponse ConversationResponse
 		maxTokens := false
 		for {
-			conversationResponseData, _ := webdriver.WebDriver.ExecuteScript(fmt.Sprintf("return conversationMap.get('%s');", messageID), nil)
+			conversationResponseData, err := webdriver.WebDriver.ExecuteScript(fmt.Sprintf("return conversationMap.get('%s');", messageID), nil)
+			if err != nil {
+				if strings.Contains(err.Error(), "conversationMap is not defined") {
+					webdriver.InitConversationMap()
+					continue
+				}
+			}
+
 			if conversationResponseData == nil || conversationResponseData == "" {
 				continue
 			}
@@ -167,7 +180,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 			}
 			temp = conversationResponseDataString
 
-			err := json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
+			err = json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
 			if err != nil {
 				continue
 			}
