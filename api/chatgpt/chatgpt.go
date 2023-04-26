@@ -222,8 +222,19 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 				"parent_message_id": "%s",
 				"model": "%s",
 				"conversation_id": "%s",
+				"timezone_offset_min": %d,
+				"variant_purpose": "%s",
 				"continue_text": "%s"
-			}`, continueMessageID, defaultRole, defaultRole, request.ContinueText, parentMessageID, request.Model, conversationID, request.ContinueText)
+			}`, continueMessageID,
+				defaultRole,
+				defaultRole,
+				request.ContinueText,
+				parentMessageID,
+				request.Model,
+				conversationID,
+				request.TimezoneOffsetMin,
+				request.VariantPurpose,
+				request.ContinueText)
 			var request StartConversationRequest
 			json.Unmarshal([]byte(requestBodyJson), &request)
 			sendConversationRequest(c, callbackChannel, request, oldContent, continueMessageID)
