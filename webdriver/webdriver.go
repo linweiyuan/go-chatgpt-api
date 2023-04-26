@@ -83,19 +83,19 @@ func init() {
 
 	if isReady(WebDriver) {
 		logger.Info(api.ChatGPTWelcomeText)
-		openNewTabAndChangeBackToOldTab()
+		OpenNewTabAndChangeBackToOldTab()
 	} else {
 		if !isAccessDenied(WebDriver) {
 			if HandleCaptcha(WebDriver) {
 				logger.Info(api.ChatGPTWelcomeText)
-				openNewTabAndChangeBackToOldTab()
+				OpenNewTabAndChangeBackToOldTab()
 			}
 		}
 	}
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func openNewTabAndChangeBackToOldTab() {
+func OpenNewTabAndChangeBackToOldTab() {
 	WebDriver.ExecuteScript(fmt.Sprintf("open('%s');", api.ChatGPTUrl), nil)
 	handles, _ := WebDriver.WindowHandles()
 	WebDriver.SwitchWindow(handles[0])

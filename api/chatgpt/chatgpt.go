@@ -44,10 +44,14 @@ func init() {
 
 //goland:noinspection GoUnhandledErrorResult
 func tryToRefreshPage() {
-	handles, _ := webdriver.WebDriver.WindowHandles()
-	webdriver.WebDriver.SwitchWindow(handles[1]) // new tab to refresh cookies
+	tabs, _ := webdriver.WebDriver.WindowHandles()
+	if len(tabs) < 2 {
+		webdriver.OpenNewTabAndChangeBackToOldTab()
+		tabs, _ = webdriver.WebDriver.WindowHandles()
+	}
+	webdriver.WebDriver.SwitchWindow(tabs[1]) // new tab to refresh cookies
 	webdriver.Refresh()
-	webdriver.WebDriver.SwitchWindow(handles[0]) // old tab for API handling
+	webdriver.WebDriver.SwitchWindow(tabs[0]) // old tab for API handling
 }
 
 //goland:noinspection GoUnhandledErrorResult
