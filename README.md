@@ -20,6 +20,8 @@ Also support official API (the way which using API key):
 
 `chatgpt-proxy-server-warp` supports `DEBUG`, `INFO`, `WARN`, `ERROR`. (This is not officially supported, just using a `grep`, so the logs may not be too precise.)
 
+For local development, set `CHATGPT_API_MODE=development`, this will disable `headless` mode and open a browser.
+
 ---
 
 Use both ChatGPT mode and API mode:
