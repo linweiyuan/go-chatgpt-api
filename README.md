@@ -88,14 +88,14 @@ services:
     container_name: chatgpt-proxy-server
     image: linweiyuan/chatgpt-proxy-server
     environment:
-      - LOG_LEVEL=INFO
+      - LOG_LEVEL=OFF
     restart: unless-stopped
 
   chatgpt-proxy-server-warp:
     container_name: chatgpt-proxy-server-warp
     image: linweiyuan/chatgpt-proxy-server-warp
     environment:
-      - LOG_LEVEL=INFO
+      - LOG_LEVEL=OFF
     restart: unless-stopped
 ```
 
