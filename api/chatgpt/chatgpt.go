@@ -83,6 +83,10 @@ func GetConversations(c *gin.Context) {
 
 //goland:noinspection GoUnhandledErrorResult
 func StartConversation(c *gin.Context) {
+	xhrMap, _ := webdriver.WebDriver.ExecuteScript("return window.xhrMap;", nil)
+	if xhrMap == nil {
+		webdriver.InitXhrMap()
+	}
 	conversationMap, _ := webdriver.WebDriver.ExecuteScript("return window.conversationMap;", nil)
 	if conversationMap == nil {
 		webdriver.InitConversationMap()
@@ -135,7 +139,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 
 	go func() {
 		defer func() {
-			webdriver.WebDriver.ExecuteScript(fmt.Sprintf("conversationMap.delete('%s');", messageID), nil)
+			webdriver.WebDriver.ExecuteScript(fmt.Sprintf("conversationMap.delete('%s');xhrMap.delete('%s');", messageID, messageID), nil)
 		}()
 
 		// temp for performance optimisation
@@ -143,6 +147,12 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 		var conversationResponse ConversationResponse
 		maxTokens := false
 		for {
+			if c.Request.Context().Err() != nil {
+				stopGenerate(messageID)
+				close(callbackChannel)
+				break
+			}
+
 			conversationResponseData, err := webdriver.WebDriver.ExecuteScript(fmt.Sprintf("return conversationMap.get('%s');", messageID), nil)
 			if err != nil {
 				if strings.Contains(err.Error(), "conversationMap is not defined") {
@@ -254,6 +264,11 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 		}
 	}()
 	return true
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func stopGenerate(id string) {
+	webdriver.WebDriver.ExecuteScript(fmt.Sprintf("xhrMap.get('%s').abort();", id), nil)
 }
 
 //goland:noinspection GoUnhandledErrorResult

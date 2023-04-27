@@ -37,6 +37,7 @@ func getPostScriptForStartConversation(url string, accessToken string, jsonStrin
 		};
 
 		const xhr = new XMLHttpRequest();
+		xhrMap.set('[MESSAGE_!@#_ID]', xhr);
 		xhr.open('POST', '%s');
 		xhr.setRequestHeader('Accept', 'text/event-stream');
 		xhr.setRequestHeader('Authorization', '%s');

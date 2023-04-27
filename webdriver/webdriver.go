@@ -100,7 +100,15 @@ func OpenNewTabAndChangeBackToOldTab() {
 	handles, _ := WebDriver.WindowHandles()
 	WebDriver.SwitchWindow(handles[0])
 
+	InitXhrMap()
 	InitConversationMap()
+}
+
+func InitXhrMap() {
+	_, err := WebDriver.ExecuteScript("window.xhrMap = new Map();", nil)
+	if err != nil {
+		logger.Error("Failed to init xhrMap, please restart go-chatgpt-api.")
+	}
 }
 
 func InitConversationMap() {
