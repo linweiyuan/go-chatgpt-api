@@ -162,6 +162,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 			}
 
 			if conversationResponseData == nil || conversationResponseData == "" {
+				time.Sleep(api.IdleTimeMilliseconds * time.Millisecond)
 				continue
 			}
 
@@ -185,6 +186,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 
 			if temp != "" {
 				if temp == conversationResponseDataString {
+					time.Sleep(api.IdleTimeMilliseconds * time.Millisecond)
 					continue
 				}
 			}
@@ -192,6 +194,7 @@ func sendConversationRequest(c *gin.Context, callbackChannel chan string, reques
 
 			err = json.Unmarshal([]byte(conversationResponseDataString), &conversationResponse)
 			if err != nil {
+				time.Sleep(api.IdleTimeMilliseconds * time.Millisecond)
 				continue
 			}
 
