@@ -15,7 +15,8 @@ const (
 
 	AuthorizationHeader = "Authorization"
 
-	RefreshEveryMinutes = 1
+	RefreshEveryMinutes  = 1
+	IdleTimeMilliseconds = 20
 )
 
 func ReturnMessage(msg string) gin.H {
