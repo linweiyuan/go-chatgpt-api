@@ -57,3 +57,8 @@ type PatchConversationRequest struct {
 	Title     *string `json:"title"`
 	IsVisible bool    `json:"is_visible"`
 }
+
+type LoginInfo struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}

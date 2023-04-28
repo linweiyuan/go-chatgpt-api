@@ -163,3 +163,46 @@ func getPatchScript(url string, accessToken string, jsonString string, errorMess
 		});
 	`, url, accessToken, jsonString, errorMessage)
 }
+
+func getGetScriptForLogin(url string, errorMessage string) string {
+	return fmt.Sprintf(`
+		fetch('%s')
+		.then(response => {
+			if (!response.ok && response.type !== 'opaque') {
+				throw new Error('%s');
+			}
+			return response.text();
+		})
+		.then(text => {
+			arguments[0](text);
+		})
+		.catch(err => {
+			arguments[0](err.message);
+		});
+	`, url, errorMessage)
+}
+func getPostScriptForLogin(url string, body string, errorMessage string) string {
+	return fmt.Sprintf(`
+		fetch('%s', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			mode: 'no-cors',
+			credentials: 'include',
+			body: '%s'
+		})
+		.then(response => {
+			if (!response.ok && response.type !== 'opaque') {
+				throw new Error('%s');
+			}
+			return response.text();
+		})
+		.then(text => {
+			arguments[0](text);
+		})
+		.catch(err => {
+			arguments[0](err.message);
+		});
+	`, url, body, errorMessage)
+}

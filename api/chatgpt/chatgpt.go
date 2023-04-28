@@ -28,6 +28,16 @@ const (
 	getAccountCheckErrorMessage    = "Check failed." // Placeholder. Never encountered.
 	parseJsonErrorMessage          = "Failed to parse json request body."
 	doneFlag                       = "[DONE]"
+
+	csrfUrl                            = "https://chat.openai.com/api/auth/csrf"
+	promptLoginUrl                     = "https://chat.openai.com/api/auth/signin/auth0?prompt=login"
+	loginPasswordUrl                   = "https://auth0.openai.com/u/login/password?state="
+	authSessionUrl                     = "https://chat.openai.com/api/auth/session"
+	getCsrfTokenErrorMessage           = "Failed to get CSRF token."
+	getAuthorizedUrlErrorMessage       = "Failed to get authorized url."
+	emailInvalidErrorMessage           = "Email is not valid."
+	emailOrPasswordInvalidErrorMessage = "Email or password is not correct."
+	getAccessTokenErrorMessage         = "Failed to get access token."
 )
 
 //goland:noinspection GoUnhandledErrorResult
@@ -440,4 +450,79 @@ func GetAccountCheck(c *gin.Context) {
 	} else {
 		c.Writer.Write([]byte(responseText.(string)))
 	}
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func UserLogin(c *gin.Context) {
+	var loginInfo LoginInfo
+	if err := c.ShouldBindJSON(&loginInfo); err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse user login info."))
+		return
+	}
+
+	// get csrf token
+	script := getGetScriptForLogin(csrfUrl, getCsrfTokenErrorMessage)
+	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if responseText == getCsrfTokenErrorMessage {
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(getCsrfTokenErrorMessage))
+		return
+	}
+
+	// get authorized url
+	responseMap := make(map[string]string)
+	json.Unmarshal([]byte(responseText.(string)), &responseMap)
+	script = getPostScriptForLogin(promptLoginUrl, fmt.Sprintf(
+		"callbackUrl=/&csrfToken=%s&json=true",
+		responseMap["csrfToken"],
+	), getAuthorizedUrlErrorMessage)
+	responseText, _ = webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if responseText == getAuthorizedUrlErrorMessage {
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(getAuthorizedUrlErrorMessage))
+		return
+	}
+
+	// get state (change to new url to fix CORS issue)
+	json.Unmarshal([]byte(responseText.(string)), &responseMap)
+	webdriver.WebDriver.Get(responseMap["url"])
+	url, _ := webdriver.WebDriver.CurrentURL()
+	state := url[50:]
+
+	// check username
+	script = getPostScriptForLogin(
+		url,
+		fmt.Sprintf(
+			"state=%s&username=%s&js-available=true&webauthn-available=true&is-brave=false&webauthn-platform-available=false&action=default",
+			state,
+			loginInfo.Username,
+		), emailInvalidErrorMessage)
+	responseText, _ = webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if responseText == emailInvalidErrorMessage {
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(emailInvalidErrorMessage))
+		return
+	}
+
+	// check username and password
+	script = getPostScriptForLogin(loginPasswordUrl+state, fmt.Sprintf(
+		"state=%s&username=%s&password=%s&action=default",
+		state,
+		loginInfo.Username,
+		loginInfo.Password,
+	), emailOrPasswordInvalidErrorMessage)
+	responseText, _ = webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if responseText == emailOrPasswordInvalidErrorMessage {
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(emailOrPasswordInvalidErrorMessage))
+		return
+	}
+
+	// get access token (change back to original url to fix CORS issue)
+	webdriver.WebDriver.Get(api.ChatGPTUrl)
+
+	script = getGetScriptForLogin(authSessionUrl, getAccessTokenErrorMessage)
+	responseText, _ = webdriver.WebDriver.ExecuteScriptAsync(script, nil)
+	if responseText == getAccessTokenErrorMessage {
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(getAccessTokenErrorMessage))
+		return
+	}
+
+	c.Writer.Write([]byte(responseText.(string)))
 }

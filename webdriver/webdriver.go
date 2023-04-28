@@ -28,7 +28,7 @@ func init() {
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
 	go func() {
 		sig := <-sigs
-		fmt.Println("Received signal:", sig.String())
+		logger.Warn("Received signal: " + sig.String())
 		wg.Wait()
 		if WebDriver != nil {
 			WebDriver.Quit()

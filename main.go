@@ -5,10 +5,9 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	_ "github.com/linweiyuan/go-chatgpt-api/env"
-
 	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
 	"github.com/linweiyuan/go-chatgpt-api/api/official"
+	_ "github.com/linweiyuan/go-chatgpt-api/env"
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
 	"github.com/linweiyuan/go-chatgpt-api/webdriver"
 )
@@ -55,9 +54,14 @@ func main() {
 		conversationGroup.POST("/message_feedback", chatgpt.FeedbackMessage)
 	}
 
+	// misc
 	router.GET("/models", chatgpt.GetModels)
-
 	router.GET("/accounts/check", chatgpt.GetAccountCheck)
+
+	// auth
+	router.POST("/auth/login", chatgpt.UserLogin) // login will cause some downtime because of CORS limits
+
+	// ----------------------------------------------------------------------------------------------------
 
 	// official api
 	apiGroup := router.Group("/v1")
