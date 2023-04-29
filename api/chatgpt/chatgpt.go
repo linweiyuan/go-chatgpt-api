@@ -94,8 +94,7 @@ func GetConversations(c *gin.Context) {
 	if !ok {
 		limit = "20"
 	}
-	url := apiPrefix + "/conversations?offset=" + offset + "&limit=" + limit
-	handleGet(c, url, getConversationsErrorMessage)
+	handleGet(c, apiPrefix+"/conversations?offset="+offset+"&limit="+limit, getConversationsErrorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -300,26 +299,12 @@ func GenerateTitle(c *gin.Context) {
 	}
 
 	jsonBytes, _ := json.Marshal(request)
-	url := apiPrefix + "/conversation/gen_title/" + c.Param("id")
-	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
-	script := getPostScript(url, accessToken, string(jsonBytes), generateTitleErrorMessage)
-	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if handleSeleniumError(err, script, c) {
-		return
-	}
-
-	if responseText == generateTitleErrorMessage {
-		tryToRefreshPage()
-		GenerateTitle(c)
-	} else {
-		c.Writer.Write([]byte(responseText.(string)))
-	}
+	handlePost(c, apiPrefix+"/conversation/gen_title/"+c.Param("id"), string(jsonBytes), generateTitleErrorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
 func GetConversation(c *gin.Context) {
-	url := apiPrefix + "/conversation/" + c.Param("id")
-	handleGet(c, url, getContentErrorMessage)
+	handleGet(c, apiPrefix+"/conversation/"+c.Param("id"), getContentErrorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -335,20 +320,7 @@ func UpdateConversation(c *gin.Context) {
 		request.IsVisible = true
 	}
 	jsonBytes, _ := json.Marshal(request)
-	url := apiPrefix + "/conversation/" + c.Param("id")
-	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
-	script := getPatchScript(url, accessToken, string(jsonBytes), updateConversationErrorMessage)
-	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if handleSeleniumError(err, script, c) {
-		return
-	}
-
-	if responseText == updateConversationErrorMessage {
-		tryToRefreshPage()
-		UpdateConversation(c)
-	} else {
-		c.Writer.Write([]byte(responseText.(string)))
-	}
+	handlePatch(c, apiPrefix+"/conversation/"+c.Param("id"), string(jsonBytes), updateConversationErrorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -360,20 +332,7 @@ func FeedbackMessage(c *gin.Context) {
 	}
 
 	jsonBytes, _ := json.Marshal(request)
-	url := apiPrefix + "/conversation/message_feedback"
-	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
-	script := getPostScript(url, accessToken, string(jsonBytes), feedbackMessageErrorMessage)
-	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if handleSeleniumError(err, script, c) {
-		return
-	}
-
-	if responseText == feedbackMessageErrorMessage {
-		tryToRefreshPage()
-		FeedbackMessage(c)
-	} else {
-		c.Writer.Write([]byte(responseText.(string)))
-	}
+	handlePost(c, apiPrefix+"/conversation/message_feedback", string(jsonBytes), feedbackMessageErrorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -381,20 +340,7 @@ func ClearConversations(c *gin.Context) {
 	jsonBytes, _ := json.Marshal(PatchConversationRequest{
 		IsVisible: false,
 	})
-	url := apiPrefix + "/conversations"
-	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
-	script := getPatchScript(url, accessToken, string(jsonBytes), clearConversationsErrorMessage)
-	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if handleSeleniumError(err, script, c) {
-		return
-	}
-
-	if responseText == clearConversationsErrorMessage {
-		tryToRefreshPage()
-		ClearConversations(c)
-	} else {
-		c.Writer.Write([]byte(responseText.(string)))
-	}
+	handlePatch(c, apiPrefix+"/conversations", string(jsonBytes), clearConversationsErrorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -413,18 +359,43 @@ func handleSeleniumError(err error, script string, c *gin.Context) bool {
 
 //goland:noinspection GoUnhandledErrorResult
 func GetModels(c *gin.Context) {
-	url := apiPrefix + "/models"
-	handleGet(c, url, getModelsErrorMessage)
+	handleGet(c, apiPrefix+"/models", getModelsErrorMessage)
 }
 
 func GetAccountCheck(c *gin.Context) {
-	url := apiPrefix + "/accounts/check"
-	handleGet(c, url, getAccountCheckErrorMessage)
+	handleGet(c, apiPrefix+"/accounts/check", getAccountCheckErrorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
 func handleGet(c *gin.Context, url string, errorMessage string) {
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
+	resp, err := client.Do(req)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK || err != nil {
+		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(errorMessage))
+		return
+	}
+
+	data, _ := io.ReadAll(resp.Body)
+	c.Writer.Write(data)
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func handlePost(c *gin.Context, url string, requestBody string, errorMessage string) {
+	req, _ := http.NewRequest(http.MethodPost, url, strings.NewReader(requestBody))
+	handlePostOrPatch(c, req, errorMessage)
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func handlePatch(c *gin.Context, url string, requestBody string, errorMessage string) {
+	req, _ := http.NewRequest(http.MethodPatch, url, strings.NewReader(requestBody))
+	handlePostOrPatch(c, req, errorMessage)
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func handlePostOrPatch(c *gin.Context, req *http.Request, errorMessage string) {
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	resp, err := client.Do(req)
