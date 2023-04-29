@@ -430,7 +430,7 @@ func handleGet(c *gin.Context, url string, errorMessage string) {
 	resp, err := client.Do(req)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
-		c.JSON(resp.StatusCode, api.ReturnMessage(errorMessage))
+		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(errorMessage))
 		return
 	}
 
@@ -442,7 +442,7 @@ func handleGet(c *gin.Context, url string, errorMessage string) {
 func UserLogin(c *gin.Context) {
 	var loginInfo LoginInfo
 	if err := c.ShouldBindJSON(&loginInfo); err != nil {
-		c.JSON(http.StatusBadRequest, api.ReturnMessage(parseUserInfoErrorMessage))
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(parseUserInfoErrorMessage))
 		return
 	}
 
@@ -452,7 +452,7 @@ func UserLogin(c *gin.Context) {
 	resp, err := client.Do(req)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
-		c.JSON(resp.StatusCode, api.ReturnMessage(getCsrfTokenErrorMessage))
+		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getCsrfTokenErrorMessage))
 		return
 	}
 
@@ -471,7 +471,7 @@ func UserLogin(c *gin.Context) {
 	resp, err = client.Do(req)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
-		c.JSON(resp.StatusCode, api.ReturnMessage(getAuthorizedUrlErrorMessage))
+		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getAuthorizedUrlErrorMessage))
 		return
 	}
 
@@ -482,7 +482,7 @@ func UserLogin(c *gin.Context) {
 	resp, err = client.Do(req)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
-		c.JSON(resp.StatusCode, api.ReturnMessage(getStateErrorMessage))
+		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getStateErrorMessage))
 		return
 	}
 
@@ -500,7 +500,7 @@ func UserLogin(c *gin.Context) {
 	resp, err = client.Do(req)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
-		c.JSON(resp.StatusCode, api.ReturnMessage(emailInvalidErrorMessage))
+		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(emailInvalidErrorMessage))
 		return
 	}
 
@@ -517,7 +517,7 @@ func UserLogin(c *gin.Context) {
 	resp, err = client.Do(req)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
-		c.JSON(resp.StatusCode, api.ReturnMessage(emailOrPasswordInvalidErrorMessage))
+		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(emailOrPasswordInvalidErrorMessage))
 		return
 	}
 
@@ -527,7 +527,7 @@ func UserLogin(c *gin.Context) {
 	resp, err = client.Do(req)
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
-		c.JSON(resp.StatusCode, api.ReturnMessage(getAccessTokenErrorMessage))
+		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getAccessTokenErrorMessage))
 		return
 	}
 
