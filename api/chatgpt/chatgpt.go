@@ -3,16 +3,21 @@ package chatgpt
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
+
+	"io"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/webdriver"
 	"github.com/tebeka/selenium"
+
+	http "github.com/bogdanfinn/fhttp"
+	tls_client "github.com/bogdanfinn/tls-client"
 )
 
 const (
@@ -29,15 +34,20 @@ const (
 	parseJsonErrorMessage          = "Failed to parse json request body."
 	doneFlag                       = "[DONE]"
 
+	contentType                        = "application/x-www-form-urlencoded"
+	userAgent                          = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
 	csrfUrl                            = "https://chat.openai.com/api/auth/csrf"
 	promptLoginUrl                     = "https://chat.openai.com/api/auth/signin/auth0?prompt=login"
+	loginUsernameUrl                   = "https://auth0.openai.com/u/login/identifier?state="
 	loginPasswordUrl                   = "https://auth0.openai.com/u/login/password?state="
 	authSessionUrl                     = "https://chat.openai.com/api/auth/session"
+	parseUserInfoErrorMessage          = "Failed to parse user login info."
 	getCsrfTokenErrorMessage           = "Failed to get CSRF token."
 	getAuthorizedUrlErrorMessage       = "Failed to get authorized url."
+	getStateErrorMessage               = "Failed to get state."
 	emailInvalidErrorMessage           = "Email is not valid."
 	emailOrPasswordInvalidErrorMessage = "Email or password is not correct."
-	getAccessTokenErrorMessage         = "Failed to get access token."
+	getAccessTokenErrorMessage         = "Failed to get access token, please try again later."
 )
 
 //goland:noinspection GoUnhandledErrorResult
@@ -456,73 +466,101 @@ func GetAccountCheck(c *gin.Context) {
 func UserLogin(c *gin.Context) {
 	var loginInfo LoginInfo
 	if err := c.ShouldBindJSON(&loginInfo); err != nil {
-		c.JSON(http.StatusBadRequest, api.ReturnMessage("Failed to parse user login info."))
+		c.JSON(http.StatusBadRequest, api.ReturnMessage(parseUserInfoErrorMessage))
 		return
 	}
+
+	client, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
+		tls_client.WithTimeoutSeconds(30),
+		tls_client.WithClientProfile(tls_client.Chrome_112),
+		tls_client.WithCookieJar(tls_client.NewCookieJar()),
+	}...)
 
 	// get csrf token
-	script := getGetScriptForLogin(csrfUrl, getCsrfTokenErrorMessage)
-	responseText, _ := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if responseText == getCsrfTokenErrorMessage {
-		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(getCsrfTokenErrorMessage))
+	req, _ := http.NewRequest(http.MethodGet, csrfUrl, nil)
+	req.Header.Set("User-Agent", userAgent)
+	resp, err := client.Do(req)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK || err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage(getCsrfTokenErrorMessage))
 		return
 	}
+
+	data, _ := io.ReadAll(resp.Body)
+	responseMap := make(map[string]string)
+	json.Unmarshal(data, &responseMap)
 
 	// get authorized url
-	responseMap := make(map[string]string)
-	json.Unmarshal([]byte(responseText.(string)), &responseMap)
-	script = getPostScriptForLogin(promptLoginUrl, fmt.Sprintf(
+	params := fmt.Sprintf(
 		"callbackUrl=/&csrfToken=%s&json=true",
 		responseMap["csrfToken"],
-	), getAuthorizedUrlErrorMessage)
-	responseText, _ = webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if responseText == getAuthorizedUrlErrorMessage {
-		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(getAuthorizedUrlErrorMessage))
+	)
+	req, err = http.NewRequest(http.MethodPost, promptLoginUrl, strings.NewReader(params))
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("User-Agent", userAgent)
+	resp, err = client.Do(req)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK || err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage(getAuthorizedUrlErrorMessage))
 		return
 	}
 
-	// get state (change to new url to fix CORS issue)
-	json.Unmarshal([]byte(responseText.(string)), &responseMap)
-	webdriver.WebDriver.Get(responseMap["url"])
-	url, _ := webdriver.WebDriver.CurrentURL()
-	state := url[50:]
+	// get state
+	data, _ = io.ReadAll(resp.Body)
+	json.Unmarshal(data, &responseMap)
+	req, err = http.NewRequest(http.MethodGet, responseMap["url"], nil)
+	resp, err = client.Do(req)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK || err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage(getStateErrorMessage))
+		return
+	}
 
 	// check username
-	script = getPostScriptForLogin(
-		url,
-		fmt.Sprintf(
-			"state=%s&username=%s&js-available=true&webauthn-available=true&is-brave=false&webauthn-platform-available=false&action=default",
-			state,
-			loginInfo.Username,
-		), emailInvalidErrorMessage)
-	responseText, _ = webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if responseText == emailInvalidErrorMessage {
-		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(emailInvalidErrorMessage))
+	doc, _ := goquery.NewDocumentFromReader(resp.Body)
+	state, _ := doc.Find("input[name=state]").Attr("value")
+	params = fmt.Sprintf(
+		"state=%s&username=%s&js-available=true&webauthn-available=true&is-brave=false&webauthn-platform-available=false&action=default",
+		state,
+		loginInfo.Username,
+	)
+	req, err = http.NewRequest(http.MethodPost, loginUsernameUrl+state, strings.NewReader(params))
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("User-Agent", userAgent)
+	resp, err = client.Do(req)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK || err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage(emailInvalidErrorMessage))
 		return
 	}
 
-	// check username and password
-	script = getPostScriptForLogin(loginPasswordUrl+state, fmt.Sprintf(
+	// check username nad password
+	params = fmt.Sprintf(
 		"state=%s&username=%s&password=%s&action=default",
 		state,
 		loginInfo.Username,
 		loginInfo.Password,
-	), emailOrPasswordInvalidErrorMessage)
-	responseText, _ = webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if responseText == emailOrPasswordInvalidErrorMessage {
-		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(emailOrPasswordInvalidErrorMessage))
+	)
+	req, err = http.NewRequest(http.MethodPost, loginPasswordUrl+state, strings.NewReader(params))
+	req.Header.Set("Content-Type", contentType)
+	req.Header.Set("User-Agent", userAgent)
+	resp, err = client.Do(req)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK || err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage(emailOrPasswordInvalidErrorMessage))
 		return
 	}
 
-	// get access token (change back to original url to fix CORS issue)
-	webdriver.WebDriver.Get(api.ChatGPTUrl)
-
-	script = getGetScriptForLogin(authSessionUrl, getAccessTokenErrorMessage)
-	responseText, _ = webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if responseText == getAccessTokenErrorMessage {
-		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(getAccessTokenErrorMessage))
+	// get access token
+	req, err = http.NewRequest(http.MethodGet, authSessionUrl, nil)
+	req.Header.Set("User-Agent", userAgent)
+	resp, err = client.Do(req)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK || err != nil {
+		c.JSON(http.StatusBadRequest, api.ReturnMessage(getAccessTokenErrorMessage))
 		return
 	}
 
-	c.Writer.Write([]byte(responseText.(string)))
+	data, _ = io.ReadAll(resp.Body)
+	c.Writer.Write(data)
 }
