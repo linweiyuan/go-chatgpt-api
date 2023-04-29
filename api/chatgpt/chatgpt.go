@@ -52,7 +52,11 @@ func StartConversation(c *gin.Context) {
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	req.Header.Set("Accept", "text/event-stream")
 	resp, err := api.Client.Do(req)
-	api.CheckError(c, err)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return
+	}
+
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
 		switch resp.StatusCode {
@@ -166,7 +170,11 @@ func handleGet(c *gin.Context, url string, errorMessage string) {
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	resp, err := api.Client.Do(req)
-	api.CheckError(c, err)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return
+	}
+
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(errorMessage))
@@ -194,7 +202,11 @@ func handlePostOrPatch(c *gin.Context, req *http.Request, errorMessage string) {
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	resp, err := api.Client.Do(req)
-	api.CheckError(c, err)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return
+	}
+
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(errorMessage))
@@ -217,7 +229,11 @@ func UserLogin(c *gin.Context) {
 	req, _ := http.NewRequest(http.MethodGet, csrfUrl, nil)
 	req.Header.Set("User-Agent", userAgent)
 	resp, err := api.Client.Do(req)
-	api.CheckError(c, err)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return
+	}
+
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getCsrfTokenErrorMessage))
@@ -237,7 +253,11 @@ func UserLogin(c *gin.Context) {
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("User-Agent", userAgent)
 	resp, err = api.Client.Do(req)
-	api.CheckError(c, err)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return
+	}
+
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getAuthorizedUrlErrorMessage))
@@ -249,7 +269,11 @@ func UserLogin(c *gin.Context) {
 	json.Unmarshal(data, &responseMap)
 	req, err = http.NewRequest(http.MethodGet, responseMap["url"], nil)
 	resp, err = api.Client.Do(req)
-	api.CheckError(c, err)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return
+	}
+
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getStateErrorMessage))
@@ -268,7 +292,11 @@ func UserLogin(c *gin.Context) {
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("User-Agent", userAgent)
 	resp, err = api.Client.Do(req)
-	api.CheckError(c, err)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return
+	}
+
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(emailInvalidErrorMessage))
@@ -286,7 +314,10 @@ func UserLogin(c *gin.Context) {
 	req.Header.Set("Content-Type", contentType)
 	req.Header.Set("User-Agent", userAgent)
 	resp, err = api.Client.Do(req)
-	api.CheckError(c, err)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return
+	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(emailOrPasswordInvalidErrorMessage))
@@ -297,7 +328,11 @@ func UserLogin(c *gin.Context) {
 	req, err = http.NewRequest(http.MethodGet, authSessionUrl, nil)
 	req.Header.Set("User-Agent", userAgent)
 	resp, err = api.Client.Do(req)
-	api.CheckError(c, err)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return
+	}
+
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK || err != nil {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getAccessTokenErrorMessage))
