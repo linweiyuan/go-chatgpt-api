@@ -21,6 +21,7 @@ import (
 )
 
 const (
+	defaultApiTimeoutSeconds       = 30
 	apiPrefix                      = "https://chat.openai.com/backend-api"
 	defaultRole                    = "user"
 	getConversationsErrorMessage   = "Failed to get conversations."
@@ -50,6 +51,8 @@ const (
 	getAccessTokenErrorMessage         = "Failed to get access token, please try again later."
 )
 
+var client tls_client.HttpClient
+
 //goland:noinspection GoUnhandledErrorResult
 func init() {
 	go func() {
@@ -61,6 +64,12 @@ func init() {
 			}
 		}
 	}()
+
+	client, _ = tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
+		tls_client.WithTimeoutSeconds(defaultApiTimeoutSeconds),
+		tls_client.WithClientProfile(tls_client.Chrome_112),
+		tls_client.WithCookieJar(tls_client.NewCookieJar()),
+	}...)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -86,19 +95,7 @@ func GetConversations(c *gin.Context) {
 		limit = "20"
 	}
 	url := apiPrefix + "/conversations?offset=" + offset + "&limit=" + limit
-	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
-	script := getGetScript(url, accessToken, getConversationsErrorMessage)
-	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if handleSeleniumError(err, script, c) {
-		return
-	}
-
-	if responseText == getConversationsErrorMessage {
-		tryToRefreshPage()
-		GetConversations(c)
-	} else {
-		c.Writer.Write([]byte(responseText.(string)))
-	}
+	handleGet(c, url, getConversationsErrorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -322,19 +319,7 @@ func GenerateTitle(c *gin.Context) {
 //goland:noinspection GoUnhandledErrorResult
 func GetConversation(c *gin.Context) {
 	url := apiPrefix + "/conversation/" + c.Param("id")
-	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
-	script := getGetScript(url, accessToken, getContentErrorMessage)
-	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if handleSeleniumError(err, script, c) {
-		return
-	}
-
-	if responseText == getContentErrorMessage {
-		tryToRefreshPage()
-		GetConversation(c)
-	} else {
-		c.Writer.Write([]byte(responseText.(string)))
-	}
+	handleGet(c, url, getContentErrorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -429,37 +414,28 @@ func handleSeleniumError(err error, script string, c *gin.Context) bool {
 //goland:noinspection GoUnhandledErrorResult
 func GetModels(c *gin.Context) {
 	url := apiPrefix + "/models"
-	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
-	script := getGetScript(url, accessToken, getModelsErrorMessage)
-	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if handleSeleniumError(err, script, c) {
-		return
-	}
+	handleGet(c, url, getModelsErrorMessage)
+}
 
-	if responseText == getModelsErrorMessage {
-		tryToRefreshPage()
-		GetModels(c)
-	} else {
-		c.Writer.Write([]byte(responseText.(string)))
-	}
+func GetAccountCheck(c *gin.Context) {
+	url := apiPrefix + "/accounts/check"
+	handleGet(c, url, getAccountCheckErrorMessage)
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func GetAccountCheck(c *gin.Context) {
-	url := apiPrefix + "/accounts/check"
-	accessToken := api.GetAccessToken(c.GetHeader(api.AuthorizationHeader))
-	script := getGetScript(url, accessToken, getAccountCheckErrorMessage)
-	responseText, err := webdriver.WebDriver.ExecuteScriptAsync(script, nil)
-	if handleSeleniumError(err, script, c) {
+func handleGet(c *gin.Context, url string, errorMessage string) {
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
+	resp, err := client.Do(req)
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK || err != nil {
+		c.JSON(resp.StatusCode, api.ReturnMessage(errorMessage))
 		return
 	}
 
-	if responseText == getAccountCheckErrorMessage {
-		tryToRefreshPage()
-		GetAccountCheck(c)
-	} else {
-		c.Writer.Write([]byte(responseText.(string)))
-	}
+	data, _ := io.ReadAll(resp.Body)
+	c.Writer.Write(data)
 }
 
 //goland:noinspection GoUnhandledErrorResult
