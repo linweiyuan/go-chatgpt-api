@@ -199,4 +199,24 @@ services:
 
 ---
 
-`WARP` is still under testing with new code.
+If you get `Access denied`, but the server is in support countries, have a try with this:
+
+```yaml
+services:
+  go-chatgpt-api:
+    container_name: go-chatgpt-api
+    image: linweiyuan/go-chatgpt-api
+    environment:
+      - GIN_MODE=release
+      - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
+    depends_on:
+      - chatgpt-proxy-server-warp
+    restart: unless-stopped
+
+  chatgpt-proxy-server-warp:
+    container_name: chatgpt-proxy-server-warp
+    image: linweiyuan/chatgpt-proxy-server-warp
+    environment:
+      - LOG_LEVEL=OFF
+    restart: unless-stopped
+```
