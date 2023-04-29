@@ -446,12 +446,6 @@ func UserLogin(c *gin.Context) {
 		return
 	}
 
-	client, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
-		tls_client.WithTimeoutSeconds(30),
-		tls_client.WithClientProfile(tls_client.Chrome_112),
-		tls_client.WithCookieJar(tls_client.NewCookieJar()),
-	}...)
-
 	// get csrf token
 	req, _ := http.NewRequest(http.MethodGet, csrfUrl, nil)
 	req.Header.Set("User-Agent", userAgent)
