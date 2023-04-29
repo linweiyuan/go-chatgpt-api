@@ -31,7 +31,7 @@ func main() {
 
 	conversationGroup := router.Group("/conversation")
 	{
-		conversationGroup.POST("", chatgpt.StartConversation)
+		conversationGroup.POST("", chatgpt.CreateConversation)
 		conversationGroup.POST("/gen_title/:id", chatgpt.GenerateTitle)
 		conversationGroup.GET("/:id", chatgpt.GetConversation)
 

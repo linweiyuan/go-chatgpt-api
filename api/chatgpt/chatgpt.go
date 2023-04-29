@@ -29,7 +29,7 @@ func GetConversations(c *gin.Context) {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func StartConversation(c *gin.Context) {
+func CreateConversation(c *gin.Context) {
 	var request StartConversationRequest
 	if err := c.BindJSON(&request); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(parseJsonErrorMessage))
