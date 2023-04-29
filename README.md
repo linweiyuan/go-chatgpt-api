@@ -14,10 +14,9 @@ Unofficial ChatGPT API.
 
 ---
 
-`compose.yaml`:
-
 **No need to run `chatgpt-proxy-server` anymore.**
 
+`compose.yaml`:
 ```yaml
 services:
   go-chatgpt-api:
