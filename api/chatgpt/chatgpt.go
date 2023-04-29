@@ -80,7 +80,7 @@ func StartConversation(c *gin.Context) {
 		}
 	}
 
-	// io.Copy(c.Writer, resp.Body) has somg lag
+	// io.Copy(c.Writer, resp.Body) has some lag
 	reader := bufio.NewReader(resp.Body)
 	for {
 		line, err := reader.ReadString('\n')
