@@ -84,6 +84,11 @@ func StartConversation(c *gin.Context) {
 	reader := bufio.NewReader(resp.Body)
 	for {
 		line, err := reader.ReadString('\n')
+		if strings.HasPrefix(line, "event") ||
+			strings.HasPrefix(line, "data: 20") ||
+			line == "\r\n" {
+			continue
+		}
 		if err != nil {
 			break
 		} else {
