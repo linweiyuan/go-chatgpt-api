@@ -15,6 +15,7 @@ func HeaderCheckMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		c.Header("Content-Type", "application/json")
 		c.Next()
 	}
 }
