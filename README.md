@@ -26,5 +26,6 @@ services:
       - 8080:8080
     environment:
       - GIN_MODE=release
+      - GO_CHATGPT_API_PROXY=
     restart: unless-stopped
 ```

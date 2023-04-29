@@ -58,7 +58,8 @@ func main() {
 	}
 	router.GET("/dashboard/billing/credit_grants", official.CheckUsage)
 
-	port := os.Getenv("CHATGPT_API_PORT")
+	//goland:noinspection SpellCheckingInspection
+	port := os.Getenv("GO_CHATGPT_API_PORT")
 	if port == "" {
 		port = "8080"
 	}
