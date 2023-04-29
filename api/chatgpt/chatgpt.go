@@ -534,7 +534,7 @@ func UserLogin(c *gin.Context) {
 		return
 	}
 
-	// check username nad password
+	// check username and password
 	params = fmt.Sprintf(
 		"state=%s&username=%s&password=%s&action=default",
 		state,
