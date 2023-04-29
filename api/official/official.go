@@ -5,36 +5,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
+
+	http "github.com/bogdanfinn/fhttp"
 )
-
-const (
-	apiUrl             = "https://api.openai.com"
-	apiChatCompletions = apiUrl + "/v1/chat/completions"
-	apiCheckUsage      = apiUrl + "/dashboard/billing/credit_grants"
-)
-
-var client *http.Client
-
-func init() {
-	client = &http.Client{
-		Timeout: 0,
-	}
-}
-
-type ChatCompletionsRequest struct {
-	Model    string                   `json:"model"`
-	Messages []ChatCompletionsMessage `json:"messages"`
-	Stream   bool                     `json:"stream"`
-}
-
-type ChatCompletionsMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
 
 //goland:noinspection GoUnhandledErrorResult
 func ChatCompletions(c *gin.Context) {
@@ -45,7 +21,7 @@ func ChatCompletions(c *gin.Context) {
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Content-Type", "application/json")
-	resp, _ := client.Do(req)
+	resp, _ := api.Client.Do(req)
 	defer resp.Body.Close()
 
 	reader := bufio.NewReader(resp.Body)
@@ -64,7 +40,7 @@ func ChatCompletions(c *gin.Context) {
 func CheckUsage(c *gin.Context) {
 	req, _ := http.NewRequest("GET", apiCheckUsage, nil)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	resp, _ := client.Do(req)
+	resp, _ := api.Client.Do(req)
 	defer resp.Body.Close()
 
 	body, _ := io.ReadAll(resp.Body)

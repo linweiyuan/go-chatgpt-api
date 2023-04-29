@@ -7,16 +7,13 @@ require (
 	github.com/bogdanfinn/fhttp v0.5.22
 	github.com/bogdanfinn/tls-client v1.3.11
 	github.com/gin-gonic/gin v1.9.0
-	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.5.1
 	github.com/sirupsen/logrus v1.9.0
-	github.com/tebeka/selenium v0.9.9
 )
 
 require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
-	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/bogdanfinn/utls v1.5.16 // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect

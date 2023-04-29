@@ -9,29 +9,17 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/api/official"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
-	"github.com/linweiyuan/go-chatgpt-api/webdriver"
 )
 
 func init() {
 	gin.ForceConsoleColor()
 }
 
-func Recover() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		defer func() {
-			if r := recover(); r != nil {
-				webdriver.NewSessionAndRefresh()
-			}
-		}()
-		c.Next()
-	}
-}
 func main() {
 	router := gin.Default()
-	router.Use(Recover())
 	router.Use(middleware.HeaderCheckMiddleware())
 
-	// chatgpt
+	// ChatGPT
 	conversationsGroup := router.Group("/conversations")
 	{
 		conversationsGroup.GET("", chatgpt.GetConversations)
@@ -76,6 +64,6 @@ func main() {
 	}
 	err := router.Run(":" + port)
 	if err != nil {
-		log.Fatal("Failed to start server:" + err.Error())
+		log.Fatal("Failed to start server: " + err.Error())
 	}
 }
