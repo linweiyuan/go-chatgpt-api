@@ -1,7 +1,6 @@
 package chatgpt
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -84,22 +83,7 @@ func CreateConversation(c *gin.Context) {
 		}
 	}
 
-	// io.Copy(c.Writer, resp.Body) has some lag
-	reader := bufio.NewReader(resp.Body)
-	for {
-		line, err := reader.ReadString('\n')
-		if strings.HasPrefix(line, "event") ||
-			strings.HasPrefix(line, "data: 20") ||
-			line == "\r\n" {
-			continue
-		}
-		if err != nil {
-			break
-		} else {
-			c.Writer.Write([]byte(line))
-			c.Writer.Flush()
-		}
-	}
+	io.Copy(c.Writer, resp.Body)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -181,8 +165,7 @@ func handleGet(c *gin.Context, url string, errorMessage string) {
 		return
 	}
 
-	data, _ := io.ReadAll(resp.Body)
-	c.Writer.Write(data)
+	io.Copy(c.Writer, resp.Body)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -213,8 +196,7 @@ func handlePostOrPatch(c *gin.Context, req *http.Request, errorMessage string) {
 		return
 	}
 
-	data, _ := io.ReadAll(resp.Body)
-	c.Writer.Write(data)
+	io.Copy(c.Writer, resp.Body)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -339,6 +321,5 @@ func UserLogin(c *gin.Context) {
 		return
 	}
 
-	data, _ = io.ReadAll(resp.Body)
-	c.Writer.Write(data)
+	io.Copy(c.Writer, resp.Body)
 }

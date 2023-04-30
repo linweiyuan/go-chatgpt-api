@@ -1,7 +1,6 @@
 package official
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"io"
@@ -23,17 +22,7 @@ func ChatCompletions(c *gin.Context) {
 	req.Header.Set("Content-Type", "application/json")
 	resp, _ := api.Client.Do(req)
 	defer resp.Body.Close()
-
-	reader := bufio.NewReader(resp.Body)
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			break
-		} else {
-			c.Writer.Write([]byte(line))
-			c.Writer.Flush()
-		}
-	}
+	io.Copy(c.Writer, resp.Body)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -42,7 +31,5 @@ func CheckUsage(c *gin.Context) {
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	resp, _ := api.Client.Do(req)
 	defer resp.Body.Close()
-
-	body, _ := io.ReadAll(resp.Body)
-	c.Writer.Write(body)
+	io.Copy(c.Writer, resp.Body)
 }
