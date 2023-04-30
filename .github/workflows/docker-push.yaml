@@ -12,6 +12,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: linweiyuan/go-chatgpt-api
+          tags: |
+            {{ date 'YYYYMMDDHHmmss' }}
+            latest
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 
@@ -25,9 +34,9 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build and push
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: linweiyuan/go-chatgpt-api
+          tags: ${{ steps.meta.outputs.tags }}
