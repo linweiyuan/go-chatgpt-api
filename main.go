@@ -17,7 +17,7 @@ func init() {
 
 func main() {
 	router := gin.Default()
-	router.Use(middleware.HeaderCheckMiddleware())
+	router.Use(middleware.CheckHeaderMiddleware())
 
 	// ChatGPT
 	conversationsGroup := router.Group("/conversations")
