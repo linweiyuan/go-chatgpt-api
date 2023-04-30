@@ -34,7 +34,6 @@ type FeedbackMessageRequest struct {
 
 type GenerateTitleRequest struct {
 	MessageID string `json:"message_id"`
-	Model     string `json:"model"`
 }
 
 type PatchConversationRequest struct {
