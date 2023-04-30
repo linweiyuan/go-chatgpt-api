@@ -1,6 +1,6 @@
 package chatgpt
 
-type StartConversationRequest struct {
+type CreateConversationRequest struct {
 	Action            string    `json:"action"`
 	Messages          []Message `json:"messages"`
 	Model             string    `json:"model"`
@@ -24,22 +24,6 @@ type Author struct {
 type Content struct {
 	ContentType string   `json:"content_type"`
 	Parts       []string `json:"parts"`
-}
-
-type ConversationResponse struct {
-	Message struct {
-		ID      string `json:"id"`
-		Content struct {
-			Parts []string `json:"parts"`
-		} `json:"content"`
-		EndTurn  bool `json:"end_turn"`
-		Metadata struct {
-			FinishDetails struct {
-				Type string `json:"type"`
-			} `json:"finish_details"`
-		} `json:"metadata"`
-	} `json:"message"`
-	ConversationID string `json:"conversation_id"`
 }
 
 type FeedbackMessageRequest struct {
