@@ -1,12 +1,15 @@
 package api
 
+//goland:noinspection GoSnakeCaseUsage
 import (
+	"bufio"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 
+	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
 )
 
@@ -44,4 +47,25 @@ func GetAccessToken(accessToken string) string {
 		return "Bearer " + accessToken
 	}
 	return accessToken
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func HandleConversationResponse(c *gin.Context, resp *http.Response) {
+	reader := bufio.NewReader(resp.Body)
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
+
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "event") ||
+			strings.HasPrefix(line, "data: 20") ||
+			line == "" {
+			continue
+		}
+
+		c.Writer.Write([]byte(line + "\n\n"))
+		c.Writer.Flush()
+	}
 }

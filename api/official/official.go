@@ -1,11 +1,9 @@
 package official
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"io"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -29,21 +27,7 @@ func ChatCompletions(c *gin.Context) {
 	}
 
 	defer resp.Body.Close()
-	reader := bufio.NewReader(resp.Body)
-	for {
-		line, err := reader.ReadString('\n')
-		if strings.HasPrefix(line, "event") ||
-			strings.HasPrefix(line, "data: 20") ||
-			line == "\r\n" {
-			continue
-		}
-		if err != nil {
-			break
-		} else {
-			c.Writer.Write([]byte(line))
-			c.Writer.Flush()
-		}
-	}
+	api.HandleConversationResponse(c, resp)
 }
 
 //goland:noinspection GoUnhandledErrorResult

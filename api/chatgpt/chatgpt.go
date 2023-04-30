@@ -1,7 +1,6 @@
 package chatgpt
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -100,21 +99,7 @@ func CreateConversation(c *gin.Context) {
 		}
 	}
 
-	reader := bufio.NewReader(resp.Body)
-	for {
-		line, err := reader.ReadString('\n')
-		if strings.HasPrefix(line, "event") ||
-			strings.HasPrefix(line, "data: 20") ||
-			line == "\r\n" {
-			continue
-		}
-		if err != nil {
-			break
-		} else {
-			c.Writer.Write([]byte(line))
-			c.Writer.Flush()
-		}
-	}
+	api.HandleConversationResponse(c, resp)
 }
 
 //goland:noinspection GoUnhandledErrorResult
