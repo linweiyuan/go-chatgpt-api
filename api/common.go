@@ -20,6 +20,7 @@ var Client tls_client.HttpClient
 func init() {
 	Client, _ = tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
+		tls_client.WithTimeoutSeconds(0),
 	}...)
 
 	//goland:noinspection SpellCheckingInspection
