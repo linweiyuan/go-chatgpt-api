@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,21 @@ import (
 
 	http "github.com/bogdanfinn/fhttp"
 )
+
+//goland:noinspection GoUnhandledErrorResult
+func init() {
+	go func() {
+		ticker := time.NewTicker(time.Minute)
+		for {
+			select {
+			case <-ticker.C:
+				req, _ := http.NewRequest(http.MethodGet, heartBeatUrl, nil)
+				req.Header.Set("User-Agent", userAgent)
+				api.Client.Do(req)
+			}
+		}
+	}()
+}
 
 //goland:noinspection GoUnhandledErrorResult
 func GetConversations(c *gin.Context) {

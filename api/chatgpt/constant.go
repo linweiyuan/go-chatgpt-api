@@ -15,6 +15,7 @@ const (
 
 	contentType                        = "application/x-www-form-urlencoded"
 	userAgent                          = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
+	heartBeatUrl                       = "https://chat.openai.com"
 	csrfUrl                            = "https://chat.openai.com/api/auth/csrf"
 	promptLoginUrl                     = "https://chat.openai.com/api/auth/signin/auth0?prompt=login"
 	loginUsernameUrl                   = "https://auth0.openai.com/u/login/identifier?state="
