@@ -63,7 +63,7 @@
 
 ```json
 {
-  "message_id": "response message id"
+  "message_id": "role assistant response message id"
 }
 ```
 
@@ -181,7 +181,7 @@
 
 ---
 
-If you need to setup a proxy, set `GO_CHATGPT_API_PROXY`, for example: `GO_CHATGPT_API_PROXY=http://127.0.0.1:20171`
+If you need to setup a proxy, use `GO_CHATGPT_API_PROXY`, for example: `GO_CHATGPT_API_PROXY=http://127.0.0.1:20171`
 or `GO_CHATGPT_API_PROXY=socks5://127.0.0.1:20170`.
 
 ```yaml
@@ -199,13 +199,16 @@ services:
 
 ---
 
-If you get `Access denied`, but the server is in support countries, have a try with this:
+If you get `Access denied`, but the server location is officially
+supported [here](https://platform.openai.com/docs/supported-countries), have a try with this:
 
 ```yaml
 services:
   go-chatgpt-api:
     container_name: go-chatgpt-api
     image: linweiyuan/go-chatgpt-api
+    ports:
+      - 8080:8080
     environment:
       - GIN_MODE=release
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
@@ -220,3 +223,6 @@ services:
       - LOG_LEVEL=OFF
     restart: unless-stopped
 ```
+
+After `go-chatgpt-api` is up, if you call API but it returns `403`, please try again and again, once `200` is
+returned, then it is ready to use.
