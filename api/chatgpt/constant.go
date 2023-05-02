@@ -15,7 +15,6 @@ const (
 
 	contentType                        = "application/x-www-form-urlencoded"
 	userAgent                          = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
-	heartBeatUrl                       = "https://chat.openai.com"
 	csrfUrl                            = "https://chat.openai.com/api/auth/csrf"
 	promptLoginUrl                     = "https://chat.openai.com/api/auth/signin/auth0?prompt=login"
 	loginUsernameUrl                   = "https://auth0.openai.com/u/login/identifier?state="
@@ -36,4 +35,10 @@ const (
 	conversationErrorMessage422 = "The request body is invalid."
 	conversationErrorMessage429 = "Too many requests, please try again later."
 	conversationErrorMessage500 = "Server error, please try again."
+
+	accessDeniedText      = "Access denied, please set environment variable GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535 or something like this."
+	welcomeText           = "Welcome to ChatGPT"
+	healthCheckFailedText = "Health check failed, trying to get latest cookies..."
+	getCookiesFailedText  = "Failed to get cookies, please try again later."
+	getCookiesUrl         = "https://get-chatgpt-cookies.linweiyuan.com"
 )

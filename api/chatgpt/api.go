@@ -49,7 +49,7 @@ func CreateConversation(c *gin.Context) {
 	req, _ := http.NewRequest("POST", apiPrefix+"/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	setCFBMCookie(req)
+	injectCookies(req)
 	req.Header.Set("Accept", "text/event-stream")
 	resp, err := api.Client.Do(req)
 	if err != nil {
