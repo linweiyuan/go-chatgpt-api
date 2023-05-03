@@ -1,8 +1,29 @@
 # go-chatgpt-api
 
-## Unofficial ChatGPT API.
+### [中文文档](README_zh.md)
 
-### Available APIs:
+## A forward proxy program attempting to bypass `Cloudflare 403` and `Access Denied`.
+
+| Version | Branch   | Image                              | Features                                                                                                       |
+|---------|----------|------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| New     | `main`   | `linweiyuan/go-chatgpt-api:latest` | Direct connection to the `API`, only requires one container to run (excluding `warp` and `cookies`)            | 
+| Old     | `legacy` | `linweiyuan/go-chatgpt-api:legacy` | Based on the browser, requires an additional `linweiyuan/chatgpt-proxy-server` image to run (excluding `warp`) | 
+
+The new version is the trend, but if there are problems with the new version, you can switch back to the old version.
+The old version is still usable and based on the browser, which should be an ultimate solution that can be used for a
+long time (although it may consume slightly more resources).
+
+---
+
+### Troubleshooting
+
+English countries does not have the "Great Firewall", so many issues are gone.
+
+More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
+
+---
+
+### Supported APIs (URL and parameters are mostly consistent with the official website, with slight modifications to some interfaces).
 
 ---
 
@@ -177,12 +198,19 @@
 
 ---
 
-**No need to run `chatgpt-proxy-server` anymore.**
+### Configuration
+
+To set a proxy, you can use the environment variable `GO_CHATGPT_API_PROXY`, such
+as `GO_CHATGPT_API_PROXY=http://127.0.0.1:20171` or `GO_CHATGPT_API_PROXY=socks5://127.0.0.1:20170`. If it is commented
+out or left blank, it will not be enabled.
+
+To use with `warp`: `GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535`. Since the scenario that requires
+setting up `warp` can directly access the `ChatGPT` website by default, using the same variable will not cause
+conflicts.
 
 ---
 
-If you need to setup a proxy, use `GO_CHATGPT_API_PROXY`, for example: `GO_CHATGPT_API_PROXY=http://127.0.0.1:20171`
-or `GO_CHATGPT_API_PROXY=socks5://127.0.0.1:20170`.
+`docker-compose.yaml`:
 
 ```yaml
 services:
@@ -197,10 +225,15 @@ services:
     restart: unless-stopped
 ```
 
----
+I only develop and test on `Arch Linux`, which is a `rolling` release version, meaning that everything on the system is
+`up-to-date`. If you encounter a `yaml` error while using it, you can add `version: '3'` in front of `services:`.
 
-If you get `Access denied`, but the server location is officially
-supported [here](https://platform.openai.com/docs/supported-countries), have a try with this:
+If you encounter an `Access denied` error, but your server is indeed
+in [Supported countries and territories](https://platform.openai.com/docs/supported-countries), try this
+configuration (it is not guaranteed to solve the problem, for example, if your server is in `Zone A`, but `Zone A`
+is not on the list of supported countries, even if you use `warp` to change to a `Cloudflare IP`, the result will still
+be
+`403`):
 
 ```yaml
 services:
@@ -224,5 +257,10 @@ services:
     restart: unless-stopped
 ```
 
-After `go-chatgpt-api` is up, if you call API but it returns `403`, please try again and again, once `200` is
-returned, then it is ready to use.
+<details>
+
+<summary>AD</summary>
+
+`Vultr` Referral Program: https://www.vultr.com/?ref=7372562
+
+</details>
