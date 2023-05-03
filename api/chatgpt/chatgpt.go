@@ -74,6 +74,7 @@ func checkHealthCheckStatus(resp *http.Response) {
 	defer resp.Body.Close()
 	if resp != nil && resp.StatusCode == http.StatusOK {
 		logger.Info(welcomeText)
+		firstTime = false
 	} else {
 		logger.Warn(healthCheckFailedText)
 
