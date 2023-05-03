@@ -246,6 +246,19 @@ services:
     restart: unless-stopped
 ```
 
+如果要让运行的镜像总是保持最新，可以配合这个一起使用：
+
+```yaml
+services:
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 3600
+    restart: unless-stopped
+```
+
 <details>
 
 <summary>广告位</summary>

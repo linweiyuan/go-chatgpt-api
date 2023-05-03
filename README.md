@@ -257,6 +257,19 @@ services:
     restart: unless-stopped
 ```
 
+If you want to make sure the image is always latest, try this:
+
+```yaml
+services:
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 3600
+    restart: unless-stopped
+```
+
 <details>
 
 <summary>AD</summary>
