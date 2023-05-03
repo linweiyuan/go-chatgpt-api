@@ -41,4 +41,7 @@ const (
 	healthCheckFailedText = "Health check failed, trying to get latest cookies..."
 	getCookiesFailedText  = "Failed to get cookies, please try again later."
 	getCookiesUrl         = "https://get-chatgpt-cookies.linweiyuan.com"
+
+	healthCheckInterval = 10
+	getCookiesInterval  = 20
 )
