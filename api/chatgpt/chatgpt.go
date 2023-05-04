@@ -76,8 +76,6 @@ func checkHealthCheckStatus(resp *http.Response) {
 		logger.Info(welcomeText)
 		firstTime = false
 	} else {
-		logger.Warn(healthCheckFailedText)
-
 		getCookies()
 	}
 }
@@ -95,7 +93,6 @@ func getCookies() {
 	req, _ := http.NewRequest(http.MethodGet, getCookiesUrl, nil)
 	resp, err := api.Client.Do(req)
 	if err != nil {
-		logger.Error("Failed to get cookies: " + err.Error())
 		return
 	}
 
@@ -105,7 +102,6 @@ func getCookies() {
 	json.Unmarshal(data, &responseMap)
 	__cf_bm = responseMap["__cf_bm"]
 	if __cf_bm == "" {
-		logger.Error(getCookiesFailedText)
 		return
 	}
 

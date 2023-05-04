@@ -36,11 +36,9 @@ const (
 	conversationErrorMessage429 = "Too many requests, please try again later."
 	conversationErrorMessage500 = "Server error, please try again."
 
-	accessDeniedText      = "Access denied, please set environment variable GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535 or something like this."
-	welcomeText           = "Welcome to ChatGPT"
-	healthCheckFailedText = "Health check failed, trying to get latest cookies..."
-	getCookiesFailedText  = "Failed to get cookies, please try again later."
-	getCookiesUrl         = "https://get-chatgpt-cookies.linweiyuan.com"
+	accessDeniedText = "Access denied, please set environment variable GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535 or something like this."
+	welcomeText      = "Welcome to ChatGPT"
+	getCookiesUrl    = "https://get-chatgpt-cookies.linweiyuan.com"
 
 	healthCheckInterval = 10
 	getCookiesInterval  = 20
