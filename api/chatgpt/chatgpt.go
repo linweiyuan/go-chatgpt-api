@@ -23,7 +23,7 @@ func handleGet(c *gin.Context, url string, errorMessage string) {
 	}
 
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK || err != nil {
+	if resp.StatusCode != http.StatusOK {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(errorMessage))
 		return
 	}
@@ -55,7 +55,7 @@ func handlePostOrPatch(c *gin.Context, req *http.Request, errorMessage string) {
 	}
 
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK || err != nil {
+	if resp.StatusCode != http.StatusOK {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(errorMessage))
 		return
 	}

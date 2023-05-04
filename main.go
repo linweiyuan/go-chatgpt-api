@@ -59,7 +59,6 @@ func main() {
 		apiGroup.POST("/auth/login", official.UserLogin)
 	}
 
-	//goland:noinspection SpellCheckingInspection
 	port := os.Getenv("GO_CHATGPT_API_PORT")
 	if port == "" {
 		port = "8080"

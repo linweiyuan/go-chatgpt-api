@@ -55,7 +55,7 @@ func CreateConversation(c *gin.Context) {
 	}
 
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK || err != nil {
+	if resp.StatusCode != http.StatusOK {
 		switch resp.StatusCode {
 		case http.StatusUnauthorized:
 			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(conversationErrorMessage401))
@@ -165,7 +165,7 @@ func UserLogin(c *gin.Context) {
 	}
 
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK || err != nil {
+	if resp.StatusCode != http.StatusOK {
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getCsrfTokenErrorMessage))
 		return
 	}
