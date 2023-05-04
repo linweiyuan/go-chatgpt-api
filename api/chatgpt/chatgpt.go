@@ -106,7 +106,6 @@ func getCookies() {
 	}
 
 	if firstTime {
-		logger.Info("Get cookies successfully: " + __cf_bm)
 		logger.Info(welcomeText)
 		firstTime = false
 	}
