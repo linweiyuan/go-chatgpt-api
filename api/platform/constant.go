@@ -4,6 +4,7 @@ package platform
 const (
 	apiUrl                    = "https://api.openai.com"
 	apiChatCompletions        = apiUrl + "/v1/chat/completions"
+	apiGetModels              = apiUrl + "/v1/models"
 	apiGetCreditGrants        = apiUrl + "/dashboard/billing/credit_grants"
 	apiGetSubscription        = apiUrl + "/dashboard/billing/subscription"
 	apiGetApiKeys             = apiUrl + "/dashboard/user/api_keys"

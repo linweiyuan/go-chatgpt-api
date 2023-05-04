@@ -31,7 +31,10 @@ func ChatCompletions(c *gin.Context) {
 	api.HandleConversationResponse(c, resp)
 }
 
-//goland:noinspection GoUnhandledErrorResult
+func GetModels(c *gin.Context) {
+	handleGet(c, apiGetModels)
+}
+
 func GetCreditGrants(c *gin.Context) {
 	handleGet(c, apiGetCreditGrants)
 }
@@ -103,7 +106,6 @@ func Login(c *gin.Context) {
 	io.Copy(c.Writer, resp.Body)
 }
 
-//goland:noinspection GoUnhandledErrorResult
 func GetSubscription(c *gin.Context) {
 	handleGet(c, apiGetSubscription)
 }

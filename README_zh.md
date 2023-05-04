@@ -196,7 +196,7 @@
 
 ---
 
-- [Chat](https://platform.openai.com/docs/api-reference/chat)（传 `accessToken`、`apiKey`、`sessionKey` 都可以）
+- [Chat](https://platform.openai.com/docs/api-reference/chat)
 
 `POST /platform/v1/chat/completions`
 
@@ -216,6 +216,12 @@
 ```
 
 </details>
+
+---
+
+- [List models](https://platform.openai.com/docs/api-reference/models/list)
+
+`GET /platform/v1/models`
 
 ---
 

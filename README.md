@@ -200,7 +200,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- chat completion (support `accessToken`, `apiKey`, `sessionKey`)
+- [Chat](https://platform.openai.com/docs/api-reference/chat)
 
 `POST /platform/v1/chat/completions`
 
@@ -220,6 +220,12 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 ```
 
 </details>
+
+---
+
+- [List models](https://platform.openai.com/docs/api-reference/models/list)
+
+`GET /platform/v1/models`
 
 ---
 
