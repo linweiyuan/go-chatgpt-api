@@ -3,11 +3,8 @@ package chatgpt
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
-	"strings"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 
@@ -47,9 +44,9 @@ func CreateConversation(c *gin.Context) {
 
 	jsonBytes, _ := json.Marshal(request)
 	req, _ := http.NewRequest("POST", apiPrefix+"/conversation", bytes.NewBuffer(jsonBytes))
-	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	injectCookies(req)
+	api.InjectCookies(req)
 	req.Header.Set("Accept", "text/event-stream")
 	resp, err := api.Client.Do(req)
 	if err != nil {
@@ -151,15 +148,16 @@ func GetAccountCheck(c *gin.Context) {
 
 //goland:noinspection GoUnhandledErrorResult
 func UserLogin(c *gin.Context) {
-	var loginInfo LoginInfo
+	var loginInfo api.LoginInfo
 	if err := c.ShouldBindJSON(&loginInfo); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(parseUserInfoErrorMessage))
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(api.ParseUserInfoErrorMessage))
 		return
 	}
 
 	// get csrf token
 	req, _ := http.NewRequest(http.MethodGet, csrfUrl, nil)
-	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("User-Agent", api.UserAgent)
+	api.InjectCookies(req)
 	resp, err := api.Client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
@@ -176,100 +174,42 @@ func UserLogin(c *gin.Context) {
 	responseMap := make(map[string]string)
 	json.Unmarshal(data, &responseMap)
 
-	// get authorized url
-	params := fmt.Sprintf(
-		"callbackUrl=/&csrfToken=%s&json=true",
-		responseMap["csrfToken"],
-	)
-	req, err = http.NewRequest(http.MethodPost, promptLoginUrl, strings.NewReader(params))
-	req.Header.Set("Content-Type", contentType)
-	req.Header.Set("User-Agent", userAgent)
-	resp, err = api.Client.Do(req)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
-		return
-	}
+	userLogin := new(ChatGPTUserLogin)
 
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK || err != nil {
-		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getAuthorizedUrlErrorMessage))
+	// get authorized url
+	authorizedUrl, statusCode, err := userLogin.GetAuthorizedUrl(responseMap["csrfToken"])
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
 		return
 	}
 
 	// get state
-	data, _ = io.ReadAll(resp.Body)
-	json.Unmarshal(data, &responseMap)
-	req, err = http.NewRequest(http.MethodGet, responseMap["url"], nil)
-	resp, err = api.Client.Do(req)
+	state, statusCode, err := userLogin.GetState(authorizedUrl)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
-		return
-	}
-
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK || err != nil {
-		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getStateErrorMessage))
+		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
 		return
 	}
 
 	// check username
-	doc, _ := goquery.NewDocumentFromReader(resp.Body)
-	state, _ := doc.Find("input[name=state]").Attr("value")
-	params = fmt.Sprintf(
-		"state=%s&username=%s&js-available=true&webauthn-available=true&is-brave=false&webauthn-platform-available=false&action=default",
-		state,
-		loginInfo.Username,
-	)
-	req, err = http.NewRequest(http.MethodPost, loginUsernameUrl+state, strings.NewReader(params))
-	req.Header.Set("Content-Type", contentType)
-	req.Header.Set("User-Agent", userAgent)
-	resp, err = api.Client.Do(req)
+	statusCode, err = userLogin.CheckUsername(state, loginInfo.Username)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
 		return
 	}
 
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK || err != nil {
-		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(emailInvalidErrorMessage))
-		return
-	}
-
-	// check username and password
-	params = fmt.Sprintf(
-		"state=%s&username=%s&password=%s&action=default",
-		state,
-		loginInfo.Username,
-		loginInfo.Password,
-	)
-	req, err = http.NewRequest(http.MethodPost, loginPasswordUrl+state, strings.NewReader(params))
-	req.Header.Set("Content-Type", contentType)
-	req.Header.Set("User-Agent", userAgent)
-	resp, err = api.Client.Do(req)
+	// check password
+	_, statusCode, err = userLogin.CheckPassword(state, loginInfo.Username, loginInfo.Password)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
-		return
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK || err != nil {
-		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(emailOrPasswordInvalidErrorMessage))
+		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
 		return
 	}
 
 	// get access token
-	req, err = http.NewRequest(http.MethodGet, authSessionUrl, nil)
-	req.Header.Set("User-Agent", userAgent)
-	resp, err = api.Client.Do(req)
+	accessToken, statusCode, err := userLogin.GetAccessToken("")
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
 		return
 	}
 
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK || err != nil {
-		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getAccessTokenErrorMessage))
-		return
-	}
-
-	io.Copy(c.Writer, resp.Body)
+	c.Writer.WriteString(accessToken)
 }

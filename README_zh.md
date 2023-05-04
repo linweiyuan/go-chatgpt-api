@@ -154,7 +154,7 @@
 
 ---
 
-- 登录（目前仅支持 `ChatGPT` 账号，谷歌或微软账号没有测试）
+- `ChatGPT` 登录（目前仅支持 `ChatGPT` 账号，谷歌或微软账号没有测试）
 
 `POST /auth/login`
 
@@ -187,6 +187,23 @@
   ],
   "model": "gpt-3.5-turbo",
   "stream": true
+}
+```
+
+</details>
+
+---
+
+- `platform` 登录
+
+`POST /v1/auth/login`
+
+<details>
+
+```json
+{
+  "username": "email",
+  "password": "password"
 }
 ```
 

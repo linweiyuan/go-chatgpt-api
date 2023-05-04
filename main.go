@@ -47,7 +47,7 @@ func main() {
 	router.GET("/accounts/check", chatgpt.GetAccountCheck)
 
 	// auth
-	router.POST("/auth/login", chatgpt.UserLogin) // login will cause some downtime because of CORS limits
+	router.POST("/auth/login", chatgpt.UserLogin)
 
 	// ----------------------------------------------------------------------------------------------------
 
@@ -55,8 +55,9 @@ func main() {
 	apiGroup := router.Group("/v1")
 	{
 		apiGroup.POST("/chat/completions", official.ChatCompletions)
+		apiGroup.GET("/dashboard/billing/credit_grants", official.CheckUsage)
+		apiGroup.POST("/auth/login", official.UserLogin)
 	}
-	router.GET("/dashboard/billing/credit_grants", official.CheckUsage)
 
 	//goland:noinspection SpellCheckingInspection
 	port := os.Getenv("GO_CHATGPT_API_PORT")

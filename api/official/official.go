@@ -38,3 +38,51 @@ func CheckUsage(c *gin.Context) {
 	defer resp.Body.Close()
 	io.Copy(c.Writer, resp.Body)
 }
+
+//goland:noinspection GoUnhandledErrorResult
+func UserLogin(c *gin.Context) {
+	var loginInfo api.LoginInfo
+	if err := c.ShouldBindJSON(&loginInfo); err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(api.ParseUserInfoErrorMessage))
+		return
+	}
+
+	// hard refresh cookies
+	resp, _ := api.Client.Get(auth0LogoutUrl)
+	defer resp.Body.Close()
+
+	userLogin := new(PlatformUserLogin)
+
+	// get authorized url
+	authorizedUrl, statusCode, err := userLogin.GetAuthorizedUrl("")
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
+		return
+	}
+
+	// get state
+	state, _, _ := userLogin.GetState(authorizedUrl)
+
+	// check username
+	statusCode, err = userLogin.CheckUsername(state, loginInfo.Username)
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
+		return
+	}
+
+	// check password
+	code, statusCode, err := userLogin.CheckPassword(state, loginInfo.Username, loginInfo.Password)
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
+		return
+	}
+
+	// get access token
+	accessToken, statusCode, err := userLogin.GetAccessToken(code)
+	if err != nil {
+		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
+		return
+	}
+
+	c.Writer.WriteString(accessToken)
+}

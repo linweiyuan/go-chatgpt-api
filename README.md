@@ -158,7 +158,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- login (currently only support ChatGPT accounts)
+- `ChatGPT` user login (currently only support ChatGPT accounts)
 
 `POST /auth/login`
 
@@ -191,6 +191,23 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
   ],
   "model": "gpt-3.5-turbo",
   "stream": true
+}
+```
+
+</details>
+
+---
+
+- `platform` user login
+
+`POST /v1/auth/login`
+
+<details>
+
+```json
+{
+  "username": "email",
+  "password": "password"
 }
 ```
 

@@ -10,7 +10,9 @@ import (
 //goland:noinspection GoUnhandledErrorResult
 func CheckHeaderMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.GetHeader(api.AuthorizationHeader) == "" && c.Request.URL.Path != "/auth/login" {
+		if c.GetHeader(api.AuthorizationHeader) == "" &&
+			c.Request.URL.Path != "/auth/login" &&
+			c.Request.URL.Path != "/v1/auth/login" {
 			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage("Missing accessToken."))
 			return
 		}

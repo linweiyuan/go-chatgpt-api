@@ -10,3 +10,12 @@ type ChatCompletionsMessage struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
+
+type PlatformUserLogin struct{}
+
+type GetAccessTokenRequest struct {
+	ClientID    string `json:"client_id"`
+	GrantType   string `json:"grant_type"`
+	Code        string `json:"code"`
+	RedirectURI string `json:"redirect_uri"`
+}

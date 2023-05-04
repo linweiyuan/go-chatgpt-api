@@ -13,20 +13,9 @@ const (
 	getAccountCheckErrorMessage    = "Check failed." // Placeholder. Never encountered.
 	parseJsonErrorMessage          = "Failed to parse json request body."
 
-	contentType                        = "application/x-www-form-urlencoded"
-	userAgent                          = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
-	csrfUrl                            = "https://chat.openai.com/api/auth/csrf"
-	promptLoginUrl                     = "https://chat.openai.com/api/auth/signin/auth0?prompt=login"
-	loginUsernameUrl                   = "https://auth0.openai.com/u/login/identifier?state="
-	loginPasswordUrl                   = "https://auth0.openai.com/u/login/password?state="
-	authSessionUrl                     = "https://chat.openai.com/api/auth/session"
-	parseUserInfoErrorMessage          = "Failed to parse user login info."
-	getCsrfTokenErrorMessage           = "Failed to get CSRF token."
-	getAuthorizedUrlErrorMessage       = "Failed to get authorized url."
-	getStateErrorMessage               = "Failed to get state."
-	emailInvalidErrorMessage           = "Email is not valid."
-	emailOrPasswordInvalidErrorMessage = "Email or password is not correct."
-	getAccessTokenErrorMessage         = "Failed to get access token, please try again later."
+	csrfUrl                  = "https://chat.openai.com/api/auth/csrf"
+	promptLoginUrl           = "https://chat.openai.com/api/auth/signin/auth0?prompt=login"
+	getCsrfTokenErrorMessage = "Failed to get CSRF token."
 
 	conversationErrorMessage401 = "Access token has expired."
 	conversationErrorMessage403 = "Something went wrong, please try again."
@@ -35,11 +24,4 @@ const (
 	conversationErrorMessage422 = "The request body is invalid."
 	conversationErrorMessage429 = "Too many requests, please try again later."
 	conversationErrorMessage500 = "Server error, please try again."
-
-	accessDeniedText = "Access denied, please set environment variable GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535 or something like this."
-	welcomeText      = "Welcome to ChatGPT"
-	getCookiesUrl    = "https://get-chatgpt-cookies.linweiyuan.com"
-
-	healthCheckInterval = 15
-	getCookiesInterval  = 25
 )
