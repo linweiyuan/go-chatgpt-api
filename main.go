@@ -80,6 +80,7 @@ func setupPlatformAPIs(router *gin.Engine) {
 			apiGroup.POST("/edits", platform.CreateEdit)
 			apiGroup.POST("/images/generations", platform.CreateImage)
 			apiGroup.POST("/embeddings", platform.CreateEmbeddings)
+			apiGroup.GET("/files", platform.ListFiles)
 		}
 
 		dashboardGroup := platformGroup.Group("/dashboard")

@@ -308,6 +308,12 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
+- [List files](https://platform.openai.com/docs/api-reference/files/list)
+
+`GET /platform/v1/files`
+
+---
+
 - get `credit grants` (only support `sessionkey`)
 
 `GET /platform/dashboard/billing/credit_grants`

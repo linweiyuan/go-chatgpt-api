@@ -100,6 +100,10 @@ func CreateEmbeddings(c *gin.Context) {
 	io.Copy(c.Writer, resp.Body)
 }
 
+func ListFiles(c *gin.Context) {
+	handleGet(c, apiListFiles)
+}
+
 func GetCreditGrants(c *gin.Context) {
 	handleGet(c, apiGetCreditGrants)
 }

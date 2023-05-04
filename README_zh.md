@@ -303,6 +303,12 @@
 </details>
 
 ---
+ 
+- [List files](https://platform.openai.com/docs/api-reference/files/list)
+
+`GET /platform/v1/files`
+
+---
 
 - 获取 `credit grants` （只能传 `sessionKey`）
 
