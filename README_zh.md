@@ -231,6 +231,26 @@
 
 ---
 
+- [Create completion](https://platform.openai.com/docs/api-reference/completions/create)
+
+`POST /platform/v1/completions`
+
+<details>
+
+```json
+{
+  "model": "text-davinci-003",
+  "prompt": "Say this is a test",
+  "max_tokens": 7,
+  "temperature": 0,
+  "stream": true
+}
+```
+
+</details>
+
+---
+
 - 获取 `credit grants` （只能传 `sessionKey`）
 
 `GET /platform/dashboard/billing/credit_grants`

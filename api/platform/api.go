@@ -18,13 +18,8 @@ func ChatCompletions(c *gin.Context) {
 	var chatCompletionsRequest ChatCompletionsRequest
 	c.ShouldBindJSON(&chatCompletionsRequest)
 	data, _ := json.Marshal(chatCompletionsRequest)
-	req, _ := http.NewRequest(http.MethodPost, apiChatCompletions, bytes.NewBuffer(data))
-	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	req.Header.Set("Accept", "text/event-stream")
-	req.Header.Set("Content-Type", "application/json")
-	resp, err := api.Client.Do(req)
+	resp, err := handlePost(c, apiChatCompletions, data)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
 		return
 	}
 
@@ -32,13 +27,31 @@ func ChatCompletions(c *gin.Context) {
 	api.HandleConversationResponse(c, resp)
 }
 
-func GetModels(c *gin.Context) {
-	handleGet(c, apiGetModels)
+func ListModels(c *gin.Context) {
+	handleGet(c, apiListModels)
 }
 
-func GetModel(c *gin.Context) {
+func RetrieveModel(c *gin.Context) {
 	model := c.Param("model")
-	handleGet(c, fmt.Sprintf(apiGetModel, model))
+	handleGet(c, fmt.Sprintf(apiRetrieveModel, model))
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func CreateCompletions(c *gin.Context) {
+	var request CreateCompletionsRequest
+	c.ShouldBindJSON(&request)
+	data, _ := json.Marshal(request)
+	resp, err := handlePost(c, apiCreateCompletions, data)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+	if request.Stream {
+		api.HandleConversationResponse(c, resp)
+	} else {
+		io.Copy(c.Writer, resp.Body)
+	}
 }
 
 func GetCreditGrants(c *gin.Context) {
@@ -127,4 +140,18 @@ func handleGet(c *gin.Context, url string) {
 	resp, _ := api.Client.Do(req)
 	defer resp.Body.Close()
 	io.Copy(c.Writer, resp.Body)
+}
+
+func handlePost(c *gin.Context, url string, data []byte) (*http.Response, error) {
+	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(data))
+	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
+	req.Header.Set("Accept", "text/event-stream")
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := api.Client.Do(req)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return nil, err
+	}
+
+	return resp, nil
 }

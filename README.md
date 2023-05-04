@@ -235,6 +235,26 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
+- [Create completion](https://platform.openai.com/docs/api-reference/completions/create)
+
+`POST /platform/v1/completions`
+
+<details>
+
+```json
+{
+  "model": "text-davinci-003",
+  "prompt": "Say this is a test",
+  "max_tokens": 7,
+  "temperature": 0,
+  "stream": true
+}
+```
+
+</details>
+
+---
+
 - get `credit grants` (only support `sessionkey`)
 
 `GET /platform/dashboard/billing/credit_grants`
