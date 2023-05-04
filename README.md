@@ -223,9 +223,15 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- check credit grants (only support `sessionkey`)
+- get `credit grants` (only support `sessionkey`)
 
 `GET /platform/dashboard/billing/credit_grants`
+
+---
+
+- get `subscription` (only support `sessionkey`)
+
+`GET /platform/dashboard/billing/subscription`
 
 ---
 

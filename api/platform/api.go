@@ -17,7 +17,7 @@ func ChatCompletions(c *gin.Context) {
 	var chatCompletionsRequest ChatCompletionsRequest
 	c.ShouldBindJSON(&chatCompletionsRequest)
 	data, _ := json.Marshal(chatCompletionsRequest)
-	req, _ := http.NewRequest("POST", apiChatCompletions, bytes.NewBuffer(data))
+	req, _ := http.NewRequest(http.MethodPost, apiChatCompletions, bytes.NewBuffer(data))
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	req.Header.Set("Accept", "text/event-stream")
 	req.Header.Set("Content-Type", "application/json")
@@ -32,8 +32,8 @@ func ChatCompletions(c *gin.Context) {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func CheckUsage(c *gin.Context) {
-	req, _ := http.NewRequest("GET", apiCheckUsage, nil)
+func GetCreditGrants(c *gin.Context) {
+	req, _ := http.NewRequest(http.MethodGet, apiGetCreditGrants, nil)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	resp, _ := api.Client.Do(req)
 	defer resp.Body.Close()
@@ -104,5 +104,14 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	io.Copy(c.Writer, resp.Body)
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func GetSubscription(c *gin.Context) {
+	req, _ := http.NewRequest(http.MethodGet, apiGetSubscription, nil)
+	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
+	resp, _ := api.Client.Do(req)
+	defer resp.Body.Close()
 	io.Copy(c.Writer, resp.Body)
 }

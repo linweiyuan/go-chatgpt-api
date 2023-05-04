@@ -4,7 +4,8 @@ package platform
 const (
 	apiUrl                    = "https://api.openai.com"
 	apiChatCompletions        = apiUrl + "/v1/chat/completions"
-	apiCheckUsage             = apiUrl + "/dashboard/billing/credit_grants"
+	apiGetCreditGrants        = apiUrl + "/dashboard/billing/credit_grants"
+	apiGetSubscription        = apiUrl + "/dashboard/billing/subscription"
 	platformAuthClientID      = "DRivsnm2Mu42T3KOpqdtwB3NYviHYzwD"
 	platformAuthAudience      = "https://api.openai.com/v1"
 	platformAuthRedirectURL   = "https://platform.openai.com/auth/callback"

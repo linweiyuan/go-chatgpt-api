@@ -225,6 +225,12 @@
 
 ---
 
+- 获取 `subscription` （只能传 `sessionKey`）
+
+`GET /platform/dashboard/billing/subscription`
+
+---
+
 如需设置代理，可以设置环境变量 `GO_CHATGPT_API_PROXY`，比如 `GO_CHATGPT_API_PROXY=http://127.0.0.1:20171`
 或者 `GO_CHATGPT_API_PROXY=socks5://127.0.0.1:20170`，注释掉或者留空则不启用
 

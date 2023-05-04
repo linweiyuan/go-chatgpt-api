@@ -80,7 +80,8 @@ func setupPlatformAPIs(router *gin.Engine) {
 		{
 			billingGroup := dashboardGroup.Group("/billing")
 			{
-				billingGroup.GET("/credit_grants", platform.CheckUsage)
+				billingGroup.GET("/credit_grants", platform.GetCreditGrants)
+				billingGroup.GET("/subscription", platform.GetSubscription)
 			}
 		}
 	}

@@ -44,7 +44,7 @@ func CreateConversation(c *gin.Context) {
 	}
 
 	jsonBytes, _ := json.Marshal(request)
-	req, _ := http.NewRequest("POST", apiPrefix+"/conversation", bytes.NewBuffer(jsonBytes))
+	req, _ := http.NewRequest(http.MethodPost, apiPrefix+"/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	api.InjectCookies(req)
