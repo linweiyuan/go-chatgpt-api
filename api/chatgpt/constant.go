@@ -40,6 +40,6 @@ const (
 	welcomeText      = "Welcome to ChatGPT"
 	getCookiesUrl    = "https://get-chatgpt-cookies.linweiyuan.com"
 
-	healthCheckInterval = 10
-	getCookiesInterval  = 20
+	healthCheckInterval = 15
+	getCookiesInterval  = 25
 )
