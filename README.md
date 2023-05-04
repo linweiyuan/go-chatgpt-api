@@ -158,7 +158,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- `ChatGPT` user login (currently only support ChatGPT accounts)
+- `ChatGPT` user login (`accessToken` will be returned) (currently only support ChatGPT accounts)
 
 `POST /auth/login`
 
@@ -198,7 +198,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- `platform` user login
+- `platform` user login (`sessionKey` will be returned)
 
 `POST /v1/auth/login`
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -84,5 +85,24 @@ func UserLogin(c *gin.Context) {
 		return
 	}
 
-	c.Writer.WriteString(accessToken)
+	// get session key
+	var getAccessTokenResponse GetAccessTokenResponse
+	json.Unmarshal([]byte(accessToken), &getAccessTokenResponse)
+	req, _ := http.NewRequest(http.MethodPost, dashboardLoginUrl, strings.NewReader("{}"))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", api.UserAgent)
+	req.Header.Set("Authorization", api.GetAccessToken(getAccessTokenResponse.AccessToken))
+	resp, err = api.Client.Do(req)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+		return
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getSessionKeyErrorMessage))
+		return
+	}
+
+	io.Copy(c.Writer, resp.Body)
 }

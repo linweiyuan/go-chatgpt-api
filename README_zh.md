@@ -154,7 +154,7 @@
 
 ---
 
-- `ChatGPT` 登录（目前仅支持 `ChatGPT` 账号，谷歌或微软账号没有测试）
+- `ChatGPT` 登录（返回 `accessToken`）（目前仅支持 `ChatGPT` 账号，谷歌或微软账号没有测试）
 
 `POST /auth/login`
 
@@ -194,7 +194,7 @@
 
 ---
 
-- `platform` 登录
+- `platform` 登录（返回 `sessionKey`）
 
 `POST /v1/auth/login`
 

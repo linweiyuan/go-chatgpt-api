@@ -17,6 +17,7 @@ import (
 func (user *PlatformUserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
 	urlParams := url.Values{
 		"client_id":     {platformAuthClientID},
+		"audience":      {platformAuthAudience},
 		"redirect_uri":  {platformAuthRedirectURL},
 		"scope":         {platformAuthScope},
 		"response_type": {platformAuthResponseType},
