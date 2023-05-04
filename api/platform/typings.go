@@ -67,3 +67,11 @@ type CreateEditRequest struct {
 	Temperature int    `json:"temperature,omitempty"`
 	TopP        int    `json:"top_p,omitempty"`
 }
+
+type CreateImageRequest struct {
+	Prompt         string `json:"prompt"`
+	N              int    `json:"n,omitempty"`
+	Size           string `json:"size,omitempty"`
+	ResponseFormat string `json:"response_format,omitempty"`
+	User           string `json:"user,omitempty"`
+}

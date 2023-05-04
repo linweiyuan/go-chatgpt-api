@@ -9,6 +9,7 @@ const (
 	apiCreateCompletions      = apiUrl + "/v1/completions"
 	apiCreataeChatCompletions = apiUrl + "/v1/chat/completions"
 	apiCreateEdit             = apiUrl + "/v1/edits"
+	apiCreateImage            = apiUrl + "/v1/images/generations"
 
 	apiGetCreditGrants = apiUrl + "/dashboard/billing/credit_grants"
 	apiGetSubscription = apiUrl + "/dashboard/billing/subscription"

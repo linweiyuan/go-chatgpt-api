@@ -273,6 +273,24 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
+- [Create image](https://platform.openai.com/docs/api-reference/images/create)
+
+`POST /platform/v1/images/generations`
+
+<details>
+
+```json
+{
+  "prompt": "A cute dog",
+  "n": 2,
+  "size": "1024x1024"
+}
+```
+
+</details>
+
+---
+
 - get `credit grants` (only support `sessionkey`)
 
 `GET /platform/dashboard/billing/credit_grants`
