@@ -225,6 +225,12 @@
 
 ---
 
+- [Retrieve model](https://platform.openai.com/docs/api-reference/models/retrieve)
+
+`GET /platform/v1/models/{model}`
+
+---
+
 - 获取 `credit grants` （只能传 `sessionKey`）
 
 `GET /platform/dashboard/billing/credit_grants`

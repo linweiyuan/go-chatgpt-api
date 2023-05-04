@@ -229,6 +229,12 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
+- [Retrieve model](https://platform.openai.com/docs/api-reference/models/retrieve)
+
+`GET /platform/v1/models/{model}`
+
+---
+
 - get `credit grants` (only support `sessionkey`)
 
 `GET /platform/dashboard/billing/credit_grants`

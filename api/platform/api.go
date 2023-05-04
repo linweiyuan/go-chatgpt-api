@@ -3,6 +3,7 @@ package platform
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 
@@ -33,6 +34,11 @@ func ChatCompletions(c *gin.Context) {
 
 func GetModels(c *gin.Context) {
 	handleGet(c, apiGetModels)
+}
+
+func GetModel(c *gin.Context) {
+	model := c.Param("model")
+	handleGet(c, fmt.Sprintf(apiGetModel, model))
 }
 
 func GetCreditGrants(c *gin.Context) {
