@@ -86,6 +86,20 @@ func CreateImage(c *gin.Context) {
 	io.Copy(c.Writer, resp.Body)
 }
 
+//goland:noinspection GoUnhandledErrorResult
+func CreateEmbeddings(c *gin.Context) {
+	var request CreateEmbeddingsRequest
+	c.ShouldBindJSON(&request)
+	data, _ := json.Marshal(request)
+	resp, err := handlePost(c, apiCreateEmbeddings, data, false)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+	io.Copy(c.Writer, resp.Body)
+}
+
 func GetCreditGrants(c *gin.Context) {
 	handleGet(c, apiGetCreditGrants)
 }

@@ -291,6 +291,23 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
+- [Create embeddings](https://platform.openai.com/docs/api-reference/embeddings/create)
+
+`POST /platform/v1/embeddings`
+
+<details>
+
+```json
+{
+  "model": "text-embedding-ada-002",
+  "input": "The food was delicious and the waiter..."
+}
+```
+
+</details>
+
+---
+
 - get `credit grants` (only support `sessionkey`)
 
 `GET /platform/dashboard/billing/credit_grants`

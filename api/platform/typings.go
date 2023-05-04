@@ -75,3 +75,9 @@ type CreateImageRequest struct {
 	ResponseFormat string `json:"response_format,omitempty"`
 	User           string `json:"user,omitempty"`
 }
+
+type CreateEmbeddingsRequest struct {
+	Model string `json:"model"`
+	Input string `json:"input"`
+	User  string `json:"user,omitempty"`
+}

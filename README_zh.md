@@ -287,6 +287,23 @@
 
 ---
 
+- [Create embeddings](https://platform.openai.com/docs/api-reference/embeddings/create)
+
+`POST /platform/v1/embeddings`
+
+<details>
+
+```json
+{
+  "model": "text-embedding-ada-002",
+  "input": "The food was delicious and the waiter..."
+}
+```
+
+</details>
+
+---
+
 - 获取 `credit grants` （只能传 `sessionKey`）
 
 `GET /platform/dashboard/billing/credit_grants`

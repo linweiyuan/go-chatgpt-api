@@ -10,6 +10,7 @@ const (
 	apiCreataeChatCompletions = apiUrl + "/v1/chat/completions"
 	apiCreateEdit             = apiUrl + "/v1/edits"
 	apiCreateImage            = apiUrl + "/v1/images/generations"
+	apiCreateEmbeddings       = apiUrl + "/v1/embeddings"
 
 	apiGetCreditGrants = apiUrl + "/dashboard/billing/credit_grants"
 	apiGetSubscription = apiUrl + "/dashboard/billing/subscription"
