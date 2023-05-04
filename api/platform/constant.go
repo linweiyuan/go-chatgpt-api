@@ -2,14 +2,17 @@ package platform
 
 //goland:noinspection SpellCheckingInspection
 const (
-	apiUrl                    = "https://api.openai.com"
-	apiChatCompletions        = apiUrl + "/v1/chat/completions"
-	apiListModels             = apiUrl + "/v1/models"
-	apiRetrieveModel          = apiUrl + "/v1/models/%s"
-	apiCreateCompletions      = apiUrl + "/v1/completions"
-	apiGetCreditGrants        = apiUrl + "/dashboard/billing/credit_grants"
-	apiGetSubscription        = apiUrl + "/dashboard/billing/subscription"
-	apiGetApiKeys             = apiUrl + "/dashboard/user/api_keys"
+	apiUrl = "https://api.openai.com"
+
+	apiListModels        = apiUrl + "/v1/models"
+	apiRetrieveModel     = apiUrl + "/v1/models/%s"
+	apiCreateCompletions = apiUrl + "/v1/completions"
+	apiChatCompletions   = apiUrl + "/v1/chat/completions"
+
+	apiGetCreditGrants = apiUrl + "/dashboard/billing/credit_grants"
+	apiGetSubscription = apiUrl + "/dashboard/billing/subscription"
+	apiGetApiKeys      = apiUrl + "/dashboard/user/api_keys"
+
 	platformAuthClientID      = "DRivsnm2Mu42T3KOpqdtwB3NYviHYzwD"
 	platformAuthAudience      = "https://api.openai.com/v1"
 	platformAuthRedirectURL   = "https://platform.openai.com/auth/callback"

@@ -73,10 +73,10 @@ func setupPlatformAPIs(router *gin.Engine) {
 
 		apiGroup := platformGroup.Group("/v1")
 		{
-			apiGroup.POST("/chat/completions", platform.ChatCompletions)
 			apiGroup.GET("/models", platform.ListModels)
 			apiGroup.GET("/models/:model", platform.RetrieveModel)
 			apiGroup.POST("/completions", platform.CreateCompletions)
+			apiGroup.POST("/chat/completions", platform.ChatCompletions)
 		}
 
 		dashboardGroup := platformGroup.Group("/dashboard")

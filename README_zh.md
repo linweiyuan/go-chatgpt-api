@@ -196,29 +196,6 @@
 
 ---
 
-- [Chat](https://platform.openai.com/docs/api-reference/chat)
-
-`POST /platform/v1/chat/completions`
-
-<details>
-
-```json
-{
-  "messages": [
-    {
-      "role": "user",
-      "content": "Hello World"
-    }
-  ],
-  "model": "gpt-3.5-turbo",
-  "stream": true
-}
-```
-
-</details>
-
----
-
 - [List models](https://platform.openai.com/docs/api-reference/models/list)
 
 `GET /platform/v1/models`
@@ -243,6 +220,29 @@
   "prompt": "Say this is a test",
   "max_tokens": 7,
   "temperature": 0,
+  "stream": true
+}
+```
+
+</details>
+
+---
+
+- [Create chat completion](https://platform.openai.com/docs/api-reference/chat/create)
+
+`POST /platform/v1/chat/completions`
+
+<details>
+
+```json
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello World"
+    }
+  ],
+  "model": "gpt-3.5-turbo",
   "stream": true
 }
 ```

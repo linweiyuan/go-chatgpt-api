@@ -1,16 +1,5 @@
 package platform
 
-type ChatCompletionsRequest struct {
-	Model    string                   `json:"model"`
-	Messages []ChatCompletionsMessage `json:"messages"`
-	Stream   bool                     `json:"stream"`
-}
-
-type ChatCompletionsMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
 type UserLogin struct{}
 
 type GetAccessTokenRequest struct {
@@ -31,19 +20,41 @@ type GetAccessTokenResponse struct {
 
 //goland:noinspection SpellCheckingInspection
 type CreateCompletionsRequest struct {
-	Model            string                  `json:"model"`
-	Prompt           string                  `json:"prompt,omitempty"`
-	Suffix           *string                 `json:"suffix,omitempty"`
-	MaxTokens        int                     `json:"max_tokens,omitempty"`
-	Temperature      int                     `json:"temperature,omitempty"`
-	TopP             int                     `json:"top_p,omitempty"`
-	N                int                     `json:"n,omitempty"`
-	Stream           bool                    `json:"stream,omitempty"`
-	Logprobs         *int                    `json:"logprobs,omitempty"`
-	Echo             bool                    `json:"echo,omitempty"`
-	Stop             *string                 `json:"stop,omitempty"`
-	PresencePenalty  int                     `json:"presence_penalty,omitempty"`
-	FrequencyPenalty int                     `json:"frequency_penalty,omitempty"`
-	BestOf           int                     `json:"best_of,omitempty"`
-	LogitBias        *map[string]interface{} `json:"logit_bias,omitempty"`
+	Model            string                 `json:"model"`
+	Prompt           string                 `json:"prompt,omitempty"`
+	Suffix           string                 `json:"suffix,omitempty"`
+	MaxTokens        int                    `json:"max_tokens,omitempty"`
+	Temperature      int                    `json:"temperature,omitempty"`
+	TopP             int                    `json:"top_p,omitempty"`
+	N                int                    `json:"n,omitempty"`
+	Stream           bool                   `json:"stream,omitempty"`
+	Logprobs         int                    `json:"logprobs,omitempty"`
+	Echo             bool                   `json:"echo,omitempty"`
+	Stop             string                 `json:"stop,omitempty"`
+	PresencePenalty  int                    `json:"presence_penalty,omitempty"`
+	FrequencyPenalty int                    `json:"frequency_penalty,omitempty"`
+	BestOf           int                    `json:"best_of,omitempty"`
+	LogitBias        map[string]interface{} `json:"logit_bias,omitempty"`
+	User             string                 `json:"user,omitempty"`
+}
+
+type ChatCompletionsRequest struct {
+	Model            string                   `json:"model"`
+	Messages         []ChatCompletionsMessage `json:"messages"`
+	Temperature      int                      `json:"temperature,omitempty"`
+	TopP             int                      `json:"top_p,omitempty"`
+	N                int                      `json:"n,omitempty"`
+	Stream           bool                     `json:"stream,omitempty"`
+	Stop             string                   `json:"stop,omitempty"`
+	MaxTokens        int                      `json:"max_tokens,omitempty"`
+	PresencePenalty  int                      `json:"presence_penalty,omitempty"`
+	FrequencyPenalty int                      `json:"frequency_penalty,omitempty"`
+	LogitBias        map[string]interface{}   `json:"logit_bias,omitempty"`
+	User             string                   `json:"user,omitempty"`
+}
+
+type ChatCompletionsMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+	Name    string `json:"name,omitempty"`
 }

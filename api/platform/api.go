@@ -13,20 +13,6 @@ import (
 	http "github.com/bogdanfinn/fhttp"
 )
 
-//goland:noinspection GoUnhandledErrorResult
-func ChatCompletions(c *gin.Context) {
-	var chatCompletionsRequest ChatCompletionsRequest
-	c.ShouldBindJSON(&chatCompletionsRequest)
-	data, _ := json.Marshal(chatCompletionsRequest)
-	resp, err := handlePost(c, apiChatCompletions, data)
-	if err != nil {
-		return
-	}
-
-	defer resp.Body.Close()
-	api.HandleConversationResponse(c, resp)
-}
-
 func ListModels(c *gin.Context) {
 	handleGet(c, apiListModels)
 }
@@ -42,6 +28,24 @@ func CreateCompletions(c *gin.Context) {
 	c.ShouldBindJSON(&request)
 	data, _ := json.Marshal(request)
 	resp, err := handlePost(c, apiCreateCompletions, data)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+	if request.Stream {
+		api.HandleConversationResponse(c, resp)
+	} else {
+		io.Copy(c.Writer, resp.Body)
+	}
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func ChatCompletions(c *gin.Context) {
+	var request ChatCompletionsRequest
+	c.ShouldBindJSON(&request)
+	data, _ := json.Marshal(request)
+	resp, err := handlePost(c, apiChatCompletions, data)
 	if err != nil {
 		return
 	}
