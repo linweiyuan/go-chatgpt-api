@@ -255,6 +255,24 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
+- [Create edit](https://platform.openai.com/docs/api-reference/edits/create)
+
+`POST /platform/v1/edits`
+
+<details>
+
+```json
+{
+  "model": "text-davinci-edit-001",
+  "input": "What day of the wek is it?",
+  "instruction": "Fix the spelling mistakes"
+}
+```
+
+</details>
+
+---
+
 - get `credit grants` (only support `sessionkey`)
 
 `GET /platform/dashboard/billing/credit_grants`

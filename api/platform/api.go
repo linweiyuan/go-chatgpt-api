@@ -27,7 +27,7 @@ func CreateCompletions(c *gin.Context) {
 	var request CreateCompletionsRequest
 	c.ShouldBindJSON(&request)
 	data, _ := json.Marshal(request)
-	resp, err := handlePost(c, apiCreateCompletions, data)
+	resp, err := handlePost(c, apiCreateCompletions, data, request.Stream)
 	if err != nil {
 		return
 	}
@@ -41,11 +41,11 @@ func CreateCompletions(c *gin.Context) {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func ChatCompletions(c *gin.Context) {
+func CreateChatCompletions(c *gin.Context) {
 	var request ChatCompletionsRequest
 	c.ShouldBindJSON(&request)
 	data, _ := json.Marshal(request)
-	resp, err := handlePost(c, apiChatCompletions, data)
+	resp, err := handlePost(c, apiCreataeChatCompletions, data, request.Stream)
 	if err != nil {
 		return
 	}
@@ -56,6 +56,20 @@ func ChatCompletions(c *gin.Context) {
 	} else {
 		io.Copy(c.Writer, resp.Body)
 	}
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func CreateEdit(c *gin.Context) {
+	var request CreateEditRequest
+	c.ShouldBindJSON(&request)
+	data, _ := json.Marshal(request)
+	resp, err := handlePost(c, apiCreateEdit, data, false)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+	io.Copy(c.Writer, resp.Body)
 }
 
 func GetCreditGrants(c *gin.Context) {
@@ -146,10 +160,12 @@ func handleGet(c *gin.Context, url string) {
 	io.Copy(c.Writer, resp.Body)
 }
 
-func handlePost(c *gin.Context, url string, data []byte) (*http.Response, error) {
+func handlePost(c *gin.Context, url string, data []byte, stream bool) (*http.Response, error) {
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(data))
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	req.Header.Set("Accept", "text/event-stream")
+	if stream {
+		req.Header.Set("Accept", "text/event-stream")
+	}
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := api.Client.Do(req)
 	if err != nil {

@@ -251,6 +251,24 @@
 
 ---
 
+- [Create edit](https://platform.openai.com/docs/api-reference/edits/create)
+
+`POST /platform/v1/edits`
+
+<details>
+
+```json
+{
+  "model": "text-davinci-edit-001",
+  "input": "What day of the wek is it?",
+  "instruction": "Fix the spelling mistakes"
+}
+```
+
+</details>
+
+---
+
 - 获取 `credit grants` （只能传 `sessionKey`）
 
 `GET /platform/dashboard/billing/credit_grants`

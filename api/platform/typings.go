@@ -58,3 +58,12 @@ type ChatCompletionsMessage struct {
 	Content string `json:"content"`
 	Name    string `json:"name,omitempty"`
 }
+
+type CreateEditRequest struct {
+	Model       string `json:"model"`
+	Input       string `json:"input"`
+	Instruction string `json:"instruction"`
+	N           int    `json:"n,omitempty"`
+	Temperature int    `json:"temperature,omitempty"`
+	TopP        int    `json:"top_p,omitempty"`
+}
