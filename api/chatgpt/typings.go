@@ -41,4 +41,4 @@ type PatchConversationRequest struct {
 	IsVisible bool    `json:"is_visible"`
 }
 
-type ChatGPTUserLogin struct{}
+type UserLogin struct{}

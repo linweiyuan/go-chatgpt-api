@@ -14,7 +14,7 @@ import (
 )
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *ChatGPTUserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
+func (user *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
 	params := fmt.Sprintf(
 		"callbackUrl=/&csrfToken=%s&json=true",
 		csrfToken,
@@ -40,7 +40,7 @@ func (user *ChatGPTUserLogin) GetAuthorizedUrl(csrfToken string) (string, int, e
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *ChatGPTUserLogin) GetState(authorizedUrl string) (string, int, error) {
+func (user *UserLogin) GetState(authorizedUrl string) (string, int, error) {
 	req, err := http.NewRequest(http.MethodGet, authorizedUrl, nil)
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
@@ -61,7 +61,7 @@ func (user *ChatGPTUserLogin) GetState(authorizedUrl string) (string, int, error
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *ChatGPTUserLogin) CheckUsername(state string, username string) (int, error) {
+func (user *UserLogin) CheckUsername(state string, username string) (int, error) {
 	formParams := fmt.Sprintf(
 		"state=%s&username=%s&js-available=true&webauthn-available=true&is-brave=false&webauthn-platform-available=false&action=default",
 		state,
@@ -85,7 +85,7 @@ func (user *ChatGPTUserLogin) CheckUsername(state string, username string) (int,
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *ChatGPTUserLogin) CheckPassword(state string, username string, password string) (string, int, error) {
+func (user *UserLogin) CheckPassword(state string, username string, password string) (string, int, error) {
 	formParams := fmt.Sprintf(
 		"state=%s&username=%s&password=%s&action=default",
 		state,
@@ -110,7 +110,7 @@ func (user *ChatGPTUserLogin) CheckPassword(state string, username string, passw
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat,GoUnusedParameter
-func (user *ChatGPTUserLogin) GetAccessToken(code string) (string, int, error) {
+func (user *UserLogin) GetAccessToken(code string) (string, int, error) {
 	req, err := http.NewRequest(http.MethodGet, api.AuthSessionUrl, nil)
 	req.Header.Set("User-Agent", api.UserAgent)
 	api.InjectCookies(req)

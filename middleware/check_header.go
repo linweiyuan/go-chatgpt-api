@@ -11,8 +11,8 @@ import (
 func CheckHeaderMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader(api.AuthorizationHeader) == "" &&
-			c.Request.URL.Path != "/auth/login" &&
-			c.Request.URL.Path != "/v1/auth/login" {
+			c.Request.URL.Path != "/chatgpt/auth/login" &&
+			c.Request.URL.Path != "/platform/auth/login" {
 			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage("Missing accessToken."))
 			return
 		}

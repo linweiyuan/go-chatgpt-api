@@ -1,4 +1,4 @@
-package official
+package platform
 
 type ChatCompletionsRequest struct {
 	Model    string                   `json:"model"`
@@ -11,7 +11,7 @@ type ChatCompletionsMessage struct {
 	Content string `json:"content"`
 }
 
-type PlatformUserLogin struct{}
+type UserLogin struct{}
 
 type GetAccessTokenRequest struct {
 	ClientID    string `json:"client_id"`

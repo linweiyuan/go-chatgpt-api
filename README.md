@@ -27,9 +27,30 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
+## ChatGPT APIs
+
+---
+
+- `ChatGPT` user login (`accessToken` will be returned) (currently `Google` or `Microsoft` accounts are not supported).
+
+`POST /chatgpt/login`
+
+<details>
+
+```json
+{
+  "username": "email",
+  "password": "password"
+}
+```
+
+</details>
+
+---
+
 - get conversation list
 
-`GET /conversations?offset=0&limit=20`
+`GET /chatgpt/conversations?offset=0&limit=20`
 
 `offset` defaults to 0, `limit` defaults to 20 (max 100).
 
@@ -37,13 +58,13 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 - get conversation content
 
-`GET /conversation/{conversationID}`
+`GET /chatgpt/conversation/{conversationID}`
 
 ---
 
 - create conversation
 
-`POST /conversation`
+`POST /chatgpt/conversation`
 
 <details>
 
@@ -78,7 +99,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 - generate conversation title
 
-`POST /conversation/gen_title/{conversationID}`
+`POST /chatgpt/conversation/gen_title/{conversationID}`
 
 <details>
 
@@ -94,7 +115,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 - rename conversation
 
-`PATCH /conversation/{conversationID}`
+`PATCH /chatgpt/conversation/{conversationID}`
 
 <details>
 
@@ -110,7 +131,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 - delete conversation
 
-`PATCH /conversation/{conversationID}`
+`PATCH /chatgpt/conversation/{conversationID}`
 
 <details>
 
@@ -126,7 +147,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 - delete all conversations
 
-`PATCH /conversations`
+`PATCH /chatgpt/conversations`
 
 <details>
 
@@ -142,7 +163,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 - feedback message
 
-`POST /conversation/message_feedback`
+`POST /chatgpt/conversation/message_feedback`
 
 <details>
 
@@ -158,9 +179,13 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- `ChatGPT` user login (`accessToken` will be returned) (currently only support ChatGPT accounts)
+## Platform APIs
 
-`POST /auth/login`
+---
+
+- `platform` user login (`sessionKey` will be returned)
+
+`POST /platform/login`
 
 <details>
 
@@ -175,9 +200,9 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- chat completion (apiKey)
+- chat completion (support `accessToken`, `apiKey`, `sessionKey`)
 
-`POST /v1/chat/completions`
+`POST /platform/v1/chat/completions`
 
 <details>
 
@@ -198,20 +223,9 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- `platform` user login (`sessionKey` will be returned)
+- check credit grants (only support `sessionkey`)
 
-`POST /v1/auth/login`
-
-<details>
-
-```json
-{
-  "username": "email",
-  "password": "password"
-}
-```
-
-</details>
+`GET /platform/dashboard/billing/credit_grants`
 
 ---
 

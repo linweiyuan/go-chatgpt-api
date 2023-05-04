@@ -50,7 +50,7 @@ type LoginInfo struct {
 	Password string `json:"password"`
 }
 
-type UserLogin interface {
+type AuthLogin interface {
 	GetAuthorizedUrl(csrfToken string) (string, int, error)
 	GetState(authorizedUrl string) (string, int, error)
 	CheckUsername(state string, username string) (int, error)

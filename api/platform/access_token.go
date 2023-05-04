@@ -1,4 +1,4 @@
-package official
+package platform
 
 import (
 	"encoding/json"
@@ -14,7 +14,7 @@ import (
 )
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat,GoUnusedParameter
-func (user *PlatformUserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
+func (user *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
 	urlParams := url.Values{
 		"client_id":     {platformAuthClientID},
 		"audience":      {platformAuthAudience},
@@ -22,7 +22,7 @@ func (user *PlatformUserLogin) GetAuthorizedUrl(csrfToken string) (string, int, 
 		"scope":         {platformAuthScope},
 		"response_type": {platformAuthResponseType},
 	}
-	req, _ := http.NewRequest(http.MethodGet, "https://auth0.openai.com/authorize?"+urlParams.Encode(), nil)
+	req, _ := http.NewRequest(http.MethodGet, platformAuth0Url+urlParams.Encode(), nil)
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := api.Client.Do(req)
@@ -38,13 +38,13 @@ func (user *PlatformUserLogin) GetAuthorizedUrl(csrfToken string) (string, int, 
 	return resp.Request.URL.String(), http.StatusOK, nil
 }
 
-func (user *PlatformUserLogin) GetState(authorizedUrl string) (string, int, error) {
+func (user *UserLogin) GetState(authorizedUrl string) (string, int, error) {
 	split := strings.Split(authorizedUrl, "=")
 	return split[1], http.StatusOK, nil
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *PlatformUserLogin) CheckUsername(state string, username string) (int, error) {
+func (user *UserLogin) CheckUsername(state string, username string) (int, error) {
 	formParams := fmt.Sprintf(
 		"state=%s&username=%s&js-available=true&webauthn-available=true&is-brave=false&webauthn-platform-available=false&action=default",
 		state,
@@ -67,7 +67,7 @@ func (user *PlatformUserLogin) CheckUsername(state string, username string) (int
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *PlatformUserLogin) CheckPassword(state string, username string, password string) (string, int, error) {
+func (user *UserLogin) CheckPassword(state string, username string, password string) (string, int, error) {
 	formParams := fmt.Sprintf(
 		"state=%s&username=%s&password=%s&action=default",
 		state,
@@ -91,7 +91,7 @@ func (user *PlatformUserLogin) CheckPassword(state string, username string, pass
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *PlatformUserLogin) GetAccessToken(code string) (string, int, error) {
+func (user *UserLogin) GetAccessToken(code string) (string, int, error) {
 	jsonBytes, _ := json.Marshal(GetAccessTokenRequest{
 		ClientID:    platformAuthClientID,
 		Code:        code,

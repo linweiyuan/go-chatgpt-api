@@ -1,4 +1,4 @@
-package official
+package platform
 
 import (
 	"bytes"
@@ -41,7 +41,7 @@ func CheckUsage(c *gin.Context) {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func UserLogin(c *gin.Context) {
+func Login(c *gin.Context) {
 	var loginInfo api.LoginInfo
 	if err := c.ShouldBindJSON(&loginInfo); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, api.ReturnMessage(api.ParseUserInfoErrorMessage))
@@ -52,7 +52,7 @@ func UserLogin(c *gin.Context) {
 	resp, _ := api.Client.Get(auth0LogoutUrl)
 	defer resp.Body.Close()
 
-	userLogin := new(PlatformUserLogin)
+	userLogin := new(UserLogin)
 
 	// get authorized url
 	authorizedUrl, statusCode, err := userLogin.GetAuthorizedUrl("")
