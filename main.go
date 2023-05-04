@@ -83,6 +83,11 @@ func setupPlatformAPIs(router *gin.Engine) {
 				billingGroup.GET("/credit_grants", platform.GetCreditGrants)
 				billingGroup.GET("/subscription", platform.GetSubscription)
 			}
+
+			userGroup := dashboardGroup.Group("/user")
+			{
+				userGroup.GET("/api_keys", platform.GetApiKeys)
+			}
 		}
 	}
 }

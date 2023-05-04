@@ -33,11 +33,7 @@ func ChatCompletions(c *gin.Context) {
 
 //goland:noinspection GoUnhandledErrorResult
 func GetCreditGrants(c *gin.Context) {
-	req, _ := http.NewRequest(http.MethodGet, apiGetCreditGrants, nil)
-	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	resp, _ := api.Client.Do(req)
-	defer resp.Body.Close()
-	io.Copy(c.Writer, resp.Body)
+	handleGet(c, apiGetCreditGrants)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -109,7 +105,16 @@ func Login(c *gin.Context) {
 
 //goland:noinspection GoUnhandledErrorResult
 func GetSubscription(c *gin.Context) {
-	req, _ := http.NewRequest(http.MethodGet, apiGetSubscription, nil)
+	handleGet(c, apiGetSubscription)
+}
+
+func GetApiKeys(c *gin.Context) {
+	handleGet(c, apiGetApiKeys)
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func handleGet(c *gin.Context, url string) {
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	resp, _ := api.Client.Do(req)
 	defer resp.Body.Close()

@@ -235,6 +235,12 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
+- get `api keys` (only support `sessionkey`)
+
+`GET /platform/dashboard/user/api_keys`
+
+---
+
 ### Configuration
 
 To set a proxy, you can use the environment variable `GO_CHATGPT_API_PROXY`, such
