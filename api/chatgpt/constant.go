@@ -22,6 +22,5 @@ const (
 	conversationErrorMessage404 = "The requested conversation cannot be found."
 	conversationErrorMessage413 = "The question is too large to handle."
 	conversationErrorMessage422 = "The request body is invalid."
-	conversationErrorMessage429 = "Too many requests, please try again later."
 	conversationErrorMessage500 = "Server error, please try again."
 )

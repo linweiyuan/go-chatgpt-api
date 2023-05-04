@@ -74,7 +74,10 @@ func CreateConversation(c *gin.Context) {
 			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(conversationErrorMessage422))
 			return
 		case http.StatusTooManyRequests:
-			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(conversationErrorMessage429))
+			responseMap := make(map[string]string)
+			data, _ := io.ReadAll(resp.Body)
+			json.Unmarshal(data, &responseMap)
+			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(responseMap["detail"]))
 			return
 		case http.StatusInternalServerError:
 			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(conversationErrorMessage500))
