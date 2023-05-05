@@ -86,15 +86,17 @@ func init() {
 			break
 		}
 	} else {
-		resp, _ := healthCheck()
-		defer resp.Body.Close()
-		data, _ := io.ReadAll(resp.Body)
-		if string(data) == "error code: 1020" {
-			logger.Error(accessDeniedText)
-			return
-		}
+		resp, err := healthCheck()
+		if err == nil {
+			defer resp.Body.Close()
+			data, _ := io.ReadAll(resp.Body)
+			if string(data) == "error code: 1020" {
+				logger.Error(accessDeniedText)
+				return
+			}
 
-		checkHealthCheckStatus(resp)
+			checkHealthCheckStatus(resp)
+		}
 	}
 
 	go func() {
@@ -103,7 +105,7 @@ func init() {
 			select {
 			case <-ticker.C:
 				resp, err := healthCheck()
-				if err != nil && resp.StatusCode != http.StatusOK {
+				if err != nil || resp.StatusCode != http.StatusOK {
 					getCookies()
 				}
 			}
