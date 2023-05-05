@@ -185,9 +185,8 @@ func getCookies() {
 	}
 
 	defer resp.Body.Close()
-	data, _ := io.ReadAll(resp.Body)
 	responseMap := make(map[string]string)
-	json.Unmarshal(data, &responseMap)
+	json.NewDecoder(resp.Body).Decode(&responseMap)
 	__cf_bm = responseMap["__cf_bm"]
 	if __cf_bm == "" {
 		return

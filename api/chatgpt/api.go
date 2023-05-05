@@ -152,9 +152,8 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	data, _ := io.ReadAll(resp.Body)
 	responseMap := make(map[string]string)
-	json.Unmarshal(data, &responseMap)
+	json.NewDecoder(resp.Body).Decode(&responseMap)
 
 	userLogin := new(UserLogin)
 

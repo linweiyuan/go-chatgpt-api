@@ -34,8 +34,7 @@ func (user *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
 	}
 
 	responseMap := make(map[string]string)
-	data, _ := io.ReadAll(resp.Body)
-	json.Unmarshal(data, &responseMap)
+	json.NewDecoder(resp.Body).Decode(&responseMap)
 	return responseMap["url"], http.StatusOK, nil
 }
 
