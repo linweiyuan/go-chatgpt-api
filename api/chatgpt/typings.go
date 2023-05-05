@@ -1,5 +1,12 @@
 package chatgpt
 
+//goland:noinspection GoSnakeCaseUsage
+import tls_client "github.com/bogdanfinn/tls-client"
+
+type UserLogin struct {
+	client tls_client.HttpClient
+}
+
 type CreateConversationRequest struct {
 	Action            string    `json:"action"`
 	Messages          []Message `json:"messages"`
@@ -40,5 +47,3 @@ type PatchConversationRequest struct {
 	Title     *string `json:"title"`
 	IsVisible bool    `json:"is_visible"`
 }
-
-type UserLogin struct{}

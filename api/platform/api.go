@@ -116,11 +116,13 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// hard refresh cookies
-	resp, _ := api.Client.Get(auth0LogoutUrl)
-	defer resp.Body.Close()
+	userLogin := UserLogin{
+		client: api.NewHttpClient(),
+	}
 
-	userLogin := new(UserLogin)
+	// hard refresh cookies
+	resp, _ := userLogin.client.Get(auth0LogoutUrl)
+	defer resp.Body.Close()
 
 	// get authorized url
 	authorizedUrl, statusCode, err := userLogin.GetAuthorizedUrl("")
@@ -160,7 +162,7 @@ func Login(c *gin.Context) {
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(getAccessTokenResponse.AccessToken))
-	resp, err = api.Client.Do(req)
+	resp, err = userLogin.client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
 		return

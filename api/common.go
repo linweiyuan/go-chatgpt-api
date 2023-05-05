@@ -21,8 +21,9 @@ const (
 	AuthorizationHeader                = "Authorization"
 	ContentType                        = "application/x-www-form-urlencoded"
 	UserAgent                          = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
-	LoginUsernameUrl                   = "https://auth0.openai.com/u/login/identifier?state="
-	LoginPasswordUrl                   = "https://auth0.openai.com/u/login/password?state="
+	Auth0Url                           = "https://auth0.openai.com"
+	LoginUsernameUrl                   = Auth0Url + "/u/login/identifier?state="
+	LoginPasswordUrl                   = Auth0Url + "/u/login/password?state="
 	ParseUserInfoErrorMessage          = "Failed to parse user login info."
 	GetAuthorizedUrlErrorMessage       = "Failed to get authorized url."
 	GetStateErrorMessage               = "Failed to get state."
@@ -190,4 +191,18 @@ func InjectCookies(req *http.Request) {
 	if __cf_bm != "" {
 		req.Header.Set("Cookie", "__cf_bm="+__cf_bm)
 	}
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func NewHttpClient() tls_client.HttpClient {
+	client, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
+		tls_client.WithCookieJar(tls_client.NewCookieJar()),
+	}...)
+
+	proxyUrl := os.Getenv("GO_CHATGPT_API_PROXY")
+	if proxyUrl != "" {
+		client.SetProxy(proxyUrl)
+	}
+
+	return client
 }

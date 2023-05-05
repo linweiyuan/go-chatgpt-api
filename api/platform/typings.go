@@ -1,6 +1,11 @@
 package platform
 
-type UserLogin struct{}
+//goland:noinspection GoSnakeCaseUsage
+import tls_client "github.com/bogdanfinn/tls-client"
+
+type UserLogin struct {
+	client tls_client.HttpClient
+}
 
 type GetAccessTokenRequest struct {
 	ClientID    string `json:"client_id"`

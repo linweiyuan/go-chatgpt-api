@@ -14,7 +14,7 @@ import (
 )
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
+func (userLogin *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
 	params := fmt.Sprintf(
 		"callbackUrl=/&csrfToken=%s&json=true",
 		csrfToken,
@@ -23,7 +23,7 @@ func (user *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	api.InjectCookies(req)
-	resp, err := api.Client.Do(req)
+	resp, err := userLogin.client.Do(req)
 	if err != nil {
 		return "", http.StatusInternalServerError, err
 	}
@@ -39,12 +39,11 @@ func (user *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *UserLogin) GetState(authorizedUrl string) (string, int, error) {
+func (userLogin *UserLogin) GetState(authorizedUrl string) (string, int, error) {
 	req, err := http.NewRequest(http.MethodGet, authorizedUrl, nil)
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
-	api.InjectCookies(req)
-	resp, err := api.Client.Do(req)
+	resp, err := userLogin.client.Do(req)
 	if err != nil {
 		return "", http.StatusInternalServerError, err
 	}
@@ -60,17 +59,16 @@ func (user *UserLogin) GetState(authorizedUrl string) (string, int, error) {
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *UserLogin) CheckUsername(state string, username string) (int, error) {
+func (userLogin *UserLogin) CheckUsername(state string, username string) (int, error) {
 	formParams := fmt.Sprintf(
 		"state=%s&username=%s&js-available=true&webauthn-available=true&is-brave=false&webauthn-platform-available=false&action=default",
 		state,
 		username,
 	)
-	req, err := http.NewRequest(http.MethodPost, api.LoginUsernameUrl+state, strings.NewReader(formParams))
+	req, _ := http.NewRequest(http.MethodPost, api.LoginUsernameUrl+state, strings.NewReader(formParams))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
-	api.InjectCookies(req)
-	resp, err := api.Client.Do(req)
+	resp, err := userLogin.client.Do(req)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -84,7 +82,7 @@ func (user *UserLogin) CheckUsername(state string, username string) (int, error)
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
-func (user *UserLogin) CheckPassword(state string, username string, password string) (string, int, error) {
+func (userLogin *UserLogin) CheckPassword(state string, username string, password string) (string, int, error) {
 	formParams := fmt.Sprintf(
 		"state=%s&username=%s&password=%s&action=default",
 		state,
@@ -94,26 +92,51 @@ func (user *UserLogin) CheckPassword(state string, username string, password str
 	req, err := http.NewRequest(http.MethodPost, api.LoginPasswordUrl+state, strings.NewReader(formParams))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
-	api.InjectCookies(req)
-	resp, err := api.Client.Do(req)
+	userLogin.client.SetFollowRedirect(false) // make sure the cookie is injected with host chat.openai.com
+	resp, err := userLogin.client.Do(req)
 	if err != nil {
 		return "", http.StatusInternalServerError, err
 	}
 
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK { // ChatGPT is 200
+	if resp.StatusCode == http.StatusBadRequest {
 		return "", resp.StatusCode, errors.New(api.EmailOrPasswordInvalidErrorMessage)
 	}
 
-	return "", http.StatusOK, nil
+	if resp.StatusCode == http.StatusFound {
+		req, _ := http.NewRequest(http.MethodGet, api.Auth0Url+resp.Header.Get("Location"), nil)
+		req.Header.Set("User-Agent", api.UserAgent)
+		resp, err := userLogin.client.Do(req)
+		if err != nil {
+			return "", http.StatusInternalServerError, err
+		}
+
+		defer resp.Body.Close()
+		if resp.StatusCode == http.StatusFound {
+			req, _ := http.NewRequest(http.MethodGet, resp.Header.Get("Location"), nil)
+			req.Header.Set("User-Agent", api.UserAgent)
+			api.InjectCookies(req) // if not set this, will get 403 in some IPs
+			resp, err := userLogin.client.Do(req)
+			if err != nil {
+				return "", http.StatusInternalServerError, err
+			}
+
+			defer resp.Body.Close()
+			return "", http.StatusOK, nil
+		}
+
+		return "", resp.StatusCode, errors.New(api.EmailOrPasswordInvalidErrorMessage)
+	}
+
+	return "", resp.StatusCode, nil
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat,GoUnusedParameter
-func (user *UserLogin) GetAccessToken(code string) (string, int, error) {
+func (userLogin *UserLogin) GetAccessToken(code string) (string, int, error) {
 	req, err := http.NewRequest(http.MethodGet, api.AuthSessionUrl, nil)
 	req.Header.Set("User-Agent", api.UserAgent)
 	api.InjectCookies(req)
-	resp, err := api.Client.Do(req)
+	resp, err := userLogin.client.Do(req)
 	if err != nil {
 		return "", http.StatusInternalServerError, err
 	}

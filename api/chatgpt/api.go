@@ -136,11 +136,15 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	userLogin := UserLogin{
+		client: api.NewHttpClient(),
+	}
+
 	// get csrf token
 	req, _ := http.NewRequest(http.MethodGet, csrfUrl, nil)
 	req.Header.Set("User-Agent", api.UserAgent)
 	api.InjectCookies(req)
-	resp, err := api.Client.Do(req)
+	resp, err := userLogin.client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
 		return
@@ -152,12 +156,9 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	// get authorized url
 	responseMap := make(map[string]string)
 	json.NewDecoder(resp.Body).Decode(&responseMap)
-
-	userLogin := new(UserLogin)
-
-	// get authorized url
 	authorizedUrl, statusCode, err := userLogin.GetAuthorizedUrl(responseMap["csrfToken"])
 	if err != nil {
 		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
