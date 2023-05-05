@@ -57,32 +57,10 @@ func CreateConversation(c *gin.Context) {
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		switch resp.StatusCode {
-		case http.StatusUnauthorized:
-			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(conversationErrorMessage401))
-			return
-		case http.StatusForbidden:
-			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(conversationErrorMessage403))
-			return
-		case http.StatusNotFound:
-			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(conversationErrorMessage404))
-			return
-		case http.StatusRequestEntityTooLarge:
-			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(conversationErrorMessage413))
-			return
-		case http.StatusUnprocessableEntity:
-			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(conversationErrorMessage422))
-			return
-		case http.StatusTooManyRequests:
-			responseMap := make(map[string]string)
-			data, _ := io.ReadAll(resp.Body)
-			json.Unmarshal(data, &responseMap)
-			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(responseMap["detail"]))
-			return
-		case http.StatusInternalServerError:
-			c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(conversationErrorMessage500))
-			return
-		}
+		responseMap := make(map[string]interface{})
+		json.NewDecoder(resp.Body).Decode(&responseMap)
+		c.AbortWithStatusJSON(resp.StatusCode, responseMap)
+		return
 	}
 
 	api.HandleConversationResponse(c, resp)
