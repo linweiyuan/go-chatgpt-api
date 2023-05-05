@@ -33,10 +33,7 @@ const (
 	AuthSessionUrl   = "https://chat.openai.com/api/auth/session"
 	accessDeniedText = "Access denied, please set environment variable GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535 or something like this."
 	welcomeText      = "Welcome to ChatGPT"
-	getCookiesUrl    = "https://get-chatgpt-cookies.linweiyuan.com"
-
-	healthCheckInterval = 15
-	getCookiesInterval  = 25
+	getCookiesUrl    = "https://get-chatgpt-cookies.linweiyuan.com/sse"
 )
 
 var Client tls_client.HttpClient
@@ -98,29 +95,6 @@ func init() {
 			checkHealthCheckStatus(resp)
 		}
 	}
-
-	go func() {
-		ticker := time.NewTicker(time.Minute * healthCheckInterval)
-		for {
-			select {
-			case <-ticker.C:
-				resp, err := healthCheck()
-				if err != nil || resp.StatusCode != http.StatusOK {
-					getCookies()
-				}
-			}
-		}
-	}()
-
-	go func() {
-		ticker := time.NewTicker(time.Minute * getCookiesInterval)
-		for {
-			select {
-			case <-ticker.C:
-				getCookies()
-			}
-		}
-	}()
 }
 
 func ReturnMessage(msg string) gin.H {
@@ -164,7 +138,7 @@ func checkHealthCheckStatus(resp *http.Response) {
 		logger.Info(welcomeText)
 		firstTime = false
 	} else {
-		getCookies()
+		go getCookiesSSE()
 	}
 }
 
@@ -177,7 +151,7 @@ func healthCheck() (resp *http.Response, err error) {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func getCookies() {
+func getCookiesSSE() {
 	req, _ := http.NewRequest(http.MethodGet, getCookiesUrl, nil)
 	resp, err := Client.Do(req)
 	if err != nil {
@@ -185,16 +159,26 @@ func getCookies() {
 	}
 
 	defer resp.Body.Close()
-	responseMap := make(map[string]string)
-	json.NewDecoder(resp.Body).Decode(&responseMap)
-	__cf_bm = responseMap["__cf_bm"]
-	if __cf_bm == "" {
-		return
-	}
+	reader := bufio.NewReader(resp.Body)
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
 
-	if firstTime {
-		logger.Info(welcomeText)
-		firstTime = false
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "event") || line == "" {
+			continue
+		}
+
+		responseMap := make(map[string]string)
+		json.Unmarshal([]byte(line[6:]), &responseMap)
+		__cf_bm = responseMap["__cf_bm"]
+
+		if firstTime {
+			logger.Info(welcomeText)
+			firstTime = false
+		}
 	}
 }
 
