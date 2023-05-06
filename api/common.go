@@ -162,7 +162,7 @@ func healthCheck() (resp *http.Response, err error) {
 func getCookiesSSE() {
 	req, _ := http.NewRequest(http.MethodGet, getCookiesSSEUrl, nil)
 	resp, err := Client.Do(req)
-	if err != nil {
+	if err != nil || resp.StatusCode != http.StatusOK {
 		time.Sleep(time.Second)
 		getCookiesSSE()
 		return
