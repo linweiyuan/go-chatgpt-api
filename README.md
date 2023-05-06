@@ -4,6 +4,8 @@
 
 ## A forward proxy program attempting to bypass `Cloudflare 403` and `Access Denied`.
 
+### Experimental project, with no guarantee of stability and backward compatibility, use at your own risk.
+
 | Version | Branch   | Image                              | Features                                                                                                       |
 |---------|----------|------------------------------------|----------------------------------------------------------------------------------------------------------------|
 | New     | `main`   | `linweiyuan/go-chatgpt-api:latest` | Direct connection to the `API`, only requires one container to run (excluding `warp` and `cookies`)            | 
