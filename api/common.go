@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/linweiyuan/go-chatgpt-api/env"
 	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 
 	http "github.com/bogdanfinn/fhttp"
@@ -71,6 +72,7 @@ func init() {
 			logger.Error("Failed to config proxy: " + err.Error())
 			return
 		}
+		logger.Info("GO_CHATGPT_API_PROXY:" + proxyUrl)
 
 		for {
 			resp, err := healthCheck()
@@ -115,6 +117,11 @@ func GetAccessToken(accessToken string) string {
 func HandleConversationResponse(c *gin.Context, resp *http.Response) {
 	reader := bufio.NewReader(resp.Body)
 	for {
+		if c.Request.Context().Err() != nil {
+			resp.Body.Close()
+			break
+		}
+
 		line, err := reader.ReadString('\n')
 		if err != nil {
 			break
@@ -139,6 +146,7 @@ func checkHealthCheckStatus(resp *http.Response) {
 		logger.Info(welcomeText)
 		firstTime = false
 	} else {
+		logger.Warn("checkHealthCheckStatus call getCookiesSSE")
 		go getCookiesSSE()
 	}
 }
