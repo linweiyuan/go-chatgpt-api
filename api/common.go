@@ -35,7 +35,6 @@ const (
 	AuthSessionUrl   = "https://chat.openai.com/api/auth/session"
 	accessDeniedText = "Access denied, please set environment variable GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535 or something like this."
 	welcomeText      = "Welcome to ChatGPT"
-	getCookiesSSEUrl = "https://get-chatgpt-cookies.linweiyuan.com/sse"
 )
 
 var Client tls_client.HttpClient
@@ -145,8 +144,13 @@ func checkHealthCheckStatus(resp *http.Response) {
 		logger.Info(welcomeText)
 		firstTime = false
 	} else {
-		logger.Warn("checkHealthCheckStatus call getCookiesSSE")
-		go getCookiesSSE()
+		cookiesApiUrl := os.Getenv("GO_CHATGPT_API_COOKIES_API_URL")
+		if cookiesApiUrl != "" {
+			go getCookiesSSE(cookiesApiUrl)
+		} else {
+			logger.Info(welcomeText)
+			firstTime = false
+		}
 	}
 }
 
@@ -159,12 +163,12 @@ func healthCheck() (resp *http.Response, err error) {
 }
 
 //goland:noinspection GoUnhandledErrorResult,GoUnusedFunction
-func getCookiesSSE() {
-	req, _ := http.NewRequest(http.MethodGet, getCookiesSSEUrl, nil)
+func getCookiesSSE(cookiesApiUrl string) {
+	req, _ := http.NewRequest(http.MethodGet, cookiesApiUrl, nil)
 	resp, err := Client.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
 		time.Sleep(time.Second)
-		getCookiesSSE()
+		getCookiesSSE(cookiesApiUrl)
 		return
 	}
 
@@ -191,7 +195,7 @@ func getCookiesSSE() {
 		}
 	}
 
-	getCookiesSSE()
+	getCookiesSSE(cookiesApiUrl)
 }
 
 func InjectCookies(req *http.Request) {
