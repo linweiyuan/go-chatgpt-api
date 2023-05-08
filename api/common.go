@@ -32,8 +32,9 @@ const (
 	GetAccessTokenErrorMessage         = "Failed to get access token."
 
 	healthCheckUrl       = "https://chat.openai.com/backend-api/accounts/check"
-	welcomeText          = "Welcome to ChatGPT"
+	welcomeHint          = "Welcome to ChatGPT"
 	defaultCookiesApiUrl = "https://api.linweiyuan.com/chatgpt/cookies"
+	errorHint403         = "If you still hit 403, do not raise new issue (will be closed directly without comment), change to a new clean IP or use legacy version first."
 )
 
 var Client tls_client.HttpClient
@@ -137,7 +138,7 @@ func checkHealthCheckStatus(resp *http.Response) {
 
 	defer resp.Body.Close()
 	if resp != nil && resp.StatusCode == http.StatusUnauthorized && cookiesApiUrl == "" {
-		logger.Info(welcomeText)
+		logger.Info(welcomeHint)
 		firstTime = false
 	} else {
 		if cookiesApiUrl == "" {
@@ -177,18 +178,24 @@ func getCookiesSSE(cookiesApiUrl string) {
 		}
 
 		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "event") || line == "" {
+		if strings.HasPrefix(line, "event") ||
+			strings.HasPrefix(line, "data: 20") ||
+			line == "" {
 			continue
 		}
 
-		responseMap := make(map[string]string)
-		json.Unmarshal([]byte(line[6:]), &responseMap)
-		__cf_bm = responseMap["__cf_bm"]
+		if len(line) > 6 {
+			responseMap := make(map[string]string)
+			err = json.Unmarshal([]byte(line[6:]), &responseMap)
+			if err == nil {
+				__cf_bm = responseMap["__cf_bm"]
 
-		if firstTime && __cf_bm != "" {
-			logger.Info(welcomeText)
-			logger.Error("If you still hit 403, do not raise new issue (will be closed directly without comment), change to a new clean IP or use legacy version.")
-			firstTime = false
+				if firstTime && __cf_bm != "" {
+					logger.Info(welcomeHint)
+					logger.Error(errorHint403)
+					firstTime = false
+				}
+			}
 		}
 	}
 
