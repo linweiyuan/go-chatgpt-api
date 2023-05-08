@@ -100,6 +100,12 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusBadRequest {
+		doc, _ := goquery.NewDocumentFromReader(resp.Body)
+		alert := doc.Find("#prompt-alert").Text()
+		if alert != "" {
+			return "", resp.StatusCode, errors.New(strings.TrimSpace(alert))
+		}
+
 		return "", resp.StatusCode, errors.New(api.EmailOrPasswordInvalidErrorMessage)
 	}
 
