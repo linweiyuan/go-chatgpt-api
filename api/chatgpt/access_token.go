@@ -143,7 +143,7 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat,GoUnusedParameter
 func (userLogin *UserLogin) GetAccessToken(code string) (string, int, error) {
-	req, err := http.NewRequest(http.MethodGet, api.AuthSessionUrl, nil)
+	req, err := http.NewRequest(http.MethodGet, authSessionUrl, nil)
 	req.Header.Set("User-Agent", api.UserAgent)
 	api.InjectCookies(req)
 	resp, err := userLogin.client.Do(req)

@@ -4,7 +4,6 @@ package api
 import (
 	"bufio"
 	"encoding/json"
-	"io"
 	"os"
 	"strings"
 	"time"
@@ -30,16 +29,17 @@ const (
 	GetStateErrorMessage               = "Failed to get state."
 	EmailInvalidErrorMessage           = "Email is not valid."
 	EmailOrPasswordInvalidErrorMessage = "Email or password is not correct."
-	GetAccessTokenErrorMessage         = "Failed to get access token, please try again later."
+	GetAccessTokenErrorMessage         = "Failed to get access token."
 
-	AuthSessionUrl = "https://chat.openai.com/api/auth/session"
-	welcomeText    = "Welcome to ChatGPT"
+	healthCheckUrl       = "https://chat.openai.com/backend-api/accounts/check"
+	welcomeText          = "Welcome to ChatGPT"
+	defaultCookiesApiUrl = "https://api.linweiyuan.com/chatgpt/cookies"
 )
 
 var Client tls_client.HttpClient
 
 //goland:noinspection GoSnakeCaseUsage
-var __cf_bm = "" // https://developers.cloudflare.com/fundamentals/get-started/reference/cloudflare-cookies/#__cf_bm-cookie-for-cloudflare-bot-products
+var __cf_bm = ""
 var firstTime = true
 
 type LoginInfo struct {
@@ -70,7 +70,7 @@ func init() {
 			logger.Error("Failed to config proxy: " + err.Error())
 			return
 		}
-		logger.Info("GO_CHATGPT_API_PROXY:" + proxyUrl)
+		logger.Info("GO_CHATGPT_API_PROXY: " + proxyUrl)
 
 		for {
 			resp, err := healthCheck()
@@ -133,25 +133,27 @@ func HandleConversationResponse(c *gin.Context, resp *http.Response) {
 
 //goland:noinspection GoUnhandledErrorResult
 func checkHealthCheckStatus(resp *http.Response) {
+	cookiesApiUrl := os.Getenv("GO_CHATGPT_API_COOKIES_API_URL")
+
 	defer resp.Body.Close()
-	if resp != nil && resp.StatusCode == http.StatusOK {
+	if resp != nil && resp.StatusCode == http.StatusUnauthorized && cookiesApiUrl == "" {
 		logger.Info(welcomeText)
 		firstTime = false
 	} else {
-		cookiesApiUrl := os.Getenv("GO_CHATGPT_API_COOKIES_API_URL")
-		if cookiesApiUrl != "" {
-			go getCookiesSSE(cookiesApiUrl)
+		if cookiesApiUrl == "" {
+			logger.Info("GO_CHATGPT_API_COOKIES_API_URL defaults to: " + defaultCookiesApiUrl)
+			cookiesApiUrl = defaultCookiesApiUrl
 		} else {
-			logger.Info(welcomeText)
-			firstTime = false
+			logger.Info("GO_CHATGPT_API_COOKIES_API_URL: " + cookiesApiUrl)
 		}
+
+		go getCookiesSSE(cookiesApiUrl)
 	}
 }
 
 func healthCheck() (resp *http.Response, err error) {
-	req, _ := http.NewRequest(http.MethodGet, AuthSessionUrl, nil)
+	req, _ := http.NewRequest(http.MethodGet, healthCheckUrl, nil)
 	req.Header.Set("User-Agent", UserAgent)
-	InjectCookies(req)
 	resp, err = Client.Do(req)
 	return
 }
@@ -161,7 +163,7 @@ func getCookiesSSE(cookiesApiUrl string) {
 	req, _ := http.NewRequest(http.MethodGet, cookiesApiUrl, nil)
 	resp, err := Client.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
-		time.Sleep(time.Second)
+		time.Sleep(time.Minute)
 		getCookiesSSE(cookiesApiUrl)
 		return
 	}
@@ -183,8 +185,9 @@ func getCookiesSSE(cookiesApiUrl string) {
 		json.Unmarshal([]byte(line[6:]), &responseMap)
 		__cf_bm = responseMap["__cf_bm"]
 
-		if firstTime {
+		if firstTime && __cf_bm != "" {
 			logger.Info(welcomeText)
+			logger.Error("If you still hit 403, do not raise new issue (will be closed directly without comment), change to a new clean IP or use legacy version.")
 			firstTime = false
 		}
 	}
