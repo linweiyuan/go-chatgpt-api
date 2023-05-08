@@ -32,9 +32,8 @@ const (
 	EmailOrPasswordInvalidErrorMessage = "Email or password is not correct."
 	GetAccessTokenErrorMessage         = "Failed to get access token, please try again later."
 
-	AuthSessionUrl   = "https://chat.openai.com/api/auth/session"
-	accessDeniedText = "Access denied, please set environment variable GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535 or something like this."
-	welcomeText      = "Welcome to ChatGPT"
+	AuthSessionUrl = "https://chat.openai.com/api/auth/session"
+	welcomeText    = "Welcome to ChatGPT"
 )
 
 var Client tls_client.HttpClient
@@ -88,11 +87,6 @@ func init() {
 		resp, err := healthCheck()
 		if err == nil {
 			defer resp.Body.Close()
-			data, _ := io.ReadAll(resp.Body)
-			if string(data) == "error code: 1020" {
-				logger.Error(accessDeniedText)
-				return
-			}
 
 			checkHealthCheckStatus(resp)
 		}
