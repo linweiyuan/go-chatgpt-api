@@ -35,6 +35,7 @@ const (
 	welcomeHint          = "Welcome to ChatGPT"
 	defaultCookiesApiUrl = "https://api.linweiyuan.com/chatgpt/cookies"
 	errorHint403         = "If you still hit 403, do not raise new issue (will be closed directly without comment), change to a new clean IP or use legacy version first."
+	errorHintBlock       = "You have been blocked to use cookies api because your IP is detected by Cloudflare WAF."
 )
 
 var Client tls_client.HttpClient
@@ -164,6 +165,12 @@ func getCookiesSSE(cookiesApiUrl string) {
 	req, _ := http.NewRequest(http.MethodGet, cookiesApiUrl, nil)
 	resp, err := Client.Do(req)
 	if err != nil || resp.StatusCode != http.StatusOK {
+		if resp != nil && resp.StatusCode == http.StatusForbidden {
+			logger.Error(errorHintBlock)
+			time.Sleep(time.Hour)
+			os.Exit(1)
+		}
+
 		time.Sleep(time.Minute)
 		getCookiesSSE(cookiesApiUrl)
 		return
