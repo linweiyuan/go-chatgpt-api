@@ -128,6 +128,10 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 			}
 
 			defer resp.Body.Close()
+			if resp.StatusCode != http.StatusFound {
+				return "", resp.StatusCode, errors.New(api.GetAccessTokenErrorMessage)
+			}
+
 			return "", http.StatusOK, nil
 		}
 
@@ -149,6 +153,12 @@ func (userLogin *UserLogin) GetAccessToken(code string) (string, int, error) {
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusTooManyRequests {
+			responseMap := make(map[string]string)
+			json.NewDecoder(resp.Body).Decode(&responseMap)
+			return "", resp.StatusCode, errors.New(responseMap["detail"])
+		}
+
 		return "", resp.StatusCode, errors.New(api.GetAccessTokenErrorMessage)
 	}
 
