@@ -128,11 +128,18 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 			}
 
 			defer resp.Body.Close()
-			if resp.StatusCode != http.StatusFound {
-				return "", resp.StatusCode, errors.New(api.GetAccessTokenErrorMessage)
+			if resp.StatusCode == http.StatusFound {
+				return "", http.StatusOK, nil
 			}
 
-			return "", http.StatusOK, nil
+			if resp.StatusCode == http.StatusTemporaryRedirect {
+				errorDescription := req.URL.Query().Get("error_description")
+				if errorDescription != "" {
+					return "", resp.StatusCode, errors.New(errorDescription)
+				}
+			}
+
+			return "", resp.StatusCode, errors.New(api.GetAccessTokenErrorMessage)
 		}
 
 		return "", resp.StatusCode, errors.New(api.EmailOrPasswordInvalidErrorMessage)
