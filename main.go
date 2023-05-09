@@ -13,6 +13,7 @@ import (
 
 func init() {
 	gin.ForceConsoleColor()
+	gin.SetMode(gin.ReleaseMode)
 }
 
 func main() {

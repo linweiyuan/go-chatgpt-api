@@ -356,7 +356,6 @@ services:
     ports:
       - 8080:8080
     environment:
-      - GIN_MODE=release
       - GO_CHATGPT_API_PROXY=
     restart: unless-stopped
 ```
@@ -379,7 +378,6 @@ services:
     ports:
       - 8080:8080
     environment:
-      - GIN_MODE=release
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
     depends_on:
       - chatgpt-proxy-server-warp
