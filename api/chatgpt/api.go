@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 
@@ -152,6 +153,15 @@ func Login(c *gin.Context) {
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusForbidden {
+			doc, _ := goquery.NewDocumentFromReader(resp.Body)
+			alert := doc.Find(".message").Text()
+			if alert != "" {
+				c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(strings.TrimSpace(alert)))
+				return
+			}
+		}
+
 		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getCsrfTokenErrorMessage))
 		return
 	}
