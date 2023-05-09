@@ -87,11 +87,13 @@ func init() {
 		}
 	} else {
 		resp, err := healthCheck()
-		if err == nil {
-			defer resp.Body.Close()
-
-			checkHealthCheckStatus(resp)
+		if err != nil {
+			logger.Error("Health check failed: " + err.Error())
+			os.Exit(1)
 		}
+
+		defer resp.Body.Close()
+		checkHealthCheckStatus(resp)
 	}
 }
 
