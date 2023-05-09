@@ -119,7 +119,12 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 
 		defer resp.Body.Close()
 		if resp.StatusCode == http.StatusFound {
-			req, _ := http.NewRequest(http.MethodGet, resp.Header.Get("Location"), nil)
+			location := resp.Header.Get("Location")
+			if strings.HasPrefix(location, "/u/mfa-otp-challenge") {
+				return "", http.StatusBadRequest, errors.New("Login with two-factor authentication enabled is not supported currently.")
+			}
+
+			req, _ := http.NewRequest(http.MethodGet, location, nil)
 			req.Header.Set("User-Agent", api.UserAgent)
 			api.InjectCookies(req) // if not set this, will get 403 in some IPs
 			resp, err := userLogin.client.Do(req)
