@@ -391,6 +391,10 @@ services:
     restart: unless-stopped
 ```
 
+If you know what `teams-enroll-token` is and want to set its value, you can do so through the environment variable `TEAMS_ENROLL_TOKEN`. 
+
+---
+
 If you want to make sure the image is always latest, try this:
 
 ```yaml

@@ -305,7 +305,7 @@
 </details>
 
 ---
- 
+
 - [List files](https://platform.openai.com/docs/api-reference/files/list)
 
 `GET /platform/v1/files`
@@ -379,6 +379,10 @@ services:
       - LOG_LEVEL=OFF
     restart: unless-stopped
 ```
+
+如果你知道什么是 `teams-enroll-token`，可以通过环境变量 `TEAMS_ENROLL_TOKEN` 设置它的值
+
+---
 
 如果要让运行的镜像总是保持最新，可以配合这个一起使用：
 
