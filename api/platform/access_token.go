@@ -83,7 +83,7 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 	}
 
 	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusForbidden { // platform is 403
+	if resp.StatusCode != http.StatusOK {
 		return "", resp.StatusCode, errors.New(api.EmailOrPasswordInvalidErrorMessage)
 	}
 
