@@ -48,7 +48,7 @@ func CreateConversation(c *gin.Context) {
 	req, _ := http.NewRequest(http.MethodPost, apiPrefix+"/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	api.InjectCookies(req)
+	injectCookies(req)
 	req.Header.Set("Accept", "text/event-stream")
 	resp, err := api.Client.Do(req)
 	if err != nil {
@@ -144,7 +144,7 @@ func Login(c *gin.Context) {
 	// get csrf token
 	req, _ := http.NewRequest(http.MethodGet, csrfUrl, nil)
 	req.Header.Set("User-Agent", api.UserAgent)
-	api.InjectCookies(req)
+	injectCookies(req)
 	resp, err := userLogin.client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
@@ -211,7 +211,7 @@ func handleGet(c *gin.Context, url string, errorMessage string) {
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	api.InjectCookies(req)
+	injectCookies(req)
 	resp, err := api.Client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
@@ -243,7 +243,7 @@ func handlePatch(c *gin.Context, url string, requestBody string, errorMessage st
 func handlePostOrPatch(c *gin.Context, req *http.Request, errorMessage string) {
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	api.InjectCookies(req)
+	injectCookies(req)
 	resp, err := api.Client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))

@@ -22,7 +22,7 @@ func (userLogin *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, err
 	req, err := http.NewRequest(http.MethodPost, promptLoginUrl, strings.NewReader(params))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
-	api.InjectCookies(req)
+	injectCookies(req)
 	resp, err := userLogin.client.Do(req)
 	if err != nil {
 		return "", http.StatusInternalServerError, err
@@ -126,7 +126,7 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 
 			req, _ := http.NewRequest(http.MethodGet, location, nil)
 			req.Header.Set("User-Agent", api.UserAgent)
-			api.InjectCookies(req) // if not set this, will get 403 in some IPs
+			injectCookies(req) // if not set this, will get 403 in some IPs
 			resp, err := userLogin.client.Do(req)
 			if err != nil {
 				return "", http.StatusInternalServerError, err
@@ -157,7 +157,7 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 func (userLogin *UserLogin) GetAccessToken(code string) (string, int, error) {
 	req, err := http.NewRequest(http.MethodGet, authSessionUrl, nil)
 	req.Header.Set("User-Agent", api.UserAgent)
-	api.InjectCookies(req)
+	injectCookies(req)
 	resp, err := userLogin.client.Do(req)
 	if err != nil {
 		return "", http.StatusInternalServerError, err

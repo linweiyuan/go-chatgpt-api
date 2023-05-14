@@ -47,3 +47,9 @@ type PatchConversationRequest struct {
 	Title     *string `json:"title"`
 	IsVisible bool    `json:"is_visible"`
 }
+
+type Cookie struct {
+	Name   string `json:"name"`
+	Value  string `json:"value"`
+	Expiry int64  `json:"expiry"`
+}
