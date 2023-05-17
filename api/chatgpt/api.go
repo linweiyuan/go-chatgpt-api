@@ -206,6 +206,34 @@ func Login(c *gin.Context) {
 	c.Writer.WriteString(accessToken)
 }
 
+func Fallback(c *gin.Context) {
+	method := c.Request.Method
+	url := apiPrefix + c.Request.URL.Path
+	queryParams := c.Request.URL.Query().Encode()
+	if queryParams != "" {
+		url += "?" + queryParams
+	}
+
+	var requestBody string
+	if c.Request.Method == http.MethodPost || c.Request.Method == http.MethodPatch {
+		body, _ := io.ReadAll(c.Request.Body)
+		requestBody = string(body)
+	}
+
+	c.Status(http.StatusOK)
+
+	switch method {
+	case http.MethodGet:
+		handleGet(c, url, fallbackErrorMessage)
+	case http.MethodPost:
+		handlePost(c, url, requestBody, fallbackErrorMessage)
+	case http.MethodPatch:
+		handlePatch(c, url, requestBody, fallbackErrorMessage)
+	default:
+		c.JSON(http.StatusMethodNotAllowed, gin.H{"message": fallbackMethodNotAllowedMessage})
+	}
+}
+
 //goland:noinspection GoUnhandledErrorResult
 func handleGet(c *gin.Context, url string, errorMessage string) {
 	req, _ := http.NewRequest(http.MethodGet, url, nil)
