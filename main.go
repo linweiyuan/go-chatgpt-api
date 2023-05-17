@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
@@ -23,6 +25,8 @@ func main() {
 	setupChatGPTAPIs(router)
 
 	setupPlatformAPIs(router)
+
+	router.NoRoute(handleFallbackRoute)
 
 	port := os.Getenv("GO_CHATGPT_API_PORT")
 	if port == "" {
@@ -97,5 +101,17 @@ func setupPlatformAPIs(router *gin.Engine) {
 				userGroup.GET("/api_keys", platform.GetApiKeys)
 			}
 		}
+	}
+}
+
+func handleFallbackRoute(c *gin.Context) {
+	path := c.Request.URL.Path
+
+	if strings.HasPrefix(path, "/chatgpt") {
+		trimmedPath := strings.TrimPrefix(path, "/chatgpt")
+		c.Request.URL.Path = trimmedPath
+		chatgpt.Fallback(c)
+	} else {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Route not found"})
 	}
 }
