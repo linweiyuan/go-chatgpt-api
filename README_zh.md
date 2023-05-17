@@ -382,6 +382,16 @@ services:
 
 如果你知道什么是 `teams-enroll-token`，可以通过环境变量 `TEAMS_ENROLL_TOKEN` 设置它的值
 
+然后利用这条命令来检查是否生效:
+
+`docker-compose exec chatgpt-proxy-server-warp warp-cli --accept-tos account | awk 'NR==1'`
+
+```
+Account type: Free （没有生效）
+
+Account type: Team （设置正常）
+```
+
 ---
 
 如果要让运行的镜像总是保持最新，可以配合这个一起使用：

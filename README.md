@@ -391,7 +391,17 @@ services:
     restart: unless-stopped
 ```
 
-If you know what `teams-enroll-token` is and want to set its value, you can do so through the environment variable `TEAMS_ENROLL_TOKEN`. 
+If you know what `teams-enroll-token` is and want to set its value, you can do so through the environment variable `TEAMS_ENROLL_TOKEN`.
+
+Run this command to check the result:
+
+`docker-compose exec chatgpt-proxy-server-warp warp-cli --accept-tos account | awk 'NR==1'`
+
+```
+Account type: Free (wrong)
+
+Account type: Team (correct)
+```
 
 ---
 
