@@ -20,6 +20,7 @@ func init() {
 
 func main() {
 	router := gin.Default()
+	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.CheckHeaderMiddleware())
 
 	setupChatGPTAPIs(router)

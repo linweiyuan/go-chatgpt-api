@@ -7,7 +7,6 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/api"
 )
 
-//goland:noinspection GoUnhandledErrorResult
 func CheckHeaderMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader(api.AuthorizationHeader) == "" &&
