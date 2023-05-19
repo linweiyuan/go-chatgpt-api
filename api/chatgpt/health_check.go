@@ -129,6 +129,7 @@ func injectCookies(req *http.Request) {
 	}
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func keepCheckingCookies() {
 	for {
 		now := time.Now()
@@ -161,7 +162,12 @@ func keepCheckingCookies() {
 					go func() {
 						for {
 							time.Sleep(time.Minute * 25)
-							resp, _ := healthCheck()
+							resp, err := healthCheck()
+							if err != nil {
+								logger.Error("Health check failed: " + err.Error())
+								os.Exit(1)
+							}
+
 							for _, cookie := range resp.Cookies() {
 								if cookie.Name == cookieName {
 									cfbm = &Cookie{
@@ -170,6 +176,7 @@ func keepCheckingCookies() {
 									}
 								}
 							}
+							resp.Body.Close()
 						}
 					}()
 				}

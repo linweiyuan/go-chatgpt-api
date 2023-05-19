@@ -27,6 +27,7 @@ const (
 	EmailInvalidErrorMessage           = "Email is not valid."
 	EmailOrPasswordInvalidErrorMessage = "Email or password is not correct."
 	GetAccessTokenErrorMessage         = "Failed to get access token."
+	defaultTimeoutSeconds              = 300 // 5 minutes
 )
 
 var Client tls_client.HttpClient
@@ -48,7 +49,7 @@ type AuthLogin interface {
 func init() {
 	Client, _ = tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
-		tls_client.WithTimeoutSeconds(0),
+		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
 	}...)
 }
 
