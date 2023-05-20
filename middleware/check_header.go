@@ -12,7 +12,7 @@ func CheckHeaderMiddleware() gin.HandlerFunc {
 		if c.GetHeader(api.AuthorizationHeader) == "" &&
 			c.Request.URL.Path != "/chatgpt/login" &&
 			c.Request.URL.Path != "/platform/login" {
-			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage("Missing accessToken."))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.ReturnMessage("Missing accessToken."))
 			return
 		}
 
