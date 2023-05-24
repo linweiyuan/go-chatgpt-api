@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"io"
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 
 	http "github.com/bogdanfinn/fhttp"

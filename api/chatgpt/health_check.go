@@ -3,8 +3,10 @@ package chatgpt
 import (
 	"encoding/json"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 
@@ -70,7 +72,15 @@ func checkHealthCheckStatus(resp *http.Response) {
 		logger.Info(readyHint)
 		firstTime = false
 	} else {
-		getCookies()
+		doc, _ := goquery.NewDocumentFromReader(resp.Body)
+		alert := doc.Find(".message").Text()
+		if alert != "" {
+			logger.Error(strings.TrimSpace(alert) + " by OpenAI.")
+			time.Sleep(time.Hour)
+			os.Exit(1)
+		} else {
+			getCookies()
+		}
 	}
 }
 
