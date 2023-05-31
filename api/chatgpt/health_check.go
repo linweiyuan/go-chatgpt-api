@@ -18,8 +18,9 @@ const (
 	readyHint            = "Service go-chatgpt-api is ready."
 	defaultCookiesApiUrl = "https://chatgpt.linweiyuan.com/cookies"
 	errorHint403         = "If you still hit 403, do not raise new issue (will be closed directly without comment), change to a new clean IP or use legacy version first."
-	errorHintBlock       = "You have been blocked to use cookies api because your IP is detected by Cloudflare WAF."
+	errorHintBlock       = "It appears that you have been blocked from using the cookies API due to your IP being detected by Cloudflare WAF. Please send your IP address to root@linweiyuan.com so that it can be added to the whitelist. More details: https://github.com/linweiyuan/go-chatgpt-api/issues/134"
 	cookieName           = "__cf_bm"
+	sleepHours           = 8760 // 365 days
 )
 
 //goland:noinspection GoSnakeCaseUsage
@@ -76,7 +77,7 @@ func checkHealthCheckStatus(resp *http.Response) {
 		alert := doc.Find(".message").Text()
 		if alert != "" {
 			logger.Error(strings.TrimSpace(alert) + " by OpenAI.")
-			time.Sleep(time.Hour)
+			time.Sleep(time.Hour * sleepHours)
 			os.Exit(1)
 		} else {
 			getCookies()
@@ -99,7 +100,7 @@ func getCookies() {
 	if err != nil || resp.StatusCode != http.StatusOK {
 		if resp != nil && resp.StatusCode == http.StatusForbidden {
 			logger.Error(errorHintBlock)
-			time.Sleep(time.Hour)
+			time.Sleep(time.Hour * sleepHours)
 			os.Exit(1)
 		}
 
