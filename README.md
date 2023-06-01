@@ -1,39 +1,28 @@
 # go-chatgpt-api
 
-### [中文文档](README_zh.md)
+### [English Doc](README_en.md)
 
-## A forward proxy program attempting to bypass `Cloudflare 403` and `Access Denied`.
+## 一个尝试绕过 `Cloudflare 403` 和 `Access denied` 的正向代理程序
 
-### Experimental project, with no guarantee of stability and backward compatibility, use at your own risk.
-
-| Version | Branch   | Image                              | Features                                                                                                       |
-|---------|----------|------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| New     | `main`   | `linweiyuan/go-chatgpt-api:latest` | Direct connection to the `API`, only requires one container to run (excluding `warp` and `cookies`)            | 
-| Old     | `legacy` | `linweiyuan/go-chatgpt-api:legacy` | Based on the browser, requires an additional `linweiyuan/chatgpt-proxy-server` image to run (excluding `warp`) | 
-
-The new version is the trend, but if there are problems with the new version, you can switch back to the old version.
-The old version is still usable and based on the browser, which should be an ultimate solution that can be used for a
-long time (although it may consume slightly more resources).
+### 实验性质项目，不保证稳定性和向后兼容，使用风险自负
 
 ---
 
-### Troubleshooting
+### 使用的过程中遇到问题应该如何解决
 
-English countries does not have the "Great Firewall", so many issues are gone.
-
-More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
+汇总贴：https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-### Supported APIs (URL and parameters are mostly consistent with the official website, with slight modifications to some interfaces).
+### 支持的 API（URL 和参数基本保持着和官网一致，部分接口有些许改动）
 
 ---
 
-## ChatGPT APIs
+### ChatGPT APIs
 
 ---
 
-- `ChatGPT` user login (`accessToken` will be returned) (currently `Google` or `Microsoft` accounts are not supported).
+- `ChatGPT` 登录（返回 `accessToken`）（目前仅支持 `ChatGPT` 账号，谷歌或微软账号没有测试）
 
 `POST /chatgpt/login`
 
@@ -50,21 +39,21 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- get conversation list
+- 获取对话列表（历史记录）
 
 `GET /chatgpt/conversations?offset=0&limit=20`
 
-`offset` defaults to 0, `limit` defaults to 20 (max 100).
+`offset` 不传默认为 0, `limit` 不传默认为 20 (最大为 100)
 
 ---
 
-- get conversation content
+- 获取对话内容
 
 `GET /chatgpt/conversation/{conversationID}`
 
 ---
 
-- create conversation
+- 新建对话
 
 `POST /chatgpt/conversation`
 
@@ -99,7 +88,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- generate conversation title
+- 生成对话标题
 
 `POST /chatgpt/conversation/gen_title/{conversationID}`
 
@@ -115,7 +104,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- rename conversation
+- 重命名对话标题
 
 `PATCH /chatgpt/conversation/{conversationID}`
 
@@ -131,7 +120,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- delete conversation
+- 删除单个对话
 
 `PATCH /chatgpt/conversation/{conversationID}`
 
@@ -147,7 +136,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- delete all conversations
+- 删除所有对话
 
 `PATCH /chatgpt/conversations`
 
@@ -163,7 +152,7 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- feedback message
+- 消息反馈
 
 `POST /chatgpt/conversation/message_feedback`
 
@@ -181,11 +170,11 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-## Platform APIs
+### Platform APIs
 
 ---
 
-- `platform` user login (`sessionKey` will be returned)
+- `platform` 登录（返回 `sessionKey`）
 
 `POST /platform/login`
 
@@ -316,37 +305,33 @@ More details: https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-- get `credit grants` (only support `sessionkey`)
+- 获取 `credit grants` （只能传 `sessionKey`）
 
 `GET /platform/dashboard/billing/credit_grants`
 
 ---
 
-- get `subscription` (only support `sessionkey`)
+- 获取 `subscription` （只能传 `sessionKey`）
 
 `GET /platform/dashboard/billing/subscription`
 
 ---
 
-- get `api keys` (only support `sessionkey`)
+- 获取 `api keys` （只能传 `sessionKey`）
 
 `GET /platform/dashboard/user/api_keys`
 
 ---
 
-### Configuration
+如需设置代理，可以设置环境变量 `GO_CHATGPT_API_PROXY`，比如 `GO_CHATGPT_API_PROXY=http://127.0.0.1:20171`
+或者 `GO_CHATGPT_API_PROXY=socks5://127.0.0.1:20170`，注释掉或者留空则不启用
 
-To set a proxy, you can use the environment variable `GO_CHATGPT_API_PROXY`, such
-as `GO_CHATGPT_API_PROXY=http://127.0.0.1:20171` or `GO_CHATGPT_API_PROXY=socks5://127.0.0.1:20170`. If it is commented
-out or left blank, it will not be enabled.
-
-To use with `warp`: `GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535`. Since the scenario that requires
-setting up `warp` can directly access the `ChatGPT` website by default, using the same variable will not cause
-conflicts.
+如需配合 `warp` 使用：`GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535`，因为需要设置 `warp`
+的场景已经默认可以直接访问 `ChatGPT` 官网，因此共用一个变量不冲突
 
 ---
 
-`docker-compose.yaml`:
+`docker-compose` 配置文件：
 
 ```yaml
 services:
@@ -360,15 +345,12 @@ services:
     restart: unless-stopped
 ```
 
-I only develop and test on `Arch Linux`, which is a `rolling` release version, meaning that everything on the system is
-`up-to-date`. If you encounter a `yaml` error while using it, you can add `version: '3'` in front of `services:`.
+我仅仅在 `Arch Linux` 上进行开发和测试，这是一个滚动更新的版本，意味着系统上所有东西都是最新的，如果你在使用的过程中 `yaml`
+报错了，则可以加上 `version: '3'` 在 `services:` 前面
 
-If you encounter an `Access denied` error, but your server is indeed
-in [Supported countries and territories](https://platform.openai.com/docs/supported-countries), try this
-configuration (it is not guaranteed to solve the problem, for example, if your server is in `Zone A`, but `Zone A`
-is not on the list of supported countries, even if you use `warp` to change to a `Cloudflare IP`, the result will still
-be
-`403`):
+如果遇到 `Access denied`，但是你的服务器确实在[被支持的国家或地区](https://platform.openai.com/docs/supported-countries)
+，尝试一下这个配置（不保证能解决问题，比如你的服务器在 A 地区，但 A 地不在支持列表内，即使用上了 `warp` 后是 `Cloudflare IP`
+，结果也会是 `403`）：
 
 ```yaml
 services:
@@ -391,21 +373,21 @@ services:
     restart: unless-stopped
 ```
 
-If you know what `teams-enroll-token` is and want to set its value, you can do so through the environment variable `TEAMS_ENROLL_TOKEN`.
+如果你知道什么是 `teams-enroll-token`，可以通过环境变量 `TEAMS_ENROLL_TOKEN` 设置它的值
 
-Run this command to check the result:
+然后利用这条命令来检查是否生效:
 
 `docker-compose exec chatgpt-proxy-server-warp warp-cli --accept-tos account | awk 'NR==1'`
 
 ```
-Account type: Free (wrong)
+Account type: Free （没有生效）
 
-Account type: Team (correct)
+Account type: Team （设置正常）
 ```
 
 ---
 
-If you want to make sure the image is always latest, try this:
+如果要让运行的镜像总是保持最新，可以配合这个一起使用：
 
 ```yaml
 services:
@@ -420,8 +402,21 @@ services:
 
 <details>
 
-<summary>AD</summary>
+<summary>广告位</summary>
 
-`Vultr` Referral Program: https://www.vultr.com/?ref=7372562
+`Vultr` 推荐链接：https://www.vultr.com/?ref=7372562
+
+---
+
+个人微信（没有验证，谁都能加，添加即通过，不用打招呼，直接把问题发出来，日常和私人问题不聊，不进群；可以解答程序使用问题，但最好自己要有一定的基础；可以远程调试，仅限 `SSH`
+或`ToDesk`，但不保证能解决）：
+
+![](https://linweiyuan.github.io/about/mmqrcode.png)
+
+---
+
+微信赞赏码（经济条件允许的可以考虑支持下）：
+
+![](https://linweiyuan.github.io/about/mm_reward_qrcode.png)
 
 </details>
