@@ -17,7 +17,7 @@ const (
 	healthCheckUrl       = "https://chat.openai.com/backend-api/accounts/check"
 	readyHint            = "Service go-chatgpt-api is ready."
 	defaultCookiesApiUrl = "https://chatgpt.linweiyuan.com/cookies"
-	errorHint403         = "If you still hit 403, do not raise new issue (will be closed directly without comment), change to a new clean IP or use legacy version first."
+	errorHint403         = "If you still hit 403, do not raise new issue (will be closed directly without comment), change to a new clean IP or use other alternatives."
 	errorHintBlock       = "It appears that you have been blocked from using the cookies API due to your IP being detected by Cloudflare WAF. Please send your IP address to root@linweiyuan.com so that it can be added to the whitelist. More details: https://github.com/linweiyuan/go-chatgpt-api/issues/134"
 	cookieName           = "__cf_bm"
 	sleepHours           = 8760 // 365 days
