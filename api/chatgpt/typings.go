@@ -15,7 +15,6 @@ type CreateConversationRequest struct {
 	ConversationID    *string   `json:"conversation_id"`
 	TimezoneOffsetMin int       `json:"timezone_offset_min"`
 	VariantPurpose    string    `json:"variant_purpose"`
-	ContinueText      string    `json:"continue_text"`
 }
 
 type Message struct {
