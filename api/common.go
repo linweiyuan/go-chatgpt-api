@@ -50,6 +50,7 @@ func init() {
 	Client, _ = tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
 		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
+		tls_client.WithClientProfile(tls_client.Firefox_110),
 	}...)
 }
 
@@ -95,6 +96,7 @@ func HandleConversationResponse(c *gin.Context, resp *http.Response) {
 func NewHttpClient() tls_client.HttpClient {
 	client, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
+		tls_client.WithClientProfile(tls_client.Firefox_110),
 	}...)
 
 	proxyUrl := os.Getenv("GO_CHATGPT_API_PROXY")
