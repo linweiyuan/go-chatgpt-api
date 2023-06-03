@@ -50,7 +50,7 @@ func init() {
 	Client, _ = tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
 		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
-		tls_client.WithClientProfile(tls_client.Firefox_110),
+		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
 }
 
@@ -92,11 +92,11 @@ func HandleConversationResponse(c *gin.Context, resp *http.Response) {
 	}
 }
 
-//goland:noinspection GoUnhandledErrorResult
+//goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
 func NewHttpClient() tls_client.HttpClient {
 	client, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
-		tls_client.WithClientProfile(tls_client.Firefox_110),
+		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
 
 	proxyUrl := os.Getenv("GO_CHATGPT_API_PROXY")
