@@ -69,6 +69,8 @@ func GetAccessToken(accessToken string) string {
 
 //goland:noinspection GoUnhandledErrorResult
 func HandleConversationResponse(c *gin.Context, resp *http.Response) {
+	c.Writer.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
+
 	reader := bufio.NewReader(resp.Body)
 	for {
 		if c.Request.Context().Err() != nil {
