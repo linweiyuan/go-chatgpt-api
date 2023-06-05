@@ -86,3 +86,8 @@ type CreateEmbeddingsRequest struct {
 	Input string `json:"input"`
 	User  string `json:"user,omitempty"`
 }
+
+type CreateModerationRequest struct {
+	Model string `json:"model"`
+	Input string `json:"input"`
+}

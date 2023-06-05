@@ -14,6 +14,7 @@ const (
 	apiCreateImage            = apiUrl + "/v1/images/generations"
 	apiCreateEmbeddings       = apiUrl + "/v1/embeddings"
 	apiListFiles              = apiUrl + "/v1/files"
+	apiCreateModeration       = apiUrl + "/v1/moderations"
 
 	apiGetCreditGrants = apiUrl + "/dashboard/billing/credit_grants"
 	apiGetSubscription = apiUrl + "/dashboard/billing/subscription"

@@ -299,6 +299,23 @@
 
 ---
 
+- [Create moderations](https://platform.openai.com/docs/api-reference/moderations/create)
+
+`POST /platform/v1/moderations`
+
+<details>
+
+```json
+{
+  "model": "text-moderation-stable",
+  "input": "I want to kill them."
+}
+```
+
+</details>
+
+---
+
 - [List files](https://platform.openai.com/docs/api-reference/files/list)
 
 `GET /platform/v1/files`
