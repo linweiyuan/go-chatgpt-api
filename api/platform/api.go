@@ -100,6 +100,19 @@ func CreateEmbeddings(c *gin.Context) {
 	io.Copy(c.Writer, resp.Body)
 }
 
+func CreateModeration(c *gin.Context) {
+	var request CreateModerationRequest
+	c.ShouldBindJSON(&request)
+	data, _ := json.Marshal(request)
+	resp, err := handlePost(c, apiCreateModeration, data, false)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+	io.Copy(c.Writer, resp.Body)
+}
+
 func ListFiles(c *gin.Context) {
 	handleGet(c, apiListFiles)
 }
