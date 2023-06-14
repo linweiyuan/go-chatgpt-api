@@ -28,16 +28,15 @@ Accept: text/event-stream
       "content": {
         "content_type": "text",
         "parts": [
-          "who are you?"
+          "hello"
         ]
       },
       "metadata": {}
     }
   ],
-  "model": "text-davinci-002-render-sha",
+  "model": "gpt-4",
   "timezone_offset_min": -480,
-  "history_and_training_disabled": false,
-  "arkose_token": null
+  "history_and_training_disabled": false
 }
 
 > {%
@@ -45,3 +44,11 @@ Accept: text/event-stream
         client.log(data.toString());
     })
 %}
+
+### get models
+GET http://127.0.0.1:8080/chatgpt/models
+Authorization: Bearer {{accessToken}}
+
+### check account
+GET http://127.0.0.1:8080/chatgpt/accounts/check
+Authorization: Bearer {{accessToken}}

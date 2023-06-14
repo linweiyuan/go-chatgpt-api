@@ -14,7 +14,7 @@ type CreateConversationRequest struct {
 	ParentMessageID   string    `json:"parent_message_id"`
 	ConversationID    *string   `json:"conversation_id"`
 	TimezoneOffsetMin int       `json:"timezone_offset_min"`
-	VariantPurpose    string    `json:"variant_purpose"`
+	ArkoseToken       string    `json:"arkose_token"`
 }
 
 type Message struct {

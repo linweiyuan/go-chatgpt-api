@@ -3,6 +3,7 @@ package chatgpt
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 
@@ -40,8 +41,23 @@ func CreateConversation(c *gin.Context) {
 	if request.Messages[0].Author.Role == "" {
 		request.Messages[0].Author.Role = defaultRole
 	}
-	if request.VariantPurpose == "" {
-		request.VariantPurpose = "none"
+
+	if request.Model == gpt4Model {
+		formParams := fmt.Sprintf(
+			"public_key=%s",
+			gpt4PublicKey,
+		)
+		req, _ := http.NewRequest(http.MethodPost, gpt4TokenUrl, strings.NewReader(formParams))
+		req.Header.Set("Content-Type", api.ContentType)
+		resp, err := api.Client.Do(req)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+			return
+		}
+
+		responseMap := make(map[string]string)
+		json.NewDecoder(resp.Body).Decode(&responseMap)
+		request.ArkoseToken = responseMap["token"]
 	}
 
 	jsonBytes, _ := json.Marshal(request)
