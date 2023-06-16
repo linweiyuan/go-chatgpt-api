@@ -17,6 +17,15 @@ type CreateConversationRequest struct {
 	ArkoseToken       string    `json:"arkose_token"`
 }
 
+type ContinueConversationRequest struct {
+	Action            string    `json:"action"`
+	Model             string    `json:"model"`
+	ParentMessageID   string    `json:"parent_message_id"`
+	ConversationID    *string   `json:"conversation_id"`
+	TimezoneOffsetMin int       `json:"timezone_offset_min"`
+	ArkoseToken       string    `json:"arkose_token"`
+}
+
 type Message struct {
 	Author  Author  `json:"author"`
 	Content Content `json:"content"`
