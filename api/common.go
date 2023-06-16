@@ -6,6 +6,8 @@ import (
 	"os"
 	"strings"
 
+	"encoding/json"
+
 	"github.com/gin-gonic/gin"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 
@@ -68,8 +70,15 @@ func GetAccessToken(accessToken string) string {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func HandleConversationResponse(c *gin.Context, resp *http.Response) {
-	c.Writer.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
+func HandleConversationResponse(c *gin.Context, resp *http.Response) (bool, string, string) {
+	Status := false
+	ParentMessageID := ""
+	oldpart := c.GetString("oldpart")
+	part := ""
+
+	if len(oldpart) == 0 {
+		c.Writer.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
+	}
 
 	reader := bufio.NewReader(resp.Body)
 	for {
@@ -89,9 +98,82 @@ func HandleConversationResponse(c *gin.Context, resp *http.Response) {
 			continue
 		}
 
+		// if len(oldpart) > 0 {
+		// 	logger.Info(fmt.Sprintf("HandleConversationResponseContinue: %s", line))
+		// }
+
+		if Status {
+			continue
+		}
+
+		if strings.HasPrefix(line, "[DONE]") {
+
+		} else {
+			if len(oldpart) > 0 {
+				var result map[string]interface{}
+				err := json.Unmarshal([]byte(line[6:]), &result)
+				if err == nil {
+					message := result["message"].(map[string]interface{})
+					content := message["content"].(map[string]interface{})
+					parts := content["parts"].([]interface{})
+					part = parts[0].(string)
+
+					parts[0] = oldpart + part
+					// message["id"] = c.GetString("msg_id")
+					// metadata := message["metadata"].(map[string]interface{})
+					// metadata["message_type"] = "next"
+
+					resultJSON, err2 := json.Marshal(result)
+					if err2 == nil {
+						line = "data: " + string(resultJSON)
+						// logger.Info(fmt.Sprintf("HandleConversationResponseAddon: %s", line))
+					}
+				}
+			} else {
+
+			}
+		}
+
 		c.Writer.Write([]byte(line + "\n\n"))
 		c.Writer.Flush()
+
+		if strings.HasPrefix(line, "[DONE]") {
+			continue
+		}
+
+		data := line[6:]
+		var result map[string]interface{}
+		err2 := json.Unmarshal([]byte(data), &result)
+		if err2 != nil {
+			continue
+		}
+		message := result["message"].(map[string]interface{})
+		status := message["status"].(string)
+
+		if status == "finished_successfully" {
+			if message["metadata"] != nil {
+				metadata := message["metadata"].(map[string]interface{})
+				if metadata["finish_details"] != nil {
+					finishDetails := metadata["finish_details"].(map[string]interface{})
+					finishType := finishDetails["type"].(string)
+					if finishType == "max_tokens" {
+						// logger.Info(fmt.Sprintf("finish_details中type的值: %s", finishType))
+						// logger.Info(fmt.Sprintf("HandleConversationResponse: %s", line))
+						content := message["content"].(map[string]interface{})
+						parts := content["parts"].([]interface{})
+						part = parts[0].(string)
+						Status = true
+						ParentMessageID = message["id"].(string)
+
+						if len(oldpart) == 0 {
+							c.Set("msg_id", ParentMessageID)
+						}
+					}
+				}
+			}
+		}
 	}
+	return Status, ParentMessageID, part
 }
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection

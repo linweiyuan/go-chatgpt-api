@@ -10,6 +10,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
+	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 
 	http "github.com/bogdanfinn/fhttp"
 )
@@ -61,6 +62,7 @@ func CreateConversation(c *gin.Context) {
 	}
 
 	jsonBytes, _ := json.Marshal(request)
+	logger.Info(fmt.Sprintf("ConversationRequest: %s", jsonBytes))
 	req, _ := http.NewRequest(http.MethodPost, apiPrefix+"/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
@@ -71,15 +73,77 @@ func CreateConversation(c *gin.Context) {
 		return
 	}
 
-	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		responseMap := make(map[string]interface{})
 		json.NewDecoder(resp.Body).Decode(&responseMap)
 		c.AbortWithStatusJSON(resp.StatusCode, responseMap)
+		resp.Body.Close()
+		return
+	}
+	c.Set("oldpart", "")
+	Status, ParentMessageID, part := api.HandleConversationResponse(c, resp)
+	if Status {
+		resp.Body.Close()
+		ContinueConversation(c, *request.ConversationID, ParentMessageID, request.Model, part)
+	} else {
+		resp.Body.Close()
+	}
+}
+
+func ContinueConversation(c *gin.Context, conversationID string, parentMessageID string, model string, oldpart string) {
+	var request ContinueConversationRequest
+
+	request.ConversationID = &conversationID
+	request.ParentMessageID = parentMessageID
+	request.Model = model
+	request.Action = "continue"
+
+	if request.Model == gpt4Model {
+		formParams := fmt.Sprintf(
+			"public_key=%s",
+			gpt4PublicKey,
+		)
+		req, _ := http.NewRequest(http.MethodPost, gpt4TokenUrl, strings.NewReader(formParams))
+		req.Header.Set("Content-Type", api.ContentType)
+		resp, err := api.Client.Do(req)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+			return
+		}
+
+		responseMap := make(map[string]string)
+		json.NewDecoder(resp.Body).Decode(&responseMap)
+		request.ArkoseToken = responseMap["token"]
+	}
+
+	jsonBytes, _ := json.Marshal(request)
+	logger.Info(fmt.Sprintf("ContinueConversationRequest: %s", jsonBytes))
+	req, _ := http.NewRequest(http.MethodPost, apiPrefix+"/conversation", bytes.NewBuffer(jsonBytes))
+	req.Header.Set("User-Agent", api.UserAgent)
+	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
+	req.Header.Set("Accept", "text/event-stream")
+	resp, err := api.Client.Do(req)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
 		return
 	}
 
-	api.HandleConversationResponse(c, resp)
+	if resp.StatusCode != http.StatusOK {
+		responseMap := make(map[string]interface{})
+		json.NewDecoder(resp.Body).Decode(&responseMap)
+		c.AbortWithStatusJSON(resp.StatusCode, responseMap)
+		resp.Body.Close()
+		return
+	}
+
+	c.Set("oldpart", oldpart)
+	Status, ParentMessageID, part := api.HandleConversationResponse(c, resp)
+	if Status {
+		resp.Body.Close()
+		ContinueConversation(c, *request.ConversationID, ParentMessageID, request.Model, part)
+	} else {
+		resp.Body.Close()
+	}
 }
 
 //goland:noinspection GoUnhandledErrorResult
