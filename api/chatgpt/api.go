@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
@@ -41,21 +43,7 @@ func CreateConversation(c *gin.Context) {
 	}
 
 	if request.Model == gpt4Model || request.Model == gpt4BrowsingModel || request.Model == gpt4PluginsModel {
-		formParams := fmt.Sprintf(
-			"public_key=%s",
-			gpt4PublicKey,
-		)
-		req, _ := http.NewRequest(http.MethodPost, gpt4TokenUrl, strings.NewReader(formParams))
-		req.Header.Set("Content-Type", api.ContentType)
-		resp, err := api.Client.Do(req)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
-			return
-		}
-
-		responseMap := make(map[string]string)
-		json.NewDecoder(resp.Body).Decode(&responseMap)
-		request.ArkoseToken = responseMap["token"]
+		request.ArkoseToken = fmt.Sprintf(arkoseTokenTemplate, generateRandomString(17), generateRandomString(10), gpt4ArkoseTokenPublicKey, generateRandomNumber())
 	}
 
 	resp, done := sendConversationRequest(c, request)
@@ -372,4 +360,24 @@ func handlePostOrPatch(c *gin.Context, req *http.Request, errorMessage string) {
 	}
 
 	io.Copy(c.Writer, resp.Body)
+}
+
+//goland:noinspection SpellCheckingInspection
+func generateRandomString(length int) string {
+	rand.NewSource(time.Now().UnixNano())
+
+	charset := "0123456789abcdefghijklmnopqrstuvwxyz"
+	result := make([]byte, length)
+
+	for i := 0; i < length; i++ {
+		randomIndex := rand.Intn(len(charset))
+		result[i] = charset[randomIndex]
+	}
+
+	return string(result)
+}
+
+func generateRandomNumber() int {
+	rand.NewSource(time.Now().UnixNano())
+	return rand.Intn(100) + 1
 }
