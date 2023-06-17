@@ -1,6 +1,7 @@
 package platform
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -34,7 +35,7 @@ func CreateCompletions(c *gin.Context) {
 
 	defer resp.Body.Close()
 	if request.Stream {
-		api.HandleConversationResponse(c, resp)
+		handleCompletionsResponse(c, resp)
 	} else {
 		io.Copy(c.Writer, resp.Body)
 	}
@@ -52,9 +53,36 @@ func CreateChatCompletions(c *gin.Context) {
 
 	defer resp.Body.Close()
 	if request.Stream {
-		api.HandleConversationResponse(c, resp)
+		handleCompletionsResponse(c, resp)
 	} else {
 		io.Copy(c.Writer, resp.Body)
+	}
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func handleCompletionsResponse(c *gin.Context, resp *http.Response) {
+	c.Writer.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
+
+	reader := bufio.NewReader(resp.Body)
+	for {
+		if c.Request.Context().Err() != nil {
+			break
+		}
+
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
+
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "event") ||
+			strings.HasPrefix(line, "data: 20") ||
+			line == "" {
+			continue
+		}
+
+		c.Writer.Write([]byte(line + "\n\n"))
+		c.Writer.Flush()
 	}
 }
 
@@ -100,6 +128,7 @@ func CreateEmbeddings(c *gin.Context) {
 	io.Copy(c.Writer, resp.Body)
 }
 
+//goland:noinspection GoUnhandledErrorResult
 func CreateModeration(c *gin.Context) {
 	var request CreateModerationRequest
 	c.ShouldBindJSON(&request)

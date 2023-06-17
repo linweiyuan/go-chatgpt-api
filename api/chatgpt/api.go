@@ -1,6 +1,7 @@
 package chatgpt
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -38,9 +39,6 @@ func CreateConversation(c *gin.Context) {
 	if request.ConversationID == nil || *request.ConversationID == "" {
 		request.ConversationID = nil
 	}
-	if request.Messages[0].Author.Role == "" {
-		request.Messages[0].Author.Role = defaultRole
-	}
 
 	if request.Model == gpt4Model || request.Model == gpt4BrowsingModel || request.Model == gpt4PluginsModel {
 		formParams := fmt.Sprintf(
@@ -60,6 +58,16 @@ func CreateConversation(c *gin.Context) {
 		request.ArkoseToken = responseMap["token"]
 	}
 
+	resp, done := sendConversationRequest(c, request)
+	if done {
+		return
+	}
+
+	handleConversationResponse(c, resp, request)
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func sendConversationRequest(c *gin.Context, request CreateConversationRequest) (*http.Response, bool) {
 	jsonBytes, _ := json.Marshal(request)
 	req, _ := http.NewRequest(http.MethodPost, apiPrefix+"/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", api.UserAgent)
@@ -68,18 +76,85 @@ func CreateConversation(c *gin.Context) {
 	resp, err := api.Client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
-		return
+		return nil, true
 	}
 
-	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		responseMap := make(map[string]interface{})
 		json.NewDecoder(resp.Body).Decode(&responseMap)
 		c.AbortWithStatusJSON(resp.StatusCode, responseMap)
-		return
+		return nil, true
 	}
 
-	api.HandleConversationResponse(c, resp)
+	return resp, false
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func handleConversationResponse(c *gin.Context, resp *http.Response, request CreateConversationRequest) {
+	c.Writer.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
+
+	isMaxTokens := false
+	continueParentMessageID := ""
+	continueConversationID := ""
+
+	defer resp.Body.Close()
+	reader := bufio.NewReader(resp.Body)
+	for {
+		if c.Request.Context().Err() != nil {
+			break
+		}
+
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
+
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "event") ||
+			strings.HasPrefix(line, "data: 20") ||
+			line == "" {
+			continue
+		}
+
+		responseJson := line[6:]
+		if strings.HasPrefix(responseJson, "[DONE]") && isMaxTokens {
+			continue
+		}
+
+		// no need to unmarshal every time, but if response content has this "max_tokens", need to further check
+		if strings.TrimSpace(responseJson) != "" && strings.Contains(responseJson, responseTypeMaxTokens) {
+			var createConversationResponse CreateConversationResponse
+			json.Unmarshal([]byte(responseJson), &createConversationResponse)
+			message := createConversationResponse.Message
+			if message.Metadata.FinishDetails.Type == responseTypeMaxTokens && createConversationResponse.Message.Status == responseStatusFinishedSuccessfully {
+				isMaxTokens = true
+				continueParentMessageID = message.ID
+				continueConversationID = createConversationResponse.ConversationID
+			}
+		}
+
+		c.Writer.Write([]byte(line + "\n\n"))
+		c.Writer.Flush()
+	}
+
+	if isMaxTokens {
+		var continueConversationRequest = CreateConversationRequest{
+			ArkoseToken:                request.ArkoseToken,
+			HistoryAndTrainingDisabled: request.HistoryAndTrainingDisabled,
+			Model:                      request.Model,
+			TimezoneOffsetMin:          request.TimezoneOffsetMin,
+
+			Action:          actionContinue,
+			ParentMessageID: continueParentMessageID,
+			ConversationID:  &continueConversationID,
+		}
+		resp, done := sendConversationRequest(c, continueConversationRequest)
+		if done {
+			return
+		}
+
+		handleConversationResponse(c, resp, continueConversationRequest)
+	}
 }
 
 //goland:noinspection GoUnhandledErrorResult
