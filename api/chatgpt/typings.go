@@ -13,6 +13,7 @@ type CreateConversationRequest struct {
 	Model             string    `json:"model"`
 	ParentMessageID   string    `json:"parent_message_id"`
 	ConversationID    *string   `json:"conversation_id"`
+	PluginIDs         []string  `json:"plugin_ids"`
 	TimezoneOffsetMin int       `json:"timezone_offset_min"`
 	ArkoseToken       string    `json:"arkose_token"`
 }
