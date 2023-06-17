@@ -42,7 +42,7 @@ func CreateConversation(c *gin.Context) {
 		request.Messages[0].Author.Role = defaultRole
 	}
 
-	if request.Model == gpt4Model {
+	if request.Model == gpt4Model || request.Model == gpt4BrowsingModel || request.Model == gpt4PluginsModel {
 		formParams := fmt.Sprintf(
 			"public_key=%s",
 			gpt4PublicKey,
