@@ -26,6 +26,8 @@ func main() {
 	setupChatGPTAPIs(router)
 	setupPlatformAPIs(router)
 
+	router.NoRoute(api.Proxy)
+
 	router.GET("/healthCheck", api.HealthCheck)
 
 	port := os.Getenv("GO_CHATGPT_API_PORT")
@@ -49,7 +51,6 @@ func setupChatGPTAPIs(router *gin.Engine) {
 			conversationGroup.POST("", chatgpt.CreateConversation)
 		}
 	}
-	router.NoRoute(api.Proxy)
 }
 
 func setupPlatformAPIs(router *gin.Engine) {
@@ -63,5 +64,4 @@ func setupPlatformAPIs(router *gin.Engine) {
 			apiGroup.POST("/completions", platform.CreateCompletions)
 		}
 	}
-	router.NoRoute(api.Proxy)
 }
