@@ -2,6 +2,7 @@ package api
 
 //goland:noinspection GoSnakeCaseUsage
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"math/rand"
@@ -99,7 +100,13 @@ func Proxy(c *gin.Context) {
 	// if not set, will return 404
 	c.Status(http.StatusOK)
 
-	req, _ := http.NewRequest(method, url, nil)
+	var req *http.Request
+	if method == http.MethodGet {
+		req, _ = http.NewRequest(http.MethodGet, url, nil)
+	} else {
+		body, _ := io.ReadAll(c.Request.Body)
+		req, _ = http.NewRequest(method, url, bytes.NewReader(body))
+	}
 	req.Header.Set("User-Agent", UserAgent)
 	req.Header.Set("Authorization", GetAccessToken(c.GetHeader(AuthorizationHeader)))
 	resp, err := Client.Do(req)
