@@ -12,11 +12,11 @@ GET {{baseUrl}}/chatgpt/backend-api/conversations?offset=0&limit=3&order=updated
 Authorization: Bearer {{accessToken}}
 
 ### get conversation
-GET {{baseUrl}}/chatgpt/conversation/0af6e438-0611-4f38-83de-8f8373a647f8
+GET {{baseUrl}}/chatgpt/backend-api/conversation/id
 Authorization: Bearer {{accessToken}}
 
 ### create conversation
-POST {{baseUrl}}/chatgpt/conversation
+POST {{baseUrl}}/chatgpt/backend-api/conversation
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 Accept: text/event-stream
@@ -44,21 +44,20 @@ Accept: text/event-stream
 }
 
 ### get models
-GET {{baseUrl}}/chatgpt/models?history_and_training_disabled=false
+GET {{baseUrl}}/chatgpt/backend-api/models?history_and_training_disabled=false
 Authorization: Bearer {{accessToken}}
 
 ### check account
-GET {{baseUrl}}/chatgpt/accounts/check
+GET {{baseUrl}}/chatgpt/backend-api/accounts/check
 Authorization: Bearer {{accessToken}}
 
 ### check account v4
-GET {{baseUrl}}/chatgpt/accounts/check
+GET {{baseUrl}}/chatgpt/backend-api/accounts/check/v4-2023-04-27
 Authorization: Bearer {{accessToken}}
 
 ### get settings beta features
-GET {{baseUrl}}/chatgpt/settings/beta_features
+GET {{baseUrl}}/chatgpt/backend-api/settings/beta_features
 Authorization: Bearer {{accessToken}}
 
-### get conversation limit
+### get conversation limit (no need to pass access token)
 GET {{baseUrl}}/chatgpt/public-api/conversation_limit
-Authorization: Bearer {{accessToken}}

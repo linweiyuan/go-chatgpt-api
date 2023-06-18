@@ -1,5 +1,5 @@
 ### login
-POST http://127.0.0.1:8080/chatgpt/login
+POST {{baseUrl}}/chatgpt/login
 Content-Type: application/json
 
 {
@@ -8,11 +8,15 @@ Content-Type: application/json
 }
 
 ### get conversations
-GET http://127.0.0.1:8080/chatgpt/conversations
+GET {{baseUrl}}/chatgpt/backend-api/conversations?offset=0&limit=3&order=updated
+Authorization: Bearer {{accessToken}}
+
+### get conversation
+GET {{baseUrl}}/chatgpt/backend-api/conversation/id
 Authorization: Bearer {{accessToken}}
 
 ### create conversation
-POST http://127.0.0.1:8080/chatgpt/conversation
+POST {{baseUrl}}/chatgpt/backend-api/conversation
 Authorization: Bearer {{accessToken}}
 Content-Type: application/json
 Accept: text/event-stream
@@ -39,20 +43,21 @@ Accept: text/event-stream
   "history_and_training_disabled": false
 }
 
-> {%
-    response.body.onEachLine((data) => {
-        client.log(data.toString());
-    })
-%}
-
 ### get models
-GET http://127.0.0.1:8080/chatgpt/models
+GET {{baseUrl}}/chatgpt/backend-api/models?history_and_training_disabled=false
 Authorization: Bearer {{accessToken}}
 
 ### check account
-GET http://127.0.0.1:8080/chatgpt/accounts/check
+GET {{baseUrl}}/chatgpt/backend-api/accounts/check
+Authorization: Bearer {{accessToken}}
+
+### check account v4
+GET {{baseUrl}}/chatgpt/backend-api/accounts/check/v4-2023-04-27
 Authorization: Bearer {{accessToken}}
 
 ### get settings beta features
-GET http://127.0.0.1:8080/chatgpt/settings/beta_features
+GET {{baseUrl}}/chatgpt/backend-api/settings/beta_features
 Authorization: Bearer {{accessToken}}
+
+### get conversation limit (no need to pass access token)
+GET {{baseUrl}}/chatgpt/public-api/conversation_limit

@@ -20,11 +20,20 @@ POST {{baseUrl}}/platform/v1/chat/completions
 Content-Type: application/json
 Authorization: Bearer {{apiKey}}
 
-{  
+{
   "model": "gpt-3.5-turbo",
-  "messages": [{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Hello!"}],
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "Hello!"
+    }
+  ],
   "stream": true
-} 
+}
 
 ### Create completion
 POST {{baseUrl}}/platform/v1/completions
@@ -37,16 +46,16 @@ Authorization: Bearer {{apiKey}}
   "max_tokens": 7,
   "temperature": 0,
   "stream": true
-} 
+}
 
 ### get user api_keys
-GET http://127.0.0.1:8080/platform/dashboard/user/api_keys
+GET {{baseUrl}}/platform/dashboard/user/api_keys
 Authorization: Bearer {{apiKey}}
 
 ### get billing credit_grants
-GET http://127.0.0.1:8080/platform/dashboard/billing/credit_grants
+GET {{baseUrl}}/platform/dashboard/billing/credit_grants
 Authorization: Bearer {{apiKey}}
 
 ### get billing subscription
-GET http://127.0.0.1:8080/platform/dashboard/billing/subscription
+GET {{baseUrl}}/platform/dashboard/billing/subscription
 Authorization: Bearer {{apiKey}}
