@@ -2,6 +2,7 @@ package chatgpt
 
 //goland:noinspection SpellCheckingInspection
 const (
+	defaultRole           = "user"
 	parseJsonErrorMessage = "Failed to parse json request body."
 
 	csrfUrl                  = "https://chat.openai.com/api/auth/csrf"

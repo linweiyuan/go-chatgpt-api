@@ -8,15 +8,15 @@ type UserLogin struct {
 }
 
 type CreateConversationRequest struct {
-	Action                     string     `json:"action"`
-	Messages                   *[]Message `json:"messages"`
-	Model                      string     `json:"model"`
-	ParentMessageID            string     `json:"parent_message_id"`
-	ConversationID             *string    `json:"conversation_id"`
-	PluginIDs                  []string   `json:"plugin_ids"`
-	TimezoneOffsetMin          int        `json:"timezone_offset_min"`
-	ArkoseToken                string     `json:"arkose_token"`
-	HistoryAndTrainingDisabled bool       `json:"history_and_training_disabled"`
+	Action                     string    `json:"action"`
+	Messages                   []Message `json:"messages"`
+	Model                      string    `json:"model"`
+	ParentMessageID            string    `json:"parent_message_id"`
+	ConversationID             *string   `json:"conversation_id"`
+	PluginIDs                  []string  `json:"plugin_ids"`
+	TimezoneOffsetMin          int       `json:"timezone_offset_min"`
+	ArkoseToken                string    `json:"arkose_token"`
+	HistoryAndTrainingDisabled bool      `json:"history_and_training_disabled"`
 }
 
 type Message struct {

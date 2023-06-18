@@ -102,6 +102,12 @@ func CreateConversation(c *gin.Context) {
 		request.ConversationID = nil
 	}
 
+	if len(request.Messages) != 0 {
+		if request.Messages[0].Author.Role == "" {
+			request.Messages[0].Author.Role = defaultRole
+		}
+	}
+
 	if request.Model == gpt4Model || request.Model == gpt4BrowsingModel || request.Model == gpt4PluginsModel {
 		request.ArkoseToken = fmt.Sprintf(arkoseTokenTemplate, api.GenerateRandomString(17), api.GenerateRandomString(10), gpt4ArkoseTokenPublicKey, api.GenerateRandomNumber())
 	}
