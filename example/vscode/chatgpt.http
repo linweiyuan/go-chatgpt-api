@@ -1,0 +1,64 @@
+### login
+POST {{baseUrl}}/chatgpt/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+### get conversations
+GET {{baseUrl}}/chatgpt/backend-api/conversations?offset=0&limit=3&order=updated
+Authorization: Bearer {{accessToken}}
+
+### get conversation
+GET {{baseUrl}}/chatgpt/conversation/0af6e438-0611-4f38-83de-8f8373a647f8
+Authorization: Bearer {{accessToken}}
+
+### create conversation
+POST {{baseUrl}}/chatgpt/conversation
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+Accept: text/event-stream
+
+{
+  "action": "next",
+  "messages": [
+    {
+      "id": "{{$guid}}",
+      "author": {
+        "role": "user"
+      },
+      "content": {
+        "content_type": "text",
+        "parts": [
+          "hello"
+        ]
+      },
+      "metadata": {}
+    }
+  ],
+  "model": "gpt-4",
+  "timezone_offset_min": -480,
+  "history_and_training_disabled": false
+}
+
+### get models
+GET {{baseUrl}}/chatgpt/models?history_and_training_disabled=false
+Authorization: Bearer {{accessToken}}
+
+### check account
+GET {{baseUrl}}/chatgpt/accounts/check
+Authorization: Bearer {{accessToken}}
+
+### check account v4
+GET {{baseUrl}}/chatgpt/accounts/check
+Authorization: Bearer {{accessToken}}
+
+### get settings beta features
+GET {{baseUrl}}/chatgpt/settings/beta_features
+Authorization: Bearer {{accessToken}}
+
+### get conversation limit
+GET {{baseUrl}}/chatgpt/public-api/conversation_limit
+Authorization: Bearer {{accessToken}}

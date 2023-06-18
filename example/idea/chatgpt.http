@@ -52,3 +52,7 @@ Authorization: Bearer {{accessToken}}
 ### check account
 GET http://127.0.0.1:8080/chatgpt/accounts/check
 Authorization: Bearer {{accessToken}}
+
+### get settings beta features
+GET http://127.0.0.1:8080/chatgpt/settings/beta_features
+Authorization: Bearer {{accessToken}}

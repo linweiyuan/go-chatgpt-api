@@ -2,16 +2,28 @@ package api
 
 //goland:noinspection GoSnakeCaseUsage
 import (
+	"encoding/json"
+	"io"
+	"math/rand"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 
+	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
 )
 
+//goland:noinspection SpellCheckingInspection
 const (
+	ChatGPTApiPrefix    = "/chatgpt"
+	ChatGPTApiUrlPrefix = "https://chat.openai.com"
+
+	PlatformApiPrefix    = "/platform"
+	PlatformApiUrlPrefix = "https://api.openai.com"
+
 	defaultErrorMessageKey             = "errorMessage"
 	AuthorizationHeader                = "Authorization"
 	ContentType                        = "application/x-www-form-urlencoded"
@@ -52,19 +64,6 @@ func init() {
 	}...)
 }
 
-func ReturnMessage(msg string) gin.H {
-	return gin.H{
-		defaultErrorMessageKey: msg,
-	}
-}
-
-func GetAccessToken(accessToken string) string {
-	if !strings.HasPrefix(accessToken, "Bearer") {
-		return "Bearer " + accessToken
-	}
-	return accessToken
-}
-
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
 func NewHttpClient() tls_client.HttpClient {
 	client, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
@@ -78,4 +77,75 @@ func NewHttpClient() tls_client.HttpClient {
 	}
 
 	return client
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func Proxy(c *gin.Context) {
+	url := c.Request.URL.Path
+	if strings.Contains(url, ChatGPTApiPrefix) {
+		url = strings.ReplaceAll(url, ChatGPTApiPrefix, ChatGPTApiUrlPrefix)
+	} else {
+		url = strings.ReplaceAll(url, PlatformApiPrefix, PlatformApiUrlPrefix)
+	}
+
+	method := c.Request.Method
+	queryParams := c.Request.URL.Query().Encode()
+	if queryParams != "" {
+		url += "?" + queryParams
+	}
+
+	// if not set, will return 404
+	c.Status(http.StatusOK)
+
+	req, _ := http.NewRequest(method, url, nil)
+	req.Header.Set("User-Agent", UserAgent)
+	req.Header.Set("Authorization", GetAccessToken(c.GetHeader(AuthorizationHeader)))
+	resp, err := Client.Do(req)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, ReturnMessage(err.Error()))
+		return
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		responseMap := make(map[string]interface{})
+		json.NewDecoder(resp.Body).Decode(&responseMap)
+		c.AbortWithStatusJSON(resp.StatusCode, responseMap)
+		return
+	}
+
+	io.Copy(c.Writer, resp.Body)
+}
+
+func ReturnMessage(msg string) gin.H {
+	return gin.H{
+		defaultErrorMessageKey: msg,
+	}
+}
+
+func GetAccessToken(accessToken string) string {
+	if !strings.HasPrefix(accessToken, "Bearer") {
+		return "Bearer " + accessToken
+	}
+	return accessToken
+}
+
+//goland:noinspection SpellCheckingInspection
+func GenerateRandomString(length int) string {
+	rand.NewSource(time.Now().UnixNano())
+
+	charset := "0123456789abcdefghijklmnopqrstuvwxyz"
+	result := make([]byte, length)
+
+	for i := 0; i < length; i++ {
+		randomIndex := rand.Intn(len(charset))
+		result[i] = charset[randomIndex]
+	}
+
+	return string(result)
+}
+
+func GenerateRandomNumber() int {
+	rand.NewSource(time.Now().UnixNano())
+	return rand.Intn(100) + 1
 }

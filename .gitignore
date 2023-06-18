@@ -2,4 +2,4 @@
 .env
 go-chatgpt-api
 undetected_chromedriver
-example/http-client.private.env.json
+example/idea/http-client.private.env.json

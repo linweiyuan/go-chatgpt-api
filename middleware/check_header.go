@@ -7,12 +7,13 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/api"
 )
 
+//goland:noinspection SpellCheckingInspection
 func CheckHeaderMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader(api.AuthorizationHeader) == "" &&
 			c.Request.URL.Path != "/chatgpt/login" &&
 			c.Request.URL.Path != "/platform/login" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, api.ReturnMessage("Missing accessToken."))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.ReturnMessage("Hello World."))
 			return
 		}
 

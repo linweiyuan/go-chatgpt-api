@@ -2,18 +2,7 @@ package chatgpt
 
 //goland:noinspection SpellCheckingInspection
 const (
-	apiPrefix                       = "https://chat.openai.com/backend-api"
-	getConversationsErrorMessage    = "Failed to get conversations."
-	generateTitleErrorMessage       = "Failed to generate title."
-	getContentErrorMessage          = "Failed to get content."
-	updateConversationErrorMessage  = "Failed to update conversation."
-	clearConversationsErrorMessage  = "Failed to clear conversations."
-	feedbackMessageErrorMessage     = "Failed to add feedback."
-	getModelsErrorMessage           = "Failed to get models."
-	getAccountCheckErrorMessage     = "Check failed." // Placeholder. Never encountered.
-	parseJsonErrorMessage           = "Failed to parse json request body."
-	fallbackErrorMessage            = "Fallback failed."
-	fallbackMethodNotAllowedMessage = "Fallback method not allowed."
+	parseJsonErrorMessage = "Failed to parse json request body."
 
 	csrfUrl                  = "https://chat.openai.com/api/auth/csrf"
 	promptLoginUrl           = "https://chat.openai.com/api/auth/signin/auth0?prompt=login"
