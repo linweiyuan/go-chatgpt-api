@@ -171,7 +171,7 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 		}
 
 		responseJson := line[6:]
-		if strings.HasPrefix(responseJson, "[DONE]") && isMaxTokens {
+		if strings.HasPrefix(responseJson, "[DONE]") && isMaxTokens && request.AutoContinue {
 			continue
 		}
 
