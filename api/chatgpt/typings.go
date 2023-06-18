@@ -17,6 +17,7 @@ type CreateConversationRequest struct {
 	TimezoneOffsetMin          int       `json:"timezone_offset_min"`
 	ArkoseToken                string    `json:"arkose_token"`
 	HistoryAndTrainingDisabled bool      `json:"history_and_training_disabled"`
+	AutoContinue               bool      `json:"auto_continue"`
 }
 
 type Message struct {

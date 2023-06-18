@@ -191,7 +191,7 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 		c.Writer.Flush()
 	}
 
-	if isMaxTokens {
+	if isMaxTokens && request.AutoContinue {
 		var continueConversationRequest = CreateConversationRequest{
 			ArkoseToken:                request.ArkoseToken,
 			HistoryAndTrainingDisabled: request.HistoryAndTrainingDisabled,
