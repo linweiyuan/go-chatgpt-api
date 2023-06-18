@@ -12,7 +12,8 @@ func CheckHeaderMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader(api.AuthorizationHeader) == "" &&
 			c.Request.URL.Path != "/chatgpt/login" &&
-			c.Request.URL.Path != "/platform/login" {
+			c.Request.URL.Path != "/platform/login" &&
+			c.Request.URL.Path != "/healthCheck" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, api.ReturnMessage("Hello World."))
 			return
 		}

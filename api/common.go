@@ -9,11 +9,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/docker/docker/api/types"
 	"github.com/gin-gonic/gin"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
+	docker_client "github.com/docker/docker/client"
 )
 
 //goland:noinspection SpellCheckingInspection
@@ -148,4 +150,38 @@ func GenerateRandomString(length int) string {
 func GenerateRandomNumber() int {
 	rand.NewSource(time.Now().UnixNano())
 	return rand.Intn(100) + 1
+}
+
+//goland:noinspection SpellCheckingInspection
+func HealthCheck(c *gin.Context) {
+	cli, err := docker_client.NewClientWithOpts(docker_client.FromEnv)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, ReturnMessage("Failed to connect to docker daemon."))
+		return
+	}
+
+	containers, err := cli.ContainerList(c, types.ContainerListOptions{})
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, ReturnMessage("Failed to list containers."))
+		return
+	}
+
+	containerID := ""
+	for _, container := range containers {
+		if container.Image == "linweiyuan/go-chatgpt-api" {
+			containerID = container.ID
+			break
+		}
+	}
+
+	containerInfo, err := cli.ContainerInspect(c, containerID)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, ReturnMessage("Failed to get container info."))
+		return
+	}
+
+	responseMap := make(map[string]interface{})
+	responseMap["imageId"] = containerInfo.Image
+
+	c.JSON(http.StatusOK, responseMap)
 }

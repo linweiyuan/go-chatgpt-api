@@ -1,8 +1,6 @@
 # go-chatgpt-api
 
-### [English Doc](README_en.md)
-
-## 一个尝试绕过 `Cloudflare 403` 和 `Access denied` 的正向代理程序
+## 一个尝试绕过 `Cloudflare` 的正向代理程序
 
 ### 实验性质项目，不保证稳定性和向后兼容，使用风险自负
 
@@ -15,6 +13,10 @@
 ---
 
 ### 支持的 API（URL 和参数基本保持着和官网一致，部分接口有些许改动）
+
+例子：https://github.com/linweiyuan/go-chatgpt-api/tree/main/example
+
+（需安装 `HTTP Client` 插件）
 
 ---
 
@@ -357,6 +359,8 @@ services:
     image: linweiyuan/go-chatgpt-api
     ports:
       - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - GO_CHATGPT_API_PROXY=
     restart: unless-stopped
@@ -376,6 +380,8 @@ services:
     image: linweiyuan/go-chatgpt-api
     ports:
       - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
     depends_on:
