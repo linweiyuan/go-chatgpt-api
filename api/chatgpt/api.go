@@ -117,7 +117,7 @@ func CreateConversation(c *gin.Context) {
 //goland:noinspection GoUnhandledErrorResult
 func sendConversationRequest(c *gin.Context, request CreateConversationRequest) (*http.Response, bool) {
 	jsonBytes, _ := json.Marshal(request)
-	req, _ := http.NewRequest(http.MethodPost, api.ChatGPTApiUrlPrefix+"/conversation", bytes.NewBuffer(jsonBytes))
+	req, _ := http.NewRequest(http.MethodPost, api.ChatGPTApiUrlPrefix+"/backend-api/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	req.Header.Set("Accept", "text/event-stream")

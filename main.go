@@ -44,7 +44,7 @@ func setupChatGPTAPIs(router *gin.Engine) {
 	{
 		chatgptGroup.POST("/login", chatgpt.Login)
 
-		conversationGroup := chatgptGroup.Group("/conversation")
+		conversationGroup := chatgptGroup.Group("/backend-api/conversation")
 		{
 			conversationGroup.POST("", chatgpt.CreateConversation)
 		}
