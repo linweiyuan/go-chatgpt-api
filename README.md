@@ -6,19 +6,29 @@
 
 ---
 
+## 2023-06-18 破坏性更新
+
+原接口： `http://go-chatgpt-api:8080/chatgpt/conversation`
+
+更新后： `http://go-chatgpt-api:8080/chatgpt/backend-api/conversation`
+
+常用的 ChatGPT 接口主要是加了 `/backend-api` 的配置，另外添加了 `/public-api` 的支持（虽然这种 API 目前来看可以直连，也不知有何用）
+
+收费 API 则不受影响
+
+---
+
 ### 使用的过程中遇到问题应该如何解决
 
 汇总贴：https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
 ---
 
-### 如何使用（URL 和参数基本保持着和官网一致，部分接口有些许改动）
+### 范例（URL 和参数基本保持着和官网一致，部分接口有些许改动）
 
-https://github.com/linweiyuan/go-chatgpt-api/tree/main/example
+部分例子，不是全部，**理论上**全部基于文本传输的接口都支持
 
-部分例子，不是全部，**理论上**全部接口都支持
-
-（需安装 `HTTP Client` 插件）
+https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTTP Client` 插件）
 
 ---
 
