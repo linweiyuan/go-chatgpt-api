@@ -4,21 +4,8 @@ import "github.com/linweiyuan/go-chatgpt-api/api"
 
 //goland:noinspection SpellCheckingInspection
 const (
-	apiUrl = "https://api.openai.com"
-
-	apiListModels             = apiUrl + "/v1/models"
-	apiRetrieveModel          = apiUrl + "/v1/models/%s"
-	apiCreateCompletions      = apiUrl + "/v1/completions"
-	apiCreataeChatCompletions = apiUrl + "/v1/chat/completions"
-	apiCreateEdit             = apiUrl + "/v1/edits"
-	apiCreateImage            = apiUrl + "/v1/images/generations"
-	apiCreateEmbeddings       = apiUrl + "/v1/embeddings"
-	apiListFiles              = apiUrl + "/v1/files"
-	apiCreateModeration       = apiUrl + "/v1/moderations"
-
-	apiGetCreditGrants = apiUrl + "/dashboard/billing/credit_grants"
-	apiGetSubscription = apiUrl + "/dashboard/billing/subscription"
-	apiGetApiKeys      = apiUrl + "/dashboard/user/api_keys"
+	apiCreateChatCompletions = api.PlatformApiUrlPrefix + "/v1/chat/completions"
+	apiCreateCompletions     = api.PlatformApiUrlPrefix + "/v1/completions"
 
 	platformAuthClientID      = "DRivsnm2Mu42T3KOpqdtwB3NYviHYzwD"
 	platformAuthAudience      = "https://api.openai.com/v1"

@@ -1,9 +1,9 @@
 package platform
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"strings"
 
@@ -12,114 +12,6 @@ import (
 
 	http "github.com/bogdanfinn/fhttp"
 )
-
-func ListModels(c *gin.Context) {
-	handleGet(c, apiListModels)
-}
-
-func RetrieveModel(c *gin.Context) {
-	model := c.Param("model")
-	handleGet(c, fmt.Sprintf(apiRetrieveModel, model))
-}
-
-//goland:noinspection GoUnhandledErrorResult
-func CreateCompletions(c *gin.Context) {
-	var request CreateCompletionsRequest
-	c.ShouldBindJSON(&request)
-	data, _ := json.Marshal(request)
-	resp, err := handlePost(c, apiCreateCompletions, data, request.Stream)
-	if err != nil {
-		return
-	}
-
-	defer resp.Body.Close()
-	if request.Stream {
-		api.HandleConversationResponse(c, resp)
-	} else {
-		io.Copy(c.Writer, resp.Body)
-	}
-}
-
-//goland:noinspection GoUnhandledErrorResult
-func CreateChatCompletions(c *gin.Context) {
-	var request ChatCompletionsRequest
-	c.ShouldBindJSON(&request)
-	data, _ := json.Marshal(request)
-	resp, err := handlePost(c, apiCreataeChatCompletions, data, request.Stream)
-	if err != nil {
-		return
-	}
-
-	defer resp.Body.Close()
-	if request.Stream {
-		api.HandleConversationResponse(c, resp)
-	} else {
-		io.Copy(c.Writer, resp.Body)
-	}
-}
-
-//goland:noinspection GoUnhandledErrorResult
-func CreateEdit(c *gin.Context) {
-	var request CreateEditRequest
-	c.ShouldBindJSON(&request)
-	data, _ := json.Marshal(request)
-	resp, err := handlePost(c, apiCreateEdit, data, false)
-	if err != nil {
-		return
-	}
-
-	defer resp.Body.Close()
-	io.Copy(c.Writer, resp.Body)
-}
-
-//goland:noinspection GoUnhandledErrorResult
-func CreateImage(c *gin.Context) {
-	var request CreateImageRequest
-	c.ShouldBindJSON(&request)
-	data, _ := json.Marshal(request)
-	resp, err := handlePost(c, apiCreateImage, data, false)
-	if err != nil {
-		return
-	}
-
-	defer resp.Body.Close()
-	io.Copy(c.Writer, resp.Body)
-}
-
-//goland:noinspection GoUnhandledErrorResult
-func CreateEmbeddings(c *gin.Context) {
-	var request CreateEmbeddingsRequest
-	c.ShouldBindJSON(&request)
-	data, _ := json.Marshal(request)
-	resp, err := handlePost(c, apiCreateEmbeddings, data, false)
-	if err != nil {
-		return
-	}
-
-	defer resp.Body.Close()
-	io.Copy(c.Writer, resp.Body)
-}
-
-func CreateModeration(c *gin.Context) {
-	var request CreateModerationRequest
-	c.ShouldBindJSON(&request)
-	data, _ := json.Marshal(request)
-	resp, err := handlePost(c, apiCreateModeration, data, false)
-	if err != nil {
-		return
-	}
-
-	defer resp.Body.Close()
-	io.Copy(c.Writer, resp.Body)
-}
-
-func ListFiles(c *gin.Context) {
-	handleGet(c, apiListFiles)
-}
-
-func GetCreditGrants(c *gin.Context) {
-	handleGet(c, apiGetCreditGrants)
-}
 
 //goland:noinspection GoUnhandledErrorResult
 func Login(c *gin.Context) {
@@ -190,21 +82,63 @@ func Login(c *gin.Context) {
 	io.Copy(c.Writer, resp.Body)
 }
 
-func GetSubscription(c *gin.Context) {
-	handleGet(c, apiGetSubscription)
+//goland:noinspection GoUnhandledErrorResult
+func CreateChatCompletions(c *gin.Context) {
+	body, _ := io.ReadAll(c.Request.Body)
+	var request struct {
+		Stream bool `json:"stream"`
+	}
+	json.Unmarshal(body, &request)
+
+	url := c.Request.URL.Path
+	if strings.Contains(url, "/chat") {
+		url = apiCreateChatCompletions
+	} else {
+		url = apiCreateCompletions
+	}
+
+	resp, err := handlePost(c, url, body, request.Stream)
+	if err != nil {
+		return
+	}
+
+	defer resp.Body.Close()
+	if request.Stream {
+		handleCompletionsResponse(c, resp)
+	} else {
+		io.Copy(c.Writer, resp.Body)
+	}
 }
 
-func GetApiKeys(c *gin.Context) {
-	handleGet(c, apiGetApiKeys)
+func CreateCompletions(c *gin.Context) {
+	CreateChatCompletions(c)
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func handleGet(c *gin.Context, url string) {
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	resp, _ := api.Client.Do(req)
-	defer resp.Body.Close()
-	io.Copy(c.Writer, resp.Body)
+func handleCompletionsResponse(c *gin.Context, resp *http.Response) {
+	c.Writer.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
+
+	reader := bufio.NewReader(resp.Body)
+	for {
+		if c.Request.Context().Err() != nil {
+			break
+		}
+
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
+
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "event") ||
+			strings.HasPrefix(line, "data: 20") ||
+			line == "" {
+			continue
+		}
+
+		c.Writer.Write([]byte(line + "\n\n"))
+		c.Writer.Flush()
+	}
 }
 
 func handlePost(c *gin.Context, url string, data []byte, stream bool) (*http.Response, error) {

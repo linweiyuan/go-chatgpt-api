@@ -19,17 +19,12 @@ func Ansi(colorString string) func(...interface{}) string {
 }
 
 var (
-	Green  = Ansi("\033[1;32m%s\033[0m")
-	Yellow = Ansi("\033[1;33m%s\033[0m")
-	Red    = Ansi("\033[1;31m%s\033[0m")
+	Green = Ansi("\033[1;32m%s\033[0m")
+	Red   = Ansi("\033[1;31m%s\033[0m")
 )
 
 func Info(msg string) {
 	logrus.Info(Green(msg))
-}
-
-func Warn(msg string) {
-	logrus.Warn(Yellow(msg))
 }
 
 func Error(msg string) {
