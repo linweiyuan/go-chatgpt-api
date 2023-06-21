@@ -6,6 +6,10 @@
 
 ---
 
+### 如果有疑问而不是什么程序出错其实可以在 [Discussions](https://github.com/linweiyuan/go-chatgpt-api/discussions) 里发而不是新增 Issue
+
+---
+
 ### 使用的过程中遇到问题应该如何解决
 
 汇总贴：https://github.com/linweiyuan/go-chatgpt-api/issues/74
@@ -107,6 +111,8 @@ services:
 <details>
 
 <summary>广告位</summary>
+
+---
 
 个人博客：https://linweiyuan.github.io
 
