@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
 env:
-  REGISTRY: ghcr.io
+  REGISTRY: ${{ 'ghcr.io' || 'docker.io' }}
 
 jobs:
   docker-build-push:
@@ -35,4 +35,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ github.actor }}/go-chatgpt-api
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/go-chatgpt-api
