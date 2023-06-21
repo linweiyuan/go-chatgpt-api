@@ -1,20 +1,12 @@
 # go-chatgpt-api
 
-## 一个尝试绕过 `Cloudflare` 的正向代理程序
+## 一个尝试绕过 `Cloudflare` 来使用 `ChatGPT` 接口的程序
 
-### 实验性质项目，不保证稳定性和向后兼容，使用风险自负
+### 实验性质练手项目，不保证稳定性和向后兼容，使用风险自负
 
 ---
 
-## 2023-06-18 破坏性更新
-
-原接口： `http://go-chatgpt-api:8080/chatgpt/conversation`
-
-更新后： `http://go-chatgpt-api:8080/chatgpt/backend-api/conversation`
-
-常用的 ChatGPT 接口主要是加了 `/backend-api` 的配置，另外添加了 `/public-api` 的支持（虽然这种 API 目前来看可以直连，也不知有何用）
-
-收费 API 则不受影响
+### 如果有疑问而不是什么程序出错其实可以在 [Discussions](https://github.com/linweiyuan/go-chatgpt-api/discussions) 里发而不是新增 Issue
 
 ---
 
@@ -36,7 +28,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 或者 `GO_CHATGPT_API_PROXY=socks5://127.0.0.1:20170`，注释掉或者留空则不启用
 
 如需配合 `warp` 使用：`GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535`，因为需要设置 `warp`
-的场景已经默认可以直接访问 `ChatGPT` 官网，因此共用一个变量不冲突
+的场景已经默认可以直接访问 `ChatGPT` 官网，因此共用一个变量不冲突（国内 `VPS` 不在讨论范围内）
 
 ---
 
@@ -120,7 +112,9 @@ services:
 
 <summary>广告位</summary>
 
-`Vultr` 推荐链接：https://www.vultr.com/?ref=7372562
+---
+
+个人博客：https://linweiyuan.github.io
 
 ---
 
