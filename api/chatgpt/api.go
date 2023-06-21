@@ -109,7 +109,21 @@ func CreateConversation(c *gin.Context) {
 	}
 
 	if request.Model == gpt4Model || request.Model == gpt4BrowsingModel || request.Model == gpt4PluginsModel {
-		request.ArkoseToken = fmt.Sprintf(arkoseTokenTemplate, api.GenerateRandomString(17), api.GenerateRandomString(10), gpt4ArkoseTokenPublicKey, api.GenerateRandomNumber())
+		formParams := fmt.Sprintf(
+			"public_key=%s",
+			gpt4ArkoseTokenPublicKey,
+		)
+		req, _ := http.NewRequest(http.MethodPost, gpt4TokenUrl, strings.NewReader(formParams))
+		req.Header.Set("Content-Type", api.ContentType)
+		resp, err := api.Client.Do(req)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+			return
+		}
+
+		responseMap := make(map[string]string)
+		json.NewDecoder(resp.Body).Decode(&responseMap)
+		request.ArkoseToken = responseMap["token"]
 	}
 
 	resp, done := sendConversationRequest(c, request)
