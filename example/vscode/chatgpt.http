@@ -61,3 +61,7 @@ Authorization: Bearer {{accessToken}}
 
 ### get conversation limit (no need to pass access token)
 GET {{baseUrl}}/chatgpt/public-api/conversation_limit
+
+### get models with pandora enabled
+GET {{baseUrl}}/api/models?history_and_training_disabled=false
+Authorization: Bearer {{accessToken}}
