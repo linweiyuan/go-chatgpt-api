@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -20,8 +21,17 @@ func init() {
 //goland:noinspection SpellCheckingInspection
 func main() {
 	router := gin.Default()
+
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.CheckHeaderMiddleware())
+
+	// make compatible with pandora
+	router.Use(func(ctx *gin.Context) {
+		pandoraEnabled := os.Getenv("GO_CHATGPT_API_PANDORA") != ""
+		if pandoraEnabled {
+			ctx.Request.URL.Path = strings.ReplaceAll(ctx.Request.URL.Path, "/api", "/chatgpt/backend-api")
+		}
+	})
 
 	setupChatGPTAPIs(router)
 	setupPlatformAPIs(router)
