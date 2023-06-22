@@ -5,10 +5,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"math/rand"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/gin-gonic/gin"
@@ -137,26 +135,6 @@ func GetAccessToken(accessToken string) string {
 		return "Bearer " + accessToken
 	}
 	return accessToken
-}
-
-//goland:noinspection SpellCheckingInspection
-func GenerateRandomString(length int) string {
-	rand.NewSource(time.Now().UnixNano())
-
-	charset := "0123456789abcdefghijklmnopqrstuvwxyz"
-	result := make([]byte, length)
-
-	for i := 0; i < length; i++ {
-		randomIndex := rand.Intn(len(charset))
-		result[i] = charset[randomIndex]
-	}
-
-	return string(result)
-}
-
-func GenerateRandomNumber() int {
-	rand.NewSource(time.Now().UnixNano())
-	return rand.Intn(100) + 1
 }
 
 //goland:noinspection SpellCheckingInspection

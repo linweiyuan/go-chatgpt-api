@@ -5,7 +5,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"net/url"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
@@ -110,10 +113,16 @@ func CreateConversation(c *gin.Context) {
 
 	if request.Model == gpt4Model || request.Model == gpt4BrowsingModel || request.Model == gpt4PluginsModel {
 		formParams := fmt.Sprintf(
-			"public_key=%s",
+			"public_key=%s&site=%s&userbrowser=%s&capi_version=%s&capi_mode=%s&style_theme=%s&rnd=%s",
 			gpt4ArkoseTokenPublicKey,
+			url.QueryEscape(gpt4ArkoseTokenSite),
+			url.QueryEscape(gpt4ArkoseTokenUserBrowser),
+			gpt4ArkoseTokenCapiVersion,
+			gpt4ArkoseTokenCapiMode,
+			gpt4ArkoseTokenStyleTheme,
+			generateArkoseTokenRnd(),
 		)
-		req, _ := http.NewRequest(http.MethodPost, gpt4TokenUrl, strings.NewReader(formParams))
+		req, _ := http.NewRequest(http.MethodPost, gpt4ArkoseTokenUrl, strings.NewReader(formParams))
 		req.Header.Set("Content-Type", api.ContentType)
 		resp, err := api.Client.Do(req)
 		if err != nil {
@@ -153,6 +162,7 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 		c.AbortWithStatusJSON(resp.StatusCode, responseMap)
 		return nil, true
 	}
+
 	return resp, false
 }
 
@@ -222,4 +232,9 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 
 		handleConversationResponse(c, resp, continueConversationRequest)
 	}
+}
+
+func generateArkoseTokenRnd() string {
+	rand.NewSource(time.Now().UnixNano())
+	return fmt.Sprintf("%.17f", rand.Float64())
 }
