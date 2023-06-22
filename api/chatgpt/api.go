@@ -35,7 +35,7 @@ func CreateConversation(c *gin.Context) {
 		}
 	}
 
-	if request.Model == gpt4Model || request.Model == gpt4BrowsingModel || request.Model == gpt4PluginsModel {
+	if strings.HasPrefix(request.Model, gpt4Model) {
 		// ???
 		bda := make(map[string]string)
 		bda["ct"] = ""

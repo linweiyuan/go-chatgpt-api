@@ -13,8 +13,6 @@ const (
 	authSessionUrl           = "https://chat.openai.com/api/auth/session"
 
 	gpt4Model                  = "gpt-4"
-	gpt4BrowsingModel          = "gpt-4-browsing"
-	gpt4PluginsModel           = "gpt-4-plugins"
 	gpt4ArkoseTokenPublicKey   = "35536E1E-65B4-4D96-9D97-6ADB7EFF8147"
 	gpt4ArkoseTokenSite        = api.ChatGPTApiUrlPrefix
 	gpt4ArkoseTokenUserBrowser = api.UserAgent
