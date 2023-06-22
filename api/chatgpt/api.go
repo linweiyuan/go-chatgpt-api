@@ -3,6 +3,7 @@ package chatgpt
 import (
 	"bufio"
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"math/rand"
@@ -35,8 +36,17 @@ func CreateConversation(c *gin.Context) {
 	}
 
 	if request.Model == gpt4Model || request.Model == gpt4BrowsingModel || request.Model == gpt4PluginsModel {
+		// ???
+		bda := make(map[string]string)
+		bda["ct"] = ""
+		bda["iv"] = ""
+		bda["s"] = ""
+		jsonData, _ := json.Marshal(bda)
+		base64String := base64.StdEncoding.EncodeToString(jsonData)
+
 		formParams := fmt.Sprintf(
-			"public_key=%s&site=%s&userbrowser=%s&capi_version=%s&capi_mode=%s&style_theme=%s&rnd=%s",
+			"bda=%s&public_key=%s&site=%s&userbrowser=%s&capi_version=%s&capi_mode=%s&style_theme=%s&rnd=%s",
+			base64String,
 			gpt4ArkoseTokenPublicKey,
 			url.QueryEscape(gpt4ArkoseTokenSite),
 			url.QueryEscape(gpt4ArkoseTokenUserBrowser),
