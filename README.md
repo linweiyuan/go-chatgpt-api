@@ -2,6 +2,8 @@
 
 ## 一个尝试绕过 `Cloudflare` 来使用 `ChatGPT` 接口的程序
 
+---
+
 ### 实验性质练手项目，不保证稳定性和向后兼容，使用风险自负
 
 ---
@@ -23,6 +25,8 @@
 https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTTP Client` 插件）
 
 ---
+
+### 配置
 
 如需设置代理，可以设置环境变量 `GO_CHATGPT_API_PROXY`，比如 `GO_CHATGPT_API_PROXY=http://127.0.0.1:20171`
 或者 `GO_CHATGPT_API_PROXY=socks5://127.0.0.1:20170`，注释掉或者留空则不启用
@@ -107,6 +111,49 @@ services:
 
 这个只会更新新镜像，旧的镜像如果没手动删除还会在本地，如果新镜像不适用，将 `<none>` 镜像重新打 `tag`
 即可，比如：`docker tag <IMAGE_ID> linweiyuan/go-chatgpt-api`，这样就完成了回滚
+
+---
+
+### 如何集成主流第三方客户端
+
+- [moeakwak/chatgpt-web-share](https://github.com/moeakwak/chatgpt-web-share)
+
+```
+CHATGPT_BASE_URL=http://go-chatgpt-api:8080/chatgpt/backend-api/
+```
+
+- [lss233/chatgpt-mirai-qq-bot](https://github.com/lss233/chatgpt-mirai-qq-bot)
+
+```
+[openai]
+browserless_endpoint = "http://go-chatgpt-api:8080/chatgpt/backend-api/"
+```
+
+- [Kerwin1202/chatgpt-web](https://github.com/Kerwin1202/chatgpt-web) | [Chanzhaoyu/chatgpt-web](https://github.com/Chanzhaoyu/chatgpt-web)
+
+```
+API_REVERSE_PROXY=http://go-chatgpt-api:8080/chatgpt/backend-api/conversation
+```
+
+- [pengzhile/pandora](https://github.com/pengzhile/pandora)（不完全兼容）
+
+```
+go-chatgpt-api: GO_CHATGPT_API_PANDORA=1
+
+pandora: CHATGPT_API_PREFIX=http://go-chatgpt-api:8080
+```
+
+---
+
+### 最后感谢各位同学
+
+<a href="https://github.com/linweiyuan/go-chatgpt-api/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
+
+---
 
 <details>
 
