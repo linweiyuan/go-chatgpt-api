@@ -153,7 +153,6 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 		c.AbortWithStatusJSON(resp.StatusCode, responseMap)
 		return nil, true
 	}
-
 	return resp, false
 }
 
@@ -206,7 +205,7 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 	}
 
 	if isMaxTokens && request.AutoContinue {
-		var continueConversationRequest = CreateConversationRequest{
+		continueConversationRequest := CreateConversationRequest{
 			ArkoseToken:                request.ArkoseToken,
 			HistoryAndTrainingDisabled: request.HistoryAndTrainingDisabled,
 			Model:                      request.Model,

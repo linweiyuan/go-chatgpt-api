@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	// "net/http"
 	"os"
 	"strings"
 
@@ -25,17 +26,9 @@ func main() {
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.CheckHeaderMiddleware())
 
-	// make compatible with pandora
-	router.Use(func(ctx *gin.Context) {
-		pandoraEnabled := os.Getenv("GO_CHATGPT_API_PANDORA") != ""
-		if pandoraEnabled {
-			ctx.Request.URL.Path = strings.ReplaceAll(ctx.Request.URL.Path, "/api", "/chatgpt/backend-api")
-		}
-	})
-
 	setupChatGPTAPIs(router)
 	setupPlatformAPIs(router)
-
+	setupPandoraAPIs(router)
 	router.NoRoute(api.Proxy)
 
 	router.GET("/healthCheck", api.HealthCheck)
@@ -47,6 +40,20 @@ func main() {
 	err := router.Run(":" + port)
 	if err != nil {
 		log.Fatal("Failed to start server: " + err.Error())
+	}
+}
+
+func setupPandoraAPIs(router *gin.Engine) {
+	pandoraEnabled := os.Getenv("GO_CHATGPT_API_PANDORA") != ""
+	if pandoraEnabled {
+		router.GET("/api/*path", func(c *gin.Context) {
+			c.Request.URL.Path = strings.ReplaceAll(c.Request.URL.Path, "/api", "/chatgpt/backend-api")
+			router.HandleContext(c)
+		})
+		router.POST("/api/*path", func(c *gin.Context) {
+			c.Request.URL.Path = strings.ReplaceAll(c.Request.URL.Path, "/api", "/chatgpt/backend-api")
+			router.HandleContext(c)
+		})
 	}
 }
 
