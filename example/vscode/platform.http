@@ -1,5 +1,5 @@
 ### login
-POST {baseUrl}/platform/login
+POST {{baseUrl}}/platform/login
 Content-Type: application/json
 
 {
