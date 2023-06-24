@@ -3,19 +3,23 @@ package chatgpt
 import (
 	"bufio"
 	"bytes"
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
-	"math/rand"
-	"net/url"
-	"strings"
-	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
+	"os"
+	"strings"
 
 	http "github.com/bogdanfinn/fhttp"
 )
+
+var (
+	arkoseTokenUrl string
+)
+
+//goland:noinspection SpellCheckingInspection
+func init() {
+	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
+}
 
 //goland:noinspection GoUnhandledErrorResult
 func CreateConversation(c *gin.Context) {
@@ -36,36 +40,18 @@ func CreateConversation(c *gin.Context) {
 	}
 
 	if strings.HasPrefix(request.Model, gpt4Model) {
-		// ???
-		bda := make(map[string]string)
-		bda["ct"] = ""
-		bda["iv"] = ""
-		bda["s"] = ""
-		jsonData, _ := json.Marshal(bda)
-		base64String := base64.StdEncoding.EncodeToString(jsonData)
+		if arkoseTokenUrl != "" {
+			req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
+			resp, err := api.Client.Do(req)
+			if err != nil || resp.StatusCode != http.StatusOK {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage("Failed to get arkose token."))
+				return
+			}
 
-		formParams := fmt.Sprintf(
-			"bda=%s&public_key=%s&site=%s&userbrowser=%s&capi_version=%s&capi_mode=%s&style_theme=%s&rnd=%s",
-			base64String,
-			gpt4ArkoseTokenPublicKey,
-			url.QueryEscape(gpt4ArkoseTokenSite),
-			url.QueryEscape(gpt4ArkoseTokenUserBrowser),
-			gpt4ArkoseTokenCapiVersion,
-			gpt4ArkoseTokenCapiMode,
-			gpt4ArkoseTokenStyleTheme,
-			generateArkoseTokenRnd(),
-		)
-		req, _ := http.NewRequest(http.MethodPost, gpt4ArkoseTokenUrl, strings.NewReader(formParams))
-		req.Header.Set("Content-Type", api.ContentType)
-		resp, err := api.Client.Do(req)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
-			return
+			responseMap := make(map[string]string)
+			json.NewDecoder(resp.Body).Decode(&responseMap)
+			request.ArkoseToken = responseMap["token"]
 		}
-
-		responseMap := make(map[string]string)
-		json.NewDecoder(resp.Body).Decode(&responseMap)
-		request.ArkoseToken = responseMap["token"]
 	}
 
 	resp, done := sendConversationRequest(c, request)
@@ -165,9 +151,4 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 
 		handleConversationResponse(c, resp, continueConversationRequest)
 	}
-}
-
-func generateArkoseTokenRnd() string {
-	rand.NewSource(time.Now().UnixNano())
-	return fmt.Sprintf("%.17f", rand.Float64())
 }

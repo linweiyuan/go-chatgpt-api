@@ -2,9 +2,11 @@
 
 ## 一个尝试绕过 `Cloudflare` 来使用 `ChatGPT` 接口的程序
 
+### 实验性质练手项目，不保证稳定性和向后兼容，使用风险自负
+
 ---
 
-### 实验性质练手项目，不保证稳定性和向后兼容，使用风险自负
+### 相关博客（程序更新很多次，文章的内容可能和现在的不一样，供参考）：[ChatGPT](https://linweiyuan.github.io/categories/ChatGPT/)
 
 ---
 
@@ -34,6 +36,12 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 如需配合 `warp` 使用：`GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535`，因为需要设置 `warp`
 的场景已经默认可以直接访问 `ChatGPT` 官网，因此共用一个变量不冲突（国内 `VPS` 不在讨论范围内）
 
+GPT-4 相关模型需要验证 `arkose_token`，配置环境变量 `GO_CHATGPT_API_ARKOSE_TOKEN_URL`
+为 `https://arkose-token.linweiyuan.com` 即可获取不是很合法的 `arkose_token` （测试过很多账号都可以 403 -> 200，部分依旧
+403）
+
+这条链接是给程序使用的，没有任何理由直接访问，直接访问会跳转当前项目 `GitHub` 地址
+
 ---
 
 `docker-compose` 配置文件：
@@ -48,7 +56,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
+      - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
+      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
     restart: unless-stopped
 ```
 
@@ -69,7 +79,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
+      - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
+      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
     depends_on:
       - chatgpt-proxy-server-warp
     restart: unless-stopped
