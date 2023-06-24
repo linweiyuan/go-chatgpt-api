@@ -15,7 +15,7 @@ func CheckHeaderMiddleware() gin.HandlerFunc {
 			c.Request.URL.Path != "/platform/login" &&
 			c.Request.URL.Path != "/healthCheck" &&
 			c.Request.URL.Path != "/chatgpt/public-api/conversation_limit" {
-			c.Redirect(http.StatusMovedPermanently, "https://github.com/linweiyuan/go-chatgpt-api")
+			c.String(http.StatusOK, api.ReadyHint)
 			c.Abort()
 			return
 		}

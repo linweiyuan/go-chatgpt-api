@@ -14,7 +14,6 @@ import (
 //goland:noinspection SpellCheckingInspection
 const (
 	healthCheckUrl = "https://chat.openai.com/backend-api/accounts/check"
-	readyHint      = "Service go-chatgpt-api is ready."
 	errorHintBlock = "Looks like you have bean blocked -> curl https://chat.openai.com | grep '<p>' | awk '{$1=$1;print}'"
 	errorHint403   = "Failed to handle 403, have a look at https://github.com/linweiyuan/java-chatgpt-api or use other more powerful alternatives (do not raise new issue about 403)."
 	sleepHours     = 8760 // 365 days
@@ -60,7 +59,7 @@ func healthCheck() (resp *http.Response, err error) {
 func checkHealthCheckStatus(resp *http.Response) {
 	defer resp.Body.Close()
 	if resp != nil && resp.StatusCode == http.StatusUnauthorized {
-		logger.Info(readyHint)
+		logger.Info(api.ReadyHint)
 	} else {
 		doc, _ := goquery.NewDocumentFromReader(resp.Body)
 		alert := doc.Find(".message").Text()
