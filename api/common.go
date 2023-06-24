@@ -168,7 +168,7 @@ func HealthCheck(c *gin.Context) {
 	}
 
 	responseMap := make(map[string]interface{})
-	responseMap["imageId"] = containerInfo.Image
+	responseMap["ImageID"] = containerInfo.Image
 
 	c.JSON(http.StatusOK, responseMap)
 }
