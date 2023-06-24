@@ -8,6 +8,12 @@
 
 ### 相关博客（程序更新很多次，文章的内容可能和现在的不一样，供参考）：[ChatGPT](https://linweiyuan.github.io/categories/ChatGPT/)
 
+- [如何生成 GPT-4 arkose_token](https://linweiyuan.github.io/2023/06/24/%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90-GPT-4-arkose-token.html)
+- [利用 HTTP Client 来调试 go-chatgpt-api](https://linweiyuan.github.io/2023/06/18/%E5%88%A9%E7%94%A8-HTTP-Client-%E6%9D%A5%E8%B0%83%E8%AF%95-go-chatgpt-api.html)
+- [一种解决 ChatGPT Access denied 的方法](https://linweiyuan.github.io/2023/04/15/%E4%B8%80%E7%A7%8D%E8%A7%A3%E5%86%B3-ChatGPT-Access-denied-%E7%9A%84%E6%96%B9%E6%B3%95.html)
+- [ChatGPT 如何自建代理](https://linweiyuan.github.io/2023/04/08/ChatGPT-%E5%A6%82%E4%BD%95%E8%87%AA%E5%BB%BA%E4%BB%A3%E7%90%86.html)
+- [一种取巧的方式绕过 Cloudflare v2 验证](https://linweiyuan.github.io/2023/03/14/%E4%B8%80%E7%A7%8D%E5%8F%96%E5%B7%A7%E7%9A%84%E6%96%B9%E5%BC%8F%E7%BB%95%E8%BF%87-Cloudflare-v2-%E9%AA%8C%E8%AF%81.html)
+
 ---
 
 ### 如果有疑问而不是什么程序出错其实可以在 [Discussions](https://github.com/linweiyuan/go-chatgpt-api/discussions) 里发而不是新增 Issue
@@ -39,8 +45,6 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 GPT-4 相关模型需要验证 `arkose_token`，配置环境变量 `GO_CHATGPT_API_ARKOSE_TOKEN_URL`
 为 `https://arkose-token.linweiyuan.com` 即可获取不是很合法的 `arkose_token` （测试过很多账号都可以 403 -> 200，部分依旧
 403）
-
-这条链接是给程序使用的，没有任何理由直接访问，直接访问会跳转当前项目 `GitHub` 地址
 
 ---
 
@@ -126,39 +130,59 @@ services:
 
 ---
 
-### 如何集成主流第三方客户端
+### 如何集成其他第三方客户端
 
 - [moeakwak/chatgpt-web-share](https://github.com/moeakwak/chatgpt-web-share)
 
+环境变量
+
 ```
-CHATGPT_BASE_URL=http://go-chatgpt-api:8080/chatgpt/backend-api/
+CHATGPT_BASE_URL=https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/
 ```
 
 - [lss233/chatgpt-mirai-qq-bot](https://github.com/lss233/chatgpt-mirai-qq-bot)
 
+`config.cfg`
+
 ```
 [openai]
-browserless_endpoint = "http://go-chatgpt-api:8080/chatgpt/backend-api/"
+browserless_endpoint = "https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/"
 ```
 
 - [Kerwin1202/chatgpt-web](https://github.com/Kerwin1202/chatgpt-web) | [Chanzhaoyu/chatgpt-web](https://github.com/Chanzhaoyu/chatgpt-web)
 
+环境变量
+
 ```
-API_REVERSE_PROXY=http://go-chatgpt-api:8080/chatgpt/backend-api/conversation
+API_REVERSE_PROXY=https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/conversation
 ```
 
 - [pengzhile/pandora](https://github.com/pengzhile/pandora)（不完全兼容）
 
+环境变量
+
 ```
 go-chatgpt-api: GO_CHATGPT_API_PANDORA=1
 
-pandora: CHATGPT_API_PREFIX=http://go-chatgpt-api:8080
+pandora: CHATGPT_API_PREFIX=https://go-chatgpt-api.linweiyuan.com
+```
+
+---
+
+- [1130600015/feishu-chatgpt](https://github.com/1130600015/feishu-chatgpt)
+
+`application.yaml`
+
+```yaml
+proxy:
+  url: https://go-chatgpt-api.linweiyuan.com
 ```
 
 ---
 
 ### 最后感谢各位同学
 
+<!--suppress HtmlRequiredAltAttribute -->
 <a href="https://github.com/linweiyuan/go-chatgpt-api/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api" />
 </a>
@@ -170,10 +194,6 @@ Made with [contrib.rocks](https://contrib.rocks).
 <details>
 
 <summary>广告位</summary>
-
----
-
-个人博客：https://linweiyuan.github.io
 
 ---
 
