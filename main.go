@@ -11,6 +11,8 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/api/platform"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
+
+	http "github.com/bogdanfinn/fhttp"
 )
 
 func init() {
@@ -29,6 +31,10 @@ func main() {
 	setupPlatformAPIs(router)
 	setupPandoraAPIs(router)
 	router.NoRoute(api.Proxy)
+
+	router.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, api.ReadyHint)
+	})
 
 	router.GET("/healthCheck", api.HealthCheck)
 
