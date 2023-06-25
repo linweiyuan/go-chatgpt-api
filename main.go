@@ -87,5 +87,9 @@ func setupPandoraAPIs(router *gin.Engine) {
 			c.Request.URL.Path = strings.ReplaceAll(c.Request.URL.Path, "/api", "/chatgpt/backend-api")
 			router.HandleContext(c)
 		})
+		router.PATCH("/api/*path", func(c *gin.Context) {
+			c.Request.URL.Path = strings.ReplaceAll(c.Request.URL.Path, "/api", "/chatgpt/backend-api")
+			router.HandleContext(c)
+		})
 	}
 }

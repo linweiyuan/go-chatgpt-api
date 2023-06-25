@@ -5,6 +5,9 @@ on:
     branches:
       - 'main'
 
+env:
+  platforms: ${{ vars.PLATFORMS || 'linux/amd64' }}
+
 jobs:
   docker-build-push:
     runs-on: ubuntu-latest
@@ -36,7 +39,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.platforms }}
           push: true
           tags: ${{ github.actor }}/go-chatgpt-api
           cache-from: type=local,src=/tmp/.buildx-cache
@@ -55,7 +58,7 @@ jobs:
         if: ${{ vars.USE_GHCR == '1' }}
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.platforms }}
           push: true
           tags: ${{ github.actor }}/go-chatgpt-api
           cache-from: type=local,src=/tmp/.buildx-cache
