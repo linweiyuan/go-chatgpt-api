@@ -33,6 +33,7 @@ func main() {
 	router.NoRoute(api.Proxy)
 
 	router.GET("/", func(c *gin.Context) {
+		c.Header("Content-Type", "text/plain")
 		c.String(http.StatusOK, api.ReadyHint)
 	})
 
