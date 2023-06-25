@@ -42,10 +42,6 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 如需配合 `warp` 使用：`GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535`，因为需要设置 `warp`
 的场景已经默认可以直接访问 `ChatGPT` 官网，因此共用一个变量不冲突（国内 `VPS` 不在讨论范围内）
 
-GPT-4 相关模型需要验证 `arkose_token`，配置环境变量 `GO_CHATGPT_API_ARKOSE_TOKEN_URL`
-为 `https://arkose-token.linweiyuan.com` 即可获取不是很合法的 `arkose_token` （测试过很多账号都可以 403 -> 200，部分依旧
-403）
-
 ---
 
 `docker-compose` 配置文件：
@@ -63,6 +59,41 @@ services:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
+    restart: unless-stopped
+```
+
+---
+
+GPT-4 相关模型需要验证 `arkose_token`，以下是配置例子
+
+```yaml
+services:
+  go-chatgpt-api:
+    container_name: go-chatgpt-api
+    image: linweiyuan/go-chatgpt-api
+    ports:
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=Asia/Shanghai
+      - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
+      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=http://chatgpt-arkose-token-api:65526
+    depends_on:
+      - chatgpt-proxy-server-warp
+      - chatgpt-arkose-token-api
+    restart: unless-stopped
+
+  chatgpt-proxy-server-warp:
+    container_name: chatgpt-proxy-server-warp
+    image: linweiyuan/chatgpt-proxy-server-warp
+    environment:
+      - LOG_LEVEL=OFF
+    restart: unless-stopped
+
+  chatgpt-arkose-token-api:
+    container_name: chatgpt-arkose-token-api
+    image: linweiyuan/chatgpt-arkose-token-api
     restart: unless-stopped
 ```
 
@@ -179,11 +210,15 @@ proxy:
 ```
 
 ### 如何控制打包行为
-Fork 此项目后，可以在 `Settings-Secrets and variables-Actions` 下控制如下行为：
-`Secrets` 页添加 `DOCKER_HUB_TOKEN` 即可自行打包推送到个人的 Dockerhub 账户下（[如何申请 token](https://docs.docker.com/docker-hub/access-tokens/)）
 
-`Variables` 页添加 `USE_GHCR=1` 即可推送到个人的 GHCR 仓库（[需要开启仓库的写入权限](https://stackoverflow.com/questions/75926611/github-workflow-to-push-docker-image-to-ghcr-io)）
-`Variables` 页添加 `PLATFORMS=linux/amd64,linux/arm64` 即可同时打包 amd64 和 arm64 的架构的镜像（缺省情况下只会打包 amd64）
+Fork 此项目后，可以在 `Settings-Secrets and variables-Actions` 下控制如下行为：
+`Secrets` 页添加 `DOCKER_HUB_TOKEN` 即可自行打包推送到个人的 Dockerhub
+账户下（[如何申请 token](https://docs.docker.com/docker-hub/access-tokens/)）
+
+`Variables` 页添加 `USE_GHCR=1` 即可推送到个人的 GHCR
+仓库（[需要开启仓库的写入权限](https://stackoverflow.com/questions/75926611/github-workflow-to-push-docker-image-to-ghcr-io)）
+`Variables` 页添加 `PLATFORMS=linux/amd64,linux/arm64` 即可同时打包 amd64 和 arm64 的架构的镜像（缺省情况下只会打包
+amd64）
 
 ---
 
