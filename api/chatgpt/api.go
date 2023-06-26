@@ -4,22 +4,14 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"strings"
+
+	"github.com/acheong08/funcaptcha"
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
-	"os"
-	"strings"
 
 	http "github.com/bogdanfinn/fhttp"
 )
-
-var (
-	arkoseTokenUrl string
-)
-
-//goland:noinspection SpellCheckingInspection
-func init() {
-	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
-}
 
 //goland:noinspection GoUnhandledErrorResult
 func CreateConversation(c *gin.Context) {
@@ -40,18 +32,13 @@ func CreateConversation(c *gin.Context) {
 	}
 
 	if strings.HasPrefix(request.Model, gpt4Model) {
-		if arkoseTokenUrl != "" {
-			req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
-			resp, err := api.Client.Do(req)
-			if err != nil || resp.StatusCode != http.StatusOK {
-				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage("Failed to get arkose token."))
-				return
-			}
-
-			responseMap := make(map[string]string)
-			json.NewDecoder(resp.Body).Decode(&responseMap)
-			request.ArkoseToken = responseMap["token"]
+		token, err := funcaptcha.GetOpenAIToken()
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage("Failed to get arkose token."))
+			return
 		}
+		request.ArkoseToken = token
+
 	}
 
 	resp, done := sendConversationRequest(c, request)
