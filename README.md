@@ -83,6 +83,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=https://arkose-token.linweiyuan.com
+      - GO_CHATGPT_API_PANDORA=1
     restart: unless-stopped
 ```
 
@@ -104,6 +105,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=http://chatgpt-arkose-token-api:65526
+      - GO_CHATGPT_API_PANDORA=1
     depends_on:
       - chatgpt-arkose-token-api
     restart: unless-stopped
@@ -132,6 +134,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=http://chatgpt-arkose-token-api:65526
+      - GO_CHATGPT_API_PANDORA=1
     depends_on:
       - chatgpt-arkose-token-api
     restart: unless-stopped
@@ -162,6 +165,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=http://chatgpt-arkose-token-api:65526
+      - GO_CHATGPT_API_PANDORA=1
     depends_on:
       - chatgpt-proxy-server-warp
       - chatgpt-arkose-token-api
