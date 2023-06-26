@@ -65,24 +65,3 @@ type CreateConversationResponse struct {
 	ConversationID string      `json:"conversation_id"`
 	Error          interface{} `json:"error"`
 }
-
-type FeedbackMessageRequest struct {
-	MessageID      string `json:"message_id"`
-	ConversationID string `json:"conversation_id"`
-	Rating         string `json:"rating"`
-}
-
-type GenerateTitleRequest struct {
-	MessageID string `json:"message_id"`
-}
-
-type PatchConversationRequest struct {
-	Title     *string `json:"title"`
-	IsVisible bool    `json:"is_visible"`
-}
-
-type Cookie struct {
-	Name   string `json:"name"`
-	Value  string `json:"value"`
-	Expiry int64  `json:"expiry"`
-}
