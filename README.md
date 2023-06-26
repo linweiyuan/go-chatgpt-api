@@ -297,7 +297,11 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 ---
 
-个人微信（没有验证，谁都能加，添加即通过，不用打招呼，直接把问题发出来，日常和私人问题不聊，不进群；可以解答程序使用问题，但最好自己要有一定的基础；可以远程调试，仅限 `SSH`
+群聊：https://github.com/linweiyuan/go-chatgpt-api/discussions/197
+
+---
+
+个人微信（没有验证，谁都能加，添加即通过，不用打招呼，直接把问题发出来，日常和私人问题不聊；可以解答程序使用问题，但最好自己要有一定的基础；可以远程调试，仅限 `SSH`
 或`ToDesk`，但不保证能解决）：
 
 ![](https://linweiyuan.github.io/about/mmqrcode.png)
