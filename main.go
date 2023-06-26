@@ -79,15 +79,7 @@ func setupPlatformAPIs(router *gin.Engine) {
 func setupPandoraAPIs(router *gin.Engine) {
 	pandoraEnabled := os.Getenv("GO_CHATGPT_API_PANDORA") != ""
 	if pandoraEnabled {
-		router.GET("/api/*path", func(c *gin.Context) {
-			c.Request.URL.Path = strings.ReplaceAll(c.Request.URL.Path, "/api", "/chatgpt/backend-api")
-			router.HandleContext(c)
-		})
-		router.POST("/api/*path", func(c *gin.Context) {
-			c.Request.URL.Path = strings.ReplaceAll(c.Request.URL.Path, "/api", "/chatgpt/backend-api")
-			router.HandleContext(c)
-		})
-		router.PATCH("/api/*path", func(c *gin.Context) {
+		router.Any("/api/*path", func(c *gin.Context) {
 			c.Request.URL.Path = strings.ReplaceAll(c.Request.URL.Path, "/api", "/chatgpt/backend-api")
 			router.HandleContext(c)
 		})
