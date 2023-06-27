@@ -6,6 +6,12 @@
 
 ---
 
+### 群聊
+
+https://github.com/linweiyuan/go-chatgpt-api/discussions/197
+
+---
+
 ### 相关博客（程序更新很多次，文章的内容可能和现在的不一样，供参考）：[ChatGPT](https://linweiyuan.github.io/categories/ChatGPT/)
 
 - [如何生成 GPT-4 arkose_token](https://linweiyuan.github.io/2023/06/24/%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90-GPT-4-arkose-token.html)
@@ -47,13 +53,13 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 
 家庭网络无需跑 `warp` 服务，跑了也没用，会报错，仅在服务器需要
 
-`GPT-4` 相关模型需要验证 `arkose_token`，如果用不上就去掉 `arkose-token` 相关配置，就算配置了，也是模型为 `gpt-4`
-相关的才会去请求接口返回 `arkose-token`
+`GPT-4` 相关模型需要验证 `arkose_token`（2023-06-26
+夜里开始已经不验证，怀疑钓鱼秋后算账或者正在测试另一种验证码，因此仍然传，但改为本地生成 []()）
 
 ---
 
 根据你的网络环境不同，可以展开查看对应配置（全部 `docker` 服务都跑起来的情况下，内存占用不到 100
-兆，[Vultr](https://www.vultr.com/?ref=7372562) 纽约区最低配
+兆，`Vultr` 纽约区最低配
 `$3.5` 一个月即可胜任，熟悉 `IPv6` 操作的还可以尝试 `$2.5` 的配置）
 
 <details>
@@ -63,13 +69,12 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 服务器不定时维护，不保证高可用，利用这些服务导致的账号安全问题，与我无关
 
 - [go-chatgpt-api](https://github.com/linweiyuan/go-chatgpt-api) -> https://go-chatgpt-api.linweiyuan.com
-- [chatgpt-arkose-token-api](https://github.com/linweiyuan/chatgpt-arkose-token-api) -> https://arkose-token.linweiyuan.com
 
 </details>
 
 <details>
 
-<summary>家庭网络，但是 go-chatgpt-api 本地跑，arkose-token-api 连我的服务</summary>
+<summary>家庭网络</summary>
 
 ```yaml
   go-chatgpt-api:
@@ -82,7 +87,6 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=https://arkose-token.linweiyuan.com
       - GO_CHATGPT_API_PANDORA=1
     restart: unless-stopped
 ```
@@ -91,7 +95,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 
 <details>
 
-<summary>家庭网络，但是本地跑全部服务</summary>
+<summary>服务器在直连或者通过网络代理的情况下可以正常访问 ChatGPT</summary>
 
 ```yaml
   go-chatgpt-api:
@@ -104,44 +108,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=http://chatgpt-arkose-token-api:65526
       - GO_CHATGPT_API_PANDORA=1
-    depends_on:
-      - chatgpt-arkose-token-api
-    restart: unless-stopped
-
-  chatgpt-arkose-token-api:
-    container_name: chatgpt-arkose-token-api
-    image: linweiyuan/chatgpt-arkose-token-api
-    restart: unless-stopped
-```
-
-</details>
-
-<details>
-
-<summary>服务器直连或者通过网络代理正常访问 ChatGPT</summary>
-
-```yaml
-  go-chatgpt-api:
-    container_name: go-chatgpt-api
-    image: linweiyuan/go-chatgpt-api
-    ports:
-      - 8080:8080
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - TZ=Asia/Shanghai
-      - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=http://chatgpt-arkose-token-api:65526
-      - GO_CHATGPT_API_PANDORA=1
-    depends_on:
-      - chatgpt-arkose-token-api
-    restart: unless-stopped
-
-  chatgpt-arkose-token-api:
-    container_name: chatgpt-arkose-token-api
-    image: linweiyuan/chatgpt-arkose-token-api
     restart: unless-stopped
 ```
 
@@ -164,11 +131,9 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=http://chatgpt-arkose-token-api:65526
       - GO_CHATGPT_API_PANDORA=1
     depends_on:
       - chatgpt-proxy-server-warp
-      - chatgpt-arkose-token-api
     restart: unless-stopped
 
   chatgpt-proxy-server-warp:
@@ -176,11 +141,6 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
     image: linweiyuan/chatgpt-proxy-server-warp
     environment:
       - LOG_LEVEL=OFF
-    restart: unless-stopped
-
-  chatgpt-arkose-token-api:
-    container_name: chatgpt-arkose-token-api
-    image: linweiyuan/chatgpt-arkose-token-api
     restart: unless-stopped
 ```
 
@@ -301,14 +261,9 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 ---
 
-群聊：https://github.com/linweiyuan/go-chatgpt-api/discussions/197
+[Vultr 推荐注册](https://www.vultr.com/?ref=7372562)
 
----
-
-个人微信（没有验证，谁都能加，添加即通过，不用打招呼，直接把问题发出来，日常和私人问题不聊；可以解答程序使用问题，但最好自己要有一定的基础；可以远程调试，仅限 `SSH`
-或`ToDesk`，但不保证能解决）：
-
-![](https://linweiyuan.github.io/about/mmqrcode.png)
+通过这条链接进去注册登录，并充值 `$10`，然后创建服务器用至少一个月，我可以得到佣金
 
 ---
 
