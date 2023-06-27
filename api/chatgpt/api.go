@@ -38,7 +38,6 @@ func CreateConversation(c *gin.Context) {
 			return
 		}
 		request.ArkoseToken = token
-
 	}
 
 	resp, done := sendConversationRequest(c, request)
