@@ -118,3 +118,7 @@ Content-Type: application/json
 	"history_and_training_disabled": false,
 	"arkose_token": null
 }
+
+### get plugins
+GET {{baseUrl}}/chatgpt/backend-api/aip/p?offset=0&limit=250&statuses=approved
+Authorization: Bearer {{accessToken}}
