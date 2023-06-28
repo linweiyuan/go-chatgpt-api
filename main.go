@@ -37,8 +37,6 @@ func main() {
 		c.String(http.StatusOK, api.ReadyHint)
 	})
 
-	router.GET("/healthCheck", api.HealthCheck)
-
 	port := os.Getenv("GO_CHATGPT_API_PORT")
 	if port == "" {
 		port = "8080"

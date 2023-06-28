@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -14,9 +15,8 @@ func CheckHeaderMiddleware() gin.HandlerFunc {
 			c.Request.URL.Path != "/chatgpt/login" &&
 			c.Request.URL.Path != "/platform/login" &&
 			c.Request.URL.Path != "/" &&
-			c.Request.URL.Path != "/healthCheck" &&
-			c.Request.URL.Path != "/chatgpt/public-api/conversation_limit" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, api.ReturnMessage("Please provide an access token or api key in 'Authorization' header."))
+			!strings.HasPrefix(c.Request.URL.Path, "/chatgpt/public-api") {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, api.ReturnMessage("Please provide a valid access token or api key in 'Authorization' header."))
 			return
 		}
 
