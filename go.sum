@@ -3,8 +3,6 @@ github.com/Microsoft/go-winio v0.6.1 h1:9/kr64B9VUZrLm5YYwbGtUJnMgqWVOdUAXu6Migc
 github.com/Microsoft/go-winio v0.6.1/go.mod h1:LRdKpFKfdobln8UmuiYcKPot9D2v6svN5+sAH+4kjUM=
 github.com/PuerkitoBio/goquery v1.8.1 h1:uQxhNlArOIdbrH1tr0UXwdVFgDcZDrZVdcpygAcwmWM=
 github.com/PuerkitoBio/goquery v1.8.1/go.mod h1:Q8ICL1kNUJ2sXGoAhPGUdYDJvgQgHzJsnnd3H7Ho5jQ=
-github.com/acheong08/funcaptcha v0.2.1-0.20230626174957-8f0b821ebe2b h1:G/Zv+bFYwQoxotAnUKmp/MxnzcrDV+tWJEZBzi1BWBI=
-github.com/acheong08/funcaptcha v0.2.1-0.20230626174957-8f0b821ebe2b/go.mod h1:VupbjtVAODvgyAB3Zo86fOA53G+UAmaV/Rk9jUCGuTU=
 github.com/acheong08/funcaptcha v0.2.1-0.20230628085018-57a8c9b81bc8 h1:COt2vPM8gz+PiUjeWH1enYPfMM3FiM/HFELqU6nO2PQ=
 github.com/acheong08/funcaptcha v0.2.1-0.20230628085018-57a8c9b81bc8/go.mod h1:VupbjtVAODvgyAB3Zo86fOA53G+UAmaV/Rk9jUCGuTU=
 github.com/andybalholm/brotli v1.0.4 h1:V7DdXeJtZscaqfNuAdSRuRFzuiKlHSC/Zh3zl9qY3JY=

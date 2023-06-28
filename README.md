@@ -53,7 +53,8 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 
 家庭网络无需跑 `warp` 服务，跑了也没用，会报错，仅在服务器需要
 
-`GPT-4` 相关模型目前需要验证 `arkose_token`
+`GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `GO_CHATGPT_API_ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
+，不设置或者留空则由程序内部自己生成
 
 ---
 
@@ -68,6 +69,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 服务器不定时维护，不保证高可用，利用这些服务导致的账号安全问题，与我无关
 
 - [go-chatgpt-api](https://github.com/linweiyuan/go-chatgpt-api) -> https://go-chatgpt-api.linweiyuan.com
+- arkose-token -> https://arkose-token.linweiyuan.com
 
 </details>
 
@@ -86,7 +88,8 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_PANDORA=1
+      - GO_CHATGPT_API_PANDORA=
+      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
     restart: unless-stopped
 ```
 
@@ -107,7 +110,8 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_PANDORA=1
+      - GO_CHATGPT_API_PANDORA=
+      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
     restart: unless-stopped
 ```
 
@@ -130,7 +134,8 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
-      - GO_CHATGPT_API_PANDORA=1
+      - GO_CHATGPT_API_PANDORA=
+      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
     depends_on:
       - chatgpt-proxy-server-warp
     restart: unless-stopped

@@ -14,4 +14,6 @@ const (
 	actionContinue                     = "continue"
 	responseTypeMaxTokens              = "max_tokens"
 	responseStatusFinishedSuccessfully = "finished_successfully"
+
+	getArkoseTokenErrorMessage = "Failed to get arkose token."
 )
