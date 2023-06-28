@@ -53,8 +53,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 
 家庭网络无需跑 `warp` 服务，跑了也没用，会报错，仅在服务器需要
 
-`GPT-4` 相关模型需要验证 `arkose_token`（2023-06-26
-夜里开始已经不验证，怀疑钓鱼秋后算账或者正在测试另一种验证码，因此仍然传，但改为本地生成 []()）
+`GPT-4` 相关模型目前需要验证 `arkose_token`
 
 ---
 
