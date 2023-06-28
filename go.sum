@@ -5,6 +5,8 @@ github.com/PuerkitoBio/goquery v1.8.1 h1:uQxhNlArOIdbrH1tr0UXwdVFgDcZDrZVdcpygAc
 github.com/PuerkitoBio/goquery v1.8.1/go.mod h1:Q8ICL1kNUJ2sXGoAhPGUdYDJvgQgHzJsnnd3H7Ho5jQ=
 github.com/acheong08/funcaptcha v0.2.1-0.20230626174957-8f0b821ebe2b h1:G/Zv+bFYwQoxotAnUKmp/MxnzcrDV+tWJEZBzi1BWBI=
 github.com/acheong08/funcaptcha v0.2.1-0.20230626174957-8f0b821ebe2b/go.mod h1:VupbjtVAODvgyAB3Zo86fOA53G+UAmaV/Rk9jUCGuTU=
+github.com/acheong08/funcaptcha v0.2.1-0.20230628085018-57a8c9b81bc8 h1:COt2vPM8gz+PiUjeWH1enYPfMM3FiM/HFELqU6nO2PQ=
+github.com/acheong08/funcaptcha v0.2.1-0.20230628085018-57a8c9b81bc8/go.mod h1:VupbjtVAODvgyAB3Zo86fOA53G+UAmaV/Rk9jUCGuTU=
 github.com/andybalholm/brotli v1.0.4 h1:V7DdXeJtZscaqfNuAdSRuRFzuiKlHSC/Zh3zl9qY3JY=
 github.com/andybalholm/brotli v1.0.4/go.mod h1:fO7iG3H7G2nSZ7m0zPUDn85XEX2GTukHGRSepvi9Eig=
 github.com/andybalholm/cascadia v1.3.1 h1:nhxRkql1kdYCc8Snf7D5/D3spOX+dBgjA6u8x004T2c=
