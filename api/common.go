@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/acheong08/funcaptcha"
 	"github.com/docker/docker/api/types"
 	"github.com/gin-gonic/gin"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
@@ -65,6 +66,7 @@ func init() {
 		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
 		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
+	funcaptcha.SetTLSClient(&Client)
 }
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection

@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/acheong08/funcaptcha v0.2.1-0.20230626174957-8f0b821ebe2b
+	github.com/acheong08/funcaptcha v0.2.1-0.20230628085018-57a8c9b81bc8
 	github.com/bogdanfinn/fhttp v0.5.23
 	github.com/bogdanfinn/tls-client v1.4.0
 	github.com/docker/docker v24.0.2+incompatible
