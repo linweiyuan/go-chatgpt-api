@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 	"os"
 	"strings"
 
@@ -40,6 +41,8 @@ func CreateConversation(c *gin.Context) {
 			request.Messages[0].Author.Role = defaultRole
 		}
 	}
+
+	logger.Info(request.Model)
 
 	if strings.HasPrefix(request.Model, gpt4Model) {
 		if arkoseTokenUrl == "" {
