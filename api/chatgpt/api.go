@@ -4,13 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
-	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/funcaptcha"
 	"github.com/linweiyuan/go-chatgpt-api/api"
+	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 
 	http "github.com/bogdanfinn/fhttp"
 )
