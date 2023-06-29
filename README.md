@@ -83,8 +83,6 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
     image: linweiyuan/go-chatgpt-api
     ports:
       - 8080:8080
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
@@ -105,8 +103,6 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
     image: linweiyuan/go-chatgpt-api
     ports:
       - 8080:8080
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
@@ -129,8 +125,6 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
     image: linweiyuan/go-chatgpt-api
     ports:
       - 8080:8080
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
