@@ -4,11 +4,11 @@ go 1.20
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/acheong08/funcaptcha v0.2.1-0.20230628085018-57a8c9b81bc8
 	github.com/bogdanfinn/fhttp v0.5.23
 	github.com/bogdanfinn/tls-client v1.4.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
+	github.com/linweiyuan/funcaptcha v0.0.0-20230629103923-00fe6789403e
 	github.com/sirupsen/logrus v1.9.0
 )
 

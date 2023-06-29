@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/acheong08/funcaptcha"
 	"github.com/gin-gonic/gin"
+	"github.com/linweiyuan/funcaptcha"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 
 	http "github.com/bogdanfinn/fhttp"
