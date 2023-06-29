@@ -54,7 +54,17 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 家庭网络无需跑 `warp` 服务，跑了也没用，会报错，仅在服务器需要
 
 `GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `GO_CHATGPT_API_ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
-，不设置或者留空则由程序内部自己生成
+，不设置或者留空则由程序内部自己生成（推荐优先使用这种）
+
+`GO_CHATGPT_API_ARKOSE_TOKEN_URL` 可选值：
+
+- https://arkose-token.linweiyuan.com [ap-southeast-1]
+- http://to.ken.xiu.ee [ap-southeast-1]
+- https://arkose-token.tms.im [us-west-2]
+
+如果用以上方法还是 `403`
+，则有一种可能就是你的账号被风控了，可以尝试用这个账号打开官网，看下会不会弹验证码，然后手动处理下，接着再回来看 `go-chatgpt-api`
+还会不会 `403`
 
 ---
 
@@ -66,10 +76,10 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 
 <summary>直接利用现成的服务</summary>
 
-服务器不定时维护，不保证高可用，利用这些服务导致的账号安全问题，与我无关
+服务器不定时维护，不保证高可用，利用这些服务导致的账号安全问题，与本项目无关
 
-- [go-chatgpt-api](https://github.com/linweiyuan/go-chatgpt-api) -> https://go-chatgpt-api.linweiyuan.com
-- arkose-token -> https://arkose-token.linweiyuan.com
+- https://go-chatgpt-api.linweiyuan.com
+- https://api.tms.im
 
 </details>
 
