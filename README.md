@@ -98,6 +98,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
       - GO_CHATGPT_API_PROXY=
       - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
+      - GO_CHATGPT_API_ARKOSE_PUID=
     restart: unless-stopped
 ```
 
@@ -118,6 +119,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
       - GO_CHATGPT_API_PROXY=
       - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
+      - GO_CHATGPT_API_ARKOSE_PUID=
     restart: unless-stopped
 ```
 
@@ -140,6 +142,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
       - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
+      - GO_CHATGPT_API_ARKOSE_PUID=
     depends_on:
       - chatgpt-proxy-server-warp
     restart: unless-stopped

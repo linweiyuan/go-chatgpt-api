@@ -15,13 +15,16 @@ import (
 	http "github.com/bogdanfinn/fhttp"
 )
 
+//goland:noinspection SpellCheckingInspection
 var (
 	arkoseTokenUrl string
+	puid           string
 )
 
 //goland:noinspection SpellCheckingInspection
 func init() {
 	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
+	puid = os.Getenv("GO_CHATGPT_API_PUID")
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -82,6 +85,10 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
 	req.Header.Set("Accept", "text/event-stream")
+	if puid != "" {
+		//goland:noinspection SpellCheckingInspection
+		req.Header.Set("Cookie", "_puid="+puid)
+	}
 	resp, err := api.Client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
