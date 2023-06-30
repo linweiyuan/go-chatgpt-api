@@ -59,3 +59,7 @@ Authorization: Bearer {{apiKey}}
 ### get billing subscription
 GET {{baseUrl}}/platform/dashboard/billing/subscription
 Authorization: Bearer {{apiKey}}
+
+### get billing usage
+GET {{baseUrl}}/platform/dashboard/billing/usage?end_date=2023-07-01&start_date=2023-06-01
+Authorization: Bearer {{apiKey}}
