@@ -68,9 +68,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 
 ---
 
-根据你的网络环境不同，可以展开查看对应配置（全部 `docker` 服务都跑起来的情况下，内存占用不到 100
-兆，`Vultr` 纽约区最低配
-`$3.5` 一个月即可胜任，熟悉 `IPv6` 操作的还可以尝试 `$2.5` 的配置）
+根据你的网络环境不同，可以展开查看对应配置
 
 <details>
 
