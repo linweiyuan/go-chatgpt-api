@@ -8,7 +8,7 @@ require (
 	github.com/bogdanfinn/tls-client v1.4.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/joho/godotenv v1.5.1
-	github.com/linweiyuan/funcaptcha v0.0.0-20230629103923-00fe6789403e
+	github.com/linweiyuan/funcaptcha v0.0.0-20230701073427-a944a6d59969
 	github.com/sirupsen/logrus v1.9.0
 )
 
