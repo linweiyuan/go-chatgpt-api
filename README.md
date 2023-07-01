@@ -79,7 +79,6 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 
 - https://go-chatgpt-api.linweiyuan.com
 - https://api.tms.im
-- https://go-api.youhuigo.click
 
 </details>
 
