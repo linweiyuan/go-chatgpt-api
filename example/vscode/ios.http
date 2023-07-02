@@ -1,0 +1,50 @@
+### create conversation
+POST https://ios.chat.openai.com/backend-api/conversation
+Authorization: Bearer {{accessToken}}
+Cookie: _devicecheck=user-xxx
+Accept: text/event-stream
+Content-Type: application/json
+
+{
+  "action": "next",
+  "messages": [
+    {
+      "id": "{{$guid}}",
+      "author": {
+        "role": "user"
+      },
+      "content": {
+        "content_type": "text",
+        "parts": [
+          "hello"
+        ]
+      },
+      "metadata": {}
+    }
+  ],
+  "model": "gpt-4",
+  "timezone_offset_min": -480,
+  "history_and_training_disabled": false,
+  "supports_modapi": true
+}
+
+### get conversations
+GET https://ios.chat.openai.com/backend-api/conversations?offset=0&limit=3&order=updated
+Authorization: Bearer {{accessToken}}
+Cookie: _devicecheck=user-xxx
+
+### device check
+POST https://ios.chat.openai.com/backend-api/devicecheck
+Authorization: Bearer {{accessToken}}
+Cookie: _preauth_devicecheck=xxx
+Content-Type: application/json
+
+{
+	"bundle_id": "com.openai.chat",
+	"device_token": "ad"
+}
+
+### me
+GET https://ios.chat.openai.com/backend-api/me?include_groups=true
+Authorization: Bearer {{accessToken}}
+Cookie: _devicecheck=user-xxx
