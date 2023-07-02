@@ -19,12 +19,14 @@ import (
 var (
 	arkoseTokenUrl string
 	puid           string
+	bx             string
 )
 
 //goland:noinspection SpellCheckingInspection
 func init() {
 	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
 	puid = os.Getenv("GO_CHATGPT_API_PUID")
+	bx = os.Getenv("GO_CHATGPT_API_BX")
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -49,7 +51,13 @@ func CreateConversation(c *gin.Context) {
 
 	if strings.HasPrefix(request.Model, gpt4Model) {
 		if arkoseTokenUrl == "" {
-			arkoseToken, err := funcaptcha.GetOpenAIToken()
+			var arkoseToken string
+			var err error
+			if bx == "" {
+				arkoseToken, err = funcaptcha.GetOpenAIToken()
+			} else {
+				arkoseToken, err = funcaptcha.GetOpenAITokenWithBx(bx)
+			}
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(getArkoseTokenErrorMessage))
 				return
