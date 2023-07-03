@@ -72,6 +72,7 @@ func CreateConversation(c *gin.Context) {
 				return
 			}
 
+			defer resp.Body.Close()
 			responseMap := make(map[string]interface{})
 			json.NewDecoder(resp.Body).Decode(&responseMap)
 			request.ArkoseToken = responseMap["token"].(string)
