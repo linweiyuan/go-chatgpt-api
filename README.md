@@ -65,8 +65,8 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 - https://a-token.xiu.ee
 - https://tttoken.azurewebsites.net
 
-如果用以上方法还是 `403`
-，则有一种可能就是你的账号被风控了，可以尝试用这个账号打开官网，看下会不会弹验证码，然后手动处理下，接着再回来看 `go-chatgpt-api`
+如果用以上方法还是 `403` 并且你的 `Plus`
+没有过期，则有一种可能就是你的账号被风控了，可以尝试用这个账号打开官网，看下会不会弹验证码，然后手动处理下，接着再回来看 `go-chatgpt-api`
 还会不会 `403`
 
 ---
