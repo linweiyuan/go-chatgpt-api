@@ -105,6 +105,34 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		defer resp.Body.Close()
+
+		req, _ := http.NewRequest(http.MethodGet, api.ChatGPTApiUrlPrefix+"/backend-api/models?history_and_training_disabled=false", nil)
+		req.Header.Set("User-Agent", api.UserAgent)
+		req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
+		response, err := api.Client.Do(req)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
+			return nil, true
+		}
+
+		defer response.Body.Close()
+		modelAvailable := false
+		var getModelsResponse GetModelsResponse
+		json.NewDecoder(response.Body).Decode(&getModelsResponse)
+		for _, model := range getModelsResponse.Models {
+			if model.Slug == request.Model {
+				modelAvailable = true
+				break
+			}
+		}
+		if !modelAvailable {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
+				"detail": noModelPermissionErrorMessage,
+			})
+			return nil, true
+		}
+
 		responseMap := make(map[string]interface{})
 		json.NewDecoder(resp.Body).Decode(&responseMap)
 		c.AbortWithStatusJSON(resp.StatusCode, responseMap)

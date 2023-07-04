@@ -65,3 +65,24 @@ type CreateConversationResponse struct {
 	ConversationID string      `json:"conversation_id"`
 	Error          interface{} `json:"error"`
 }
+
+type GetModelsResponse struct {
+	Models []struct {
+		Slug         string   `json:"slug"`
+		MaxTokens    int      `json:"max_tokens"`
+		Title        string   `json:"title"`
+		Description  string   `json:"description"`
+		Tags         []string `json:"tags"`
+		Capabilities struct {
+		} `json:"capabilities"`
+		EnabledTools []string `json:"enabled_tools,omitempty"`
+	} `json:"models"`
+	Categories []struct {
+		Category             string `json:"category"`
+		HumanCategoryName    string `json:"human_category_name"`
+		SubscriptionLevel    string `json:"subscription_level"`
+		DefaultModel         string `json:"default_model"`
+		CodeInterpreterModel string `json:"code_interpreter_model"`
+		PluginsModel         string `json:"plugins_model"`
+	} `json:"categories"`
+}
