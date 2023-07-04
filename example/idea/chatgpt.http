@@ -122,3 +122,7 @@ Content-Type: application/json
 ### get plugins
 GET {{baseUrl}}/chatgpt/backend-api/aip/p?offset=0&limit=250&statuses=approved
 Authorization: Bearer {{accessToken}}
+
+### get payment url
+GET {{baseUrl}}/chatgpt/backend-api/payments/customer_portal
+Authorization: Bearer {{accessToken}}
