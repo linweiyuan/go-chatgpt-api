@@ -11,6 +11,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/linweiyuan/funcaptcha v0.0.0-20230704212036-45a7d90e69e5
 	github.com/sirupsen/logrus v1.9.0
+	github.com/google/uuid v1.3.0
 )
 
 require (
