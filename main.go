@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -10,6 +11,8 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/api/platform"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
+
+	http "github.com/bogdanfinn/fhttp"
 )
 
 func init() {
@@ -20,15 +23,19 @@ func init() {
 //goland:noinspection SpellCheckingInspection
 func main() {
 	router := gin.Default()
+
 	router.Use(middleware.CORSMiddleware())
 	router.Use(middleware.CheckHeaderMiddleware())
 
 	setupChatGPTAPIs(router)
 	setupPlatformAPIs(router)
-
+	setupPandoraAPIs(router)
 	router.NoRoute(api.Proxy)
 
-	router.GET("/healthCheck", api.HealthCheck)
+	router.GET("/", func(c *gin.Context) {
+		c.Header("Content-Type", "text/plain")
+		c.String(http.StatusOK, api.ReadyHint)
+	})
 
 	port := os.Getenv("GO_CHATGPT_API_PORT")
 	if port == "" {
@@ -63,5 +70,16 @@ func setupPlatformAPIs(router *gin.Engine) {
 			apiGroup.POST("/chat/completions", platform.CreateChatCompletions)
 			apiGroup.POST("/completions", platform.CreateCompletions)
 		}
+	}
+}
+
+//goland:noinspection SpellCheckingInspection
+func setupPandoraAPIs(router *gin.Engine) {
+	pandoraEnabled := os.Getenv("GO_CHATGPT_API_PANDORA") != ""
+	if pandoraEnabled {
+		router.Any("/api/*path", func(c *gin.Context) {
+			c.Request.URL.Path = strings.ReplaceAll(c.Request.URL.Path, "/api", "/chatgpt/backend-api")
+			router.HandleContext(c)
+		})
 	}
 }

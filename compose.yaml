@@ -5,9 +5,10 @@ services:
     image: linweiyuan/go-chatgpt-api
     ports:
       - 8080:8080
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
+      - GO_CHATGPT_API_PANDORA=
+      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
+      - GO_CHATGPT_API_PUID=
     restart: unless-stopped

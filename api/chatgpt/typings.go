@@ -66,23 +66,23 @@ type CreateConversationResponse struct {
 	Error          interface{} `json:"error"`
 }
 
-type FeedbackMessageRequest struct {
-	MessageID      string `json:"message_id"`
-	ConversationID string `json:"conversation_id"`
-	Rating         string `json:"rating"`
-}
-
-type GenerateTitleRequest struct {
-	MessageID string `json:"message_id"`
-}
-
-type PatchConversationRequest struct {
-	Title     *string `json:"title"`
-	IsVisible bool    `json:"is_visible"`
-}
-
-type Cookie struct {
-	Name   string `json:"name"`
-	Value  string `json:"value"`
-	Expiry int64  `json:"expiry"`
+type GetModelsResponse struct {
+	Models []struct {
+		Slug         string   `json:"slug"`
+		MaxTokens    int      `json:"max_tokens"`
+		Title        string   `json:"title"`
+		Description  string   `json:"description"`
+		Tags         []string `json:"tags"`
+		Capabilities struct {
+		} `json:"capabilities"`
+		EnabledTools []string `json:"enabled_tools,omitempty"`
+	} `json:"models"`
+	Categories []struct {
+		Category             string `json:"category"`
+		HumanCategoryName    string `json:"human_category_name"`
+		SubscriptionLevel    string `json:"subscription_level"`
+		DefaultModel         string `json:"default_model"`
+		CodeInterpreterModel string `json:"code_interpreter_model"`
+		PluginsModel         string `json:"plugins_model"`
+	} `json:"categories"`
 }

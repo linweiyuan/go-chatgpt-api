@@ -5,18 +5,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"math/rand"
 	"os"
 	"strings"
-	"time"
 
-	"github.com/docker/docker/api/types"
 	"github.com/gin-gonic/gin"
+	"github.com/linweiyuan/funcaptcha"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
-	docker_client "github.com/docker/docker/client"
 )
 
 //goland:noinspection SpellCheckingInspection
@@ -40,7 +37,9 @@ const (
 	EmailInvalidErrorMessage           = "Email is not valid."
 	EmailOrPasswordInvalidErrorMessage = "Email or password is not correct."
 	GetAccessTokenErrorMessage         = "Failed to get access token."
-	defaultTimeoutSeconds              = 300 // 5 minutes
+	defaultTimeoutSeconds              = 600 // 10 minutes
+
+	ReadyHint = "Service go-chatgpt-api is ready."
 )
 
 var Client tls_client.HttpClient
@@ -65,6 +64,7 @@ func init() {
 		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
 		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
+	funcaptcha.SetTLSClient(&Client)
 }
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
@@ -137,58 +137,4 @@ func GetAccessToken(accessToken string) string {
 		return "Bearer " + accessToken
 	}
 	return accessToken
-}
-
-//goland:noinspection SpellCheckingInspection
-func GenerateRandomString(length int) string {
-	rand.NewSource(time.Now().UnixNano())
-
-	charset := "0123456789abcdefghijklmnopqrstuvwxyz"
-	result := make([]byte, length)
-
-	for i := 0; i < length; i++ {
-		randomIndex := rand.Intn(len(charset))
-		result[i] = charset[randomIndex]
-	}
-
-	return string(result)
-}
-
-func GenerateRandomNumber() int {
-	rand.NewSource(time.Now().UnixNano())
-	return rand.Intn(100) + 1
-}
-
-//goland:noinspection SpellCheckingInspection
-func HealthCheck(c *gin.Context) {
-	cli, err := docker_client.NewClientWithOpts(docker_client.FromEnv)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, ReturnMessage("Failed to connect to docker daemon."))
-		return
-	}
-
-	containers, err := cli.ContainerList(c, types.ContainerListOptions{})
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, ReturnMessage("Failed to list containers."))
-		return
-	}
-
-	containerID := ""
-	for _, container := range containers {
-		if container.Image == "linweiyuan/go-chatgpt-api" {
-			containerID = container.ID
-			break
-		}
-	}
-
-	containerInfo, err := cli.ContainerInspect(c, containerID)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, ReturnMessage("Failed to get container info."))
-		return
-	}
-
-	responseMap := make(map[string]interface{})
-	responseMap["imageId"] = containerInfo.Image
-
-	c.JSON(http.StatusOK, responseMap)
 }

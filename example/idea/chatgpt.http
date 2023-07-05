@@ -61,3 +61,68 @@ Authorization: Bearer {{accessToken}}
 
 ### get conversation limit (no need to pass access token)
 GET {{baseUrl}}/chatgpt/public-api/conversation_limit
+
+### get models with pandora enabled
+GET {{baseUrl}}/api/models?history_and_training_disabled=false
+Authorization: Bearer {{accessToken}}
+
+### share link to chat
+POST {{baseUrl}}/chatgpt/backend-api/share/create
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "current_node_id": "9020711b-3dcf-4705-82ac-46b5af30fc7b",
+  "conversation_id": "74c406dd-a2e8-477a-b420-90ed57a55bf9",
+  "is_anonymous": false
+}
+
+### copy link
+PATCH {{baseUrl}}/chatgpt/backend-api/share/{share_id}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "share_id": "49cd2432-d084-4ab7-8549-4ee18046812b",
+  "highlighted_message_id": null,
+  "title": "Summarize Request and Response 11122",
+  "is_public": false,
+  "is_visible": false,
+  "is_anonymous": true
+}
+
+### continue shared conversation
+POST {{baseUrl}}/chatgpt/backend-api/conversation
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+	"action": "next",
+	"messages": [{
+		"id": "{{$random.uuid}}",
+		"author": {
+			"role": "user"
+		},
+		"content": {
+			"content_type": "text",
+			"parts": [
+        "hello again"
+      ]
+		},
+		"metadata": {}
+	}],
+	"continue_from_shared_conversation_id": "this is the share_id",
+	"parent_message_id": "this is the current_node_id",
+	"model": "text-davinci-002-render-sha",
+	"timezone_offset_min": -480,
+	"history_and_training_disabled": false,
+	"arkose_token": null
+}
+
+### get plugins
+GET {{baseUrl}}/chatgpt/backend-api/aip/p?offset=0&limit=250&statuses=approved
+Authorization: Bearer {{accessToken}}
+
+### get payment url
+GET {{baseUrl}}/chatgpt/backend-api/payments/customer_portal
+Authorization: Bearer {{accessToken}}
