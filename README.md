@@ -11,7 +11,9 @@
 - `GPT-3.5` 和 `GPT-4` 对话增删改查及分享
 - https://platform.openai.com/playground 登录返回 `apiKey`
 - `apiKey` 余额查询
-- ...
+- 等等 ...
+- 支持 `ChatGPT` 转 `API`，接口 `/imitate/v1/chat/completions`，利用 `accessToken` 模拟 `apiKey`，实现伪免费使用 `API`
+  ，从而支持集成仅支持 `apiKey` 调用的第三方客户端项目
 
 范例（URL 和参数基本保持着和官网一致，部分接口有些许改动），部分例子，不是全部，**理论上**全部基于文本传输的接口都支持
 
@@ -260,7 +262,7 @@ amd64）
 
 <!--suppress HtmlRequiredAltAttribute -->
 <a href="https://github.com/linweiyuan/go-chatgpt-api/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api"  alt=""/>
+  <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api&max="  alt=""/>
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).
