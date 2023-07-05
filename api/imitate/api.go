@@ -42,9 +42,15 @@ func CreateChatCompletions(c *gin.Context) {
 		return
 	}
 
-	// 从配置文件里获取（先跑起来再说o(*≧▽≦)ツ）
-	// TODO more
+	authHeader := c.GetHeader("Authorization")
 	token := os.Getenv("IMITATE_ACCESS_TOKEN")
+	if authHeader != "" {
+		customAccessToken := strings.Replace(authHeader, "Bearer ", "", 1)
+		// Check if customAccessToken starts with sk-
+		if strings.HasPrefix(customAccessToken, "eyJhbGciOiJSUzI1NiI") {
+			token = customAccessToken
+		}
+	}
 
 	// 将聊天请求转换为ChatGPT请求。
 	translatedRequest := convertAPIRequest(originalRequest)
