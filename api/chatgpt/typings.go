@@ -1,7 +1,10 @@
 package chatgpt
 
 //goland:noinspection GoSnakeCaseUsage
-import tls_client "github.com/bogdanfinn/tls-client"
+import (
+	tls_client "github.com/bogdanfinn/tls-client"
+	"github.com/google/uuid"
+)
 
 type UserLogin struct {
 	client tls_client.HttpClient
@@ -18,6 +21,14 @@ type CreateConversationRequest struct {
 	ArkoseToken                string    `json:"arkose_token"`
 	HistoryAndTrainingDisabled bool      `json:"history_and_training_disabled"`
 	AutoContinue               bool      `json:"auto_continue"`
+}
+
+func (c *CreateConversationRequest) AddMessage(role string, content string) {
+	c.Messages = append(c.Messages, Message{
+		ID:      uuid.New().String(),
+		Author:  Author{Role: role},
+		Content: Content{ContentType: "text", Parts: []string{content}},
+	})
 }
 
 type Message struct {
