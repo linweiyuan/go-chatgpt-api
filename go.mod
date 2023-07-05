@@ -7,6 +7,7 @@ require (
 	github.com/bogdanfinn/fhttp v0.5.23
 	github.com/bogdanfinn/tls-client v1.4.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.5.1
 	github.com/linweiyuan/funcaptcha v0.0.0-20230704212036-45a7d90e69e5
 	github.com/sirupsen/logrus v1.9.0
