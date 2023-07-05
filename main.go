@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/linweiyuan/go-chatgpt-api/api/imitate"
 	"log"
 	"os"
 	"strings"
@@ -30,6 +31,7 @@ func main() {
 	setupChatGPTAPIs(router)
 	setupPlatformAPIs(router)
 	setupPandoraAPIs(router)
+	setupImitateAPIs(router)
 	router.NoRoute(api.Proxy)
 
 	router.GET("/", func(c *gin.Context) {
@@ -81,5 +83,17 @@ func setupPandoraAPIs(router *gin.Engine) {
 			c.Request.URL.Path = strings.ReplaceAll(c.Request.URL.Path, "/api", "/chatgpt/backend-api")
 			router.HandleContext(c)
 		})
+	}
+}
+
+func setupImitateAPIs(router *gin.Engine) {
+	imitateGroup := router.Group("/imitate")
+	{
+		imitateGroup.POST("/login", chatgpt.Login)
+
+		apiGroup := imitateGroup.Group("/v1")
+		{
+			apiGroup.POST("/chat/completions", imitate.CreateChatCompletions)
+		}
 	}
 }
