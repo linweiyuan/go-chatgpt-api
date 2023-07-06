@@ -14,7 +14,8 @@ const (
 	actionContinue                     = "continue"
 	responseTypeMaxTokens              = "max_tokens"
 	responseStatusFinishedSuccessfully = "finished_successfully"
-
-	getArkoseTokenErrorMessage    = "Failed to get arkose token."
-	noModelPermissionErrorMessage = "You have no permission to use this model, maybe you Plus has expired, or this model is temporary disabled."
+	builtInArkoseTokenIllegalMessage   = "arkose token is illegal, try using an external arkose token service"
+	ArkoseTokenIllegalMessage          = "arkose token is illegal,the arkose service url :"
+	getArkoseTokenErrorMessage         = "Failed to get arkose token."
+	noModelPermissionErrorMessage      = "You have no permission to use this model, maybe you Plus has expired, or this model is temporary disabled."
 )
