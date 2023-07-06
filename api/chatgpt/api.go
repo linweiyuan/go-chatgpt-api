@@ -17,9 +17,10 @@ import (
 
 //goland:noinspection SpellCheckingInspection
 var (
-	arkoseTokenUrl string
-	puid           string
-	bx             string
+	arkoseTokenUrl        string
+	puid                  string
+	bx                    string
+	arkoseValidatePattern = "sup=1|rid="
 )
 
 //goland:noinspection SpellCheckingInspection
@@ -62,7 +63,10 @@ func CreateConversation(c *gin.Context) {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(getArkoseTokenErrorMessage))
 				return
 			}
-
+			if !strings.Contains(arkoseToken, arkoseValidatePattern) {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(builtInArkoseTokenIllegalMessage))
+				return
+			}
 			request.ArkoseToken = arkoseToken
 		} else {
 			req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
@@ -75,7 +79,12 @@ func CreateConversation(c *gin.Context) {
 			defer resp.Body.Close()
 			responseMap := make(map[string]interface{})
 			json.NewDecoder(resp.Body).Decode(&responseMap)
-			request.ArkoseToken = responseMap["token"].(string)
+			arkoseToken := responseMap["token"].(string)
+			if !strings.Contains(arkoseToken, arkoseValidatePattern) {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(ArkoseTokenIllegalMessage+arkoseTokenUrl))
+				return
+			}
+			request.ArkoseToken = arkoseToken
 		}
 	}
 
