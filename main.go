@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -14,9 +15,20 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
 
 	http "github.com/bogdanfinn/fhttp"
+	"github.com/acheong08/OpenAIAuth/auth"
+)
+
+type auth_struct struct {
+	OpenAI_Email    string `json:"openai_email"`
+	OpenAI_Password string `json:"openai_password"`
+}
+
+var (
+	authorizations auth_struct
 )
 
 func init() {
+	setupPUID()
 	gin.ForceConsoleColor()
 	gin.SetMode(gin.ReleaseMode)
 }
@@ -95,5 +107,29 @@ func setupImitateAPIs(router *gin.Engine) {
 		{
 			apiGroup.POST("/chat/completions", imitate.CreateChatCompletions)
 		}
+	}
+}
+
+func setupPUID() {
+	authorizations.OpenAI_Email = os.Getenv("GO_CHATGPT_OPENAI_EMAIL")
+	authorizations.OpenAI_Password = os.Getenv("GO_CHATGPT_OPENAI_PASSWORD")
+	if authorizations.OpenAI_Email != "" && authorizations.OpenAI_Password != "" {
+		go func() {
+			for {
+				authenticator := auth.NewAuthenticator(authorizations.OpenAI_Email, authorizations.OpenAI_Password, "")
+				err := authenticator.Begin()
+				if err != nil {
+					log.Println(err)
+					break
+				}
+				puid, err := authenticator.GetPUID()
+				if err != nil {
+					break
+				}
+				os.Setenv("GO_CHATGPT_API_PUID", puid)
+				println(puid)
+				time.Sleep(24 * time.Hour * 7)
+			}
+		}()
 	}
 }
