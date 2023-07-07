@@ -54,6 +54,7 @@ func setupChatGPTAPIs(router *gin.Engine) {
 	chatgptGroup := router.Group("/chatgpt")
 	{
 		chatgptGroup.POST("/login", chatgpt.Login)
+		chatgptGroup.POST("/backend-api/login", chatgpt.Login) // add support for other projects
 
 		conversationGroup := chatgptGroup.Group("/backend-api/conversation")
 		{
@@ -66,6 +67,7 @@ func setupPlatformAPIs(router *gin.Engine) {
 	platformGroup := router.Group("/platform")
 	{
 		platformGroup.POST("/login", platform.Login)
+		platformGroup.POST("/v1/login", platform.Login)
 
 		apiGroup := platformGroup.Group("/v1")
 		{
