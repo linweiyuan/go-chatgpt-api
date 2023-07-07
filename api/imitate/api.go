@@ -21,14 +21,12 @@ import (
 //goland:noinspection SpellCheckingInspection
 var (
 	arkoseTokenUrl string
-	puid           string
 	bx             string
 )
 
 //goland:noinspection SpellCheckingInspection
 func init() {
 	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
-	puid = os.Getenv("GO_CHATGPT_API_PUID")
 	bx = os.Getenv("GO_CHATGPT_API_BX")
 }
 
@@ -202,7 +200,8 @@ func sendConversationRequest(c *gin.Context, request chatgpt.CreateConversationR
 	req, _ := http.NewRequest(http.MethodPost, api.ChatGPTApiUrlPrefix+"/backend-api/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", accessToken)
-	req.Header.Set("Accept", "text/event-stream")
+	req.Header.Set("Accept", "text/event-stream")	
+	puid := os.Getenv("GO_CHATGPT_API_PUID")
 	if puid != "" {
 		//goland:noinspection SpellCheckingInspection
 		req.Header.Set("Cookie", "_puid="+puid)
