@@ -235,6 +235,16 @@ proxy:
   url: https://go-chatgpt-api.linweiyuan.com
 ```
 
+---
+
+- [Yidadaa/ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web)
+
+环境变量
+
+```
+BASE_URL=https://go-chatgpt-api.linweiyuan.com/imitate
+```
+
 ### 如何控制打包行为
 
 Fork 此项目后，可以在 `Settings-Secrets and variables-Actions` 下控制如下行为：
@@ -262,7 +272,7 @@ amd64）
 
 <!--suppress HtmlRequiredAltAttribute -->
 <a href="https://github.com/linweiyuan/go-chatgpt-api/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api&max="  alt=""/>
+  <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api&max=-1"  alt=""/>
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).
