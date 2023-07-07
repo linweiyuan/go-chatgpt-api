@@ -5,17 +5,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	http "github.com/bogdanfinn/fhttp"
+	"io"
+	"os"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/linweiyuan/funcaptcha"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
-	"io"
-	"os"
-	"strings"
+
+	http "github.com/bogdanfinn/fhttp"
 )
 
+//goland:noinspection SpellCheckingInspection
 var (
 	arkoseTokenUrl string
 	puid           string
@@ -121,8 +124,8 @@ func CreateChatCompletions(c *gin.Context) {
 	}
 }
 
+//goland:noinspection SpellCheckingInspection
 func convertAPIRequest(apiRequest APIRequest) chatgpt.CreateConversationRequest {
-
 	chatgptRequest := NewChatGPTRequest()
 
 	if strings.HasPrefix(apiRequest.Model, "gpt-3.5") {
@@ -182,6 +185,7 @@ func GetOpenAIToken() (string, error) {
 	return arkoseToken, err
 }
 
+//goland:noinspection SpellCheckingInspection
 func NewChatGPTRequest() chatgpt.CreateConversationRequest {
 	enableHistory := os.Getenv("ENABLE_HISTORY") == ""
 	return chatgpt.CreateConversationRequest{
@@ -219,6 +223,7 @@ func sendConversationRequest(c *gin.Context, request chatgpt.CreateConversationR
 	return resp, false
 }
 
+//goland:noinspection SpellCheckingInspection
 func Handler(c *gin.Context, response *http.Response, stream bool) (string, *ContinueInfo) {
 	maxTokens := false
 

@@ -2,9 +2,11 @@ package imitate
 
 import (
 	"encoding/json"
-	http "github.com/bogdanfinn/fhttp"
-	"github.com/gin-gonic/gin"
 	"io"
+
+	"github.com/gin-gonic/gin"
+
+	http "github.com/bogdanfinn/fhttp"
 )
 
 type ContinueInfo struct {
