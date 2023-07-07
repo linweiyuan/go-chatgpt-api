@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/acheong08/OpenAIAuth/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/funcaptcha"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -18,6 +20,7 @@ import (
 //goland:noinspection SpellCheckingInspection
 var (
 	arkoseTokenUrl string
+	puid           string
 	bx             string
 )
 
@@ -25,6 +28,8 @@ var (
 func init() {
 	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
 	bx = os.Getenv("GO_CHATGPT_API_BX")
+
+	setupPUID()
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -97,8 +102,7 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 	req, _ := http.NewRequest(http.MethodPost, api.ChatGPTApiUrlPrefix+"/backend-api/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
-	req.Header.Set("Accept", "text/event-stream")	
-	puid := os.Getenv("GO_CHATGPT_API_PUID")
+	req.Header.Set("Accept", "text/event-stream")
 	if puid != "" {
 		//goland:noinspection SpellCheckingInspection
 		req.Header.Set("Cookie", "_puid="+puid)
@@ -212,5 +216,30 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 		}
 
 		handleConversationResponse(c, resp, continueConversationRequest)
+	}
+}
+
+//goland:noinspection SpellCheckingInspection
+func setupPUID() {
+	username := os.Getenv("GO_CHATGPT_API_OPENAI_EMAIL")
+	password := os.Getenv("GO_CHATGPT_API_OPENAI_PASSWORD")
+	if username != "" && password != "" {
+		go func() {
+			for {
+				authenticator := auth.NewAuthenticator(username, password, os.Getenv("GO_CHATGPT_API_PROXY"))
+				err := authenticator.Begin()
+				if err != nil {
+					logger.Error("Failed to login to get PUID.")
+					break
+				}
+
+				puid, err = authenticator.GetPUID()
+				if err != nil {
+					logger.Error("Failed to get PUID.")
+					break
+				}
+				time.Sleep(24 * time.Hour * 7)
+			}
+		}()
 	}
 }
