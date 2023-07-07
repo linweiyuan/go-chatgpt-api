@@ -19,6 +19,7 @@ import (
 //goland:noinspection SpellCheckingInspection
 const (
 	ChatGPTApiPrefix    = "/chatgpt"
+	ImitateApiPrefix    = "/imitate/v1"
 	ChatGPTApiUrlPrefix = "https://chat.openai.com"
 
 	PlatformApiPrefix    = "/platform"
@@ -87,6 +88,8 @@ func Proxy(c *gin.Context) {
 	url := c.Request.URL.Path
 	if strings.Contains(url, ChatGPTApiPrefix) {
 		url = strings.ReplaceAll(url, ChatGPTApiPrefix, ChatGPTApiUrlPrefix)
+	} else if strings.Contains(url, ImitateApiPrefix) {
+		url = strings.ReplaceAll(url, ImitateApiPrefix, ChatGPTApiUrlPrefix+"/backend-api")
 	} else {
 		url = strings.ReplaceAll(url, PlatformApiPrefix, PlatformApiUrlPrefix)
 	}
