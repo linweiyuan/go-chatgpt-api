@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/funcaptcha"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
+	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
@@ -130,6 +131,8 @@ func Proxy(c *gin.Context) {
 }
 
 func ReturnMessage(msg string) gin.H {
+	logger.Warn(msg)
+
 	return gin.H{
 		defaultErrorMessageKey: msg,
 	}
