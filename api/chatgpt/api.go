@@ -65,8 +65,13 @@ func CreateConversation(c *gin.Context) {
 		} else {
 			req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
 			resp, err := api.Client.Do(req)
-			if err != nil || resp.StatusCode != http.StatusOK {
+			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(getArkoseTokenErrorMessage))
+				return
+			}
+
+			if resp.StatusCode != http.StatusOK {
+				c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getArkoseTokenErrorMessage))
 				return
 			}
 
