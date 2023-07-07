@@ -48,7 +48,7 @@ Issue
 `GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `GO_CHATGPT_API_ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
 ，不设置或者留空则由程序内部自己生成（推荐优先使用这种）
 
-`GO_CHATGPT_API_ARKOSE_TOKEN_URL` 可选值：
+`GO_CHATGPT_API_ARKOSE_TOKEN_URL` 可选值：（目前全部已失效）
 
 - https://arkose-token.linweiyuan.com
 - https://arkose-token.tms.im
@@ -56,6 +56,7 @@ Issue
 - https://a-token.xiu.ee
 - https://tttoken.azurewebsites.net
 - https://arkosetoken.tsmai.top
+- https://api.tms.im/arkose-token-ap
 
 如果用以上方法还是 `403` 并且你的 `Plus`
 没有过期，则有一种可能就是你的账号被风控了，可以尝试用这个账号打开官网，看下会不会弹验证码，然后手动处理下，接着再回来看 `go-chatgpt-api`
@@ -91,7 +92,8 @@ Issue
       - GO_CHATGPT_API_PROXY=
       - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_ARKOSE_PUID=
+      - GO_CHATGPT_API_OPENAI_EMAIL=
+      - GO_CHATGPT_API_OPENAI_PASSWORD=
     restart: unless-stopped
 ```
 
@@ -112,7 +114,8 @@ Issue
       - GO_CHATGPT_API_PROXY=
       - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_ARKOSE_PUID=
+      - GO_CHATGPT_API_OPENAI_EMAIL=
+      - GO_CHATGPT_API_OPENAI_PASSWORD=
     restart: unless-stopped
 ```
 
@@ -135,7 +138,8 @@ Issue
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
       - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_ARKOSE_PUID=
+      - GO_CHATGPT_API_OPENAI_EMAIL=
+      - GO_CHATGPT_API_OPENAI_PASSWORD=
     depends_on:
       - chatgpt-proxy-server-warp
     restart: unless-stopped
