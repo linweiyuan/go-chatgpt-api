@@ -12,8 +12,7 @@ import (
 func CheckHeaderMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.GetHeader(api.AuthorizationHeader) == "" &&
-			c.Request.URL.Path != "/chatgpt/login" &&
-			c.Request.URL.Path != "/platform/login" &&
+			!strings.HasSuffix(c.Request.URL.Path, "/login") &&
 			c.Request.URL.Path != "/" &&
 			!strings.HasPrefix(c.Request.URL.Path, "/chatgpt/public-api") {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, api.ReturnMessage("Please provide a valid access token or api key in 'Authorization' header."))

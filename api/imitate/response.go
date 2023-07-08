@@ -2,6 +2,7 @@ package imitate
 
 import (
 	"encoding/json"
+
 	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
 )
 
@@ -29,6 +30,7 @@ type Delta struct {
 	Role    string `json:"role,omitempty"`
 }
 
+//goland:noinspection SpellCheckingInspection
 func NewChatCompletionChunk(text string) ChatCompletionChunk {
 	return ChatCompletionChunk{
 		ID:      "chatcmpl-QXlha2FBbmROaXhpZUFyZUF3ZXNvbWUK",

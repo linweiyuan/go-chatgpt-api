@@ -5,27 +5,28 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	http "github.com/bogdanfinn/fhttp"
+	"io"
+	"os"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/linweiyuan/funcaptcha"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
-	"io"
-	"os"
-	"strings"
+
+	http "github.com/bogdanfinn/fhttp"
 )
 
+//goland:noinspection SpellCheckingInspection
 var (
 	arkoseTokenUrl string
-	puid           string
 	bx             string
 )
 
 //goland:noinspection SpellCheckingInspection
 func init() {
 	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
-	puid = os.Getenv("GO_CHATGPT_API_PUID")
 	bx = os.Getenv("GO_CHATGPT_API_BX")
 }
 
@@ -42,9 +43,15 @@ func CreateChatCompletions(c *gin.Context) {
 		return
 	}
 
-	// 从配置文件里获取（先跑起来再说o(*≧▽≦)ツ）
-	// TODO more
+	authHeader := c.GetHeader("Authorization")
 	token := os.Getenv("IMITATE_ACCESS_TOKEN")
+	if authHeader != "" {
+		customAccessToken := strings.Replace(authHeader, "Bearer ", "", 1)
+		// Check if customAccessToken starts with sk-
+		if strings.HasPrefix(customAccessToken, "eyJhbGciOiJSUzI1NiI") {
+			token = customAccessToken
+		}
+	}
 
 	// 将聊天请求转换为ChatGPT请求。
 	translatedRequest := convertAPIRequest(originalRequest)
@@ -115,8 +122,8 @@ func CreateChatCompletions(c *gin.Context) {
 	}
 }
 
+//goland:noinspection SpellCheckingInspection
 func convertAPIRequest(apiRequest APIRequest) chatgpt.CreateConversationRequest {
-
 	chatgptRequest := NewChatGPTRequest()
 
 	if strings.HasPrefix(apiRequest.Model, "gpt-3.5") {
@@ -176,6 +183,7 @@ func GetOpenAIToken() (string, error) {
 	return arkoseToken, err
 }
 
+//goland:noinspection SpellCheckingInspection
 func NewChatGPTRequest() chatgpt.CreateConversationRequest {
 	enableHistory := os.Getenv("ENABLE_HISTORY") == ""
 	return chatgpt.CreateConversationRequest{
@@ -192,7 +200,8 @@ func sendConversationRequest(c *gin.Context, request chatgpt.CreateConversationR
 	req, _ := http.NewRequest(http.MethodPost, api.ChatGPTApiUrlPrefix+"/backend-api/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set("Authorization", accessToken)
-	req.Header.Set("Accept", "text/event-stream")
+	req.Header.Set("Accept", "text/event-stream")	
+	puid := os.Getenv("GO_CHATGPT_API_PUID")
 	if puid != "" {
 		//goland:noinspection SpellCheckingInspection
 		req.Header.Set("Cookie", "_puid="+puid)
@@ -213,6 +222,7 @@ func sendConversationRequest(c *gin.Context, request chatgpt.CreateConversationR
 	return resp, false
 }
 
+//goland:noinspection SpellCheckingInspection
 func Handler(c *gin.Context, response *http.Response, stream bool) (string, *ContinueInfo) {
 	maxTokens := false
 

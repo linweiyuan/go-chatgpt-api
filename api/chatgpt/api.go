@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/acheong08/OpenAIAuth/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/funcaptcha"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -25,8 +27,9 @@ var (
 //goland:noinspection SpellCheckingInspection
 func init() {
 	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
-	puid = os.Getenv("GO_CHATGPT_API_PUID")
 	bx = os.Getenv("GO_CHATGPT_API_BX")
+
+	setupPUID()
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -67,15 +70,21 @@ func CreateConversation(c *gin.Context) {
 		} else {
 			req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
 			resp, err := api.Client.Do(req)
-			if err != nil || resp.StatusCode != http.StatusOK {
+			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(getArkoseTokenErrorMessage))
+				return
+			}
+
+			if resp.StatusCode != http.StatusOK {
+				c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getArkoseTokenErrorMessage))
 				return
 			}
 
 			defer resp.Body.Close()
 			responseMap := make(map[string]interface{})
 			json.NewDecoder(resp.Body).Decode(&responseMap)
-			request.ArkoseToken = responseMap["token"].(string)
+			arkoseToken := responseMap["token"].(string)
+			request.ArkoseToken = arkoseToken
 		}
 	}
 
@@ -207,5 +216,30 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 		}
 
 		handleConversationResponse(c, resp, continueConversationRequest)
+	}
+}
+
+//goland:noinspection SpellCheckingInspection
+func setupPUID() {
+	username := os.Getenv("GO_CHATGPT_API_OPENAI_EMAIL")
+	password := os.Getenv("GO_CHATGPT_API_OPENAI_PASSWORD")
+	if username != "" && password != "" {
+		go func() {
+			for {
+				authenticator := auth.NewAuthenticator(username, password, os.Getenv("GO_CHATGPT_API_PROXY"))
+				err := authenticator.Begin()
+				if err != nil {
+					logger.Error("Failed to login to get PUID.")
+					break
+				}
+
+				puid, err = authenticator.GetPUID()
+				if err != nil {
+					logger.Error("Failed to get PUID.")
+					break
+				}
+				time.Sleep(24 * time.Hour * 7)
+			}
+		}()
 	}
 }

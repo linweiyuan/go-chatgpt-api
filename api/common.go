@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/funcaptcha"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
+	"github.com/linweiyuan/go-chatgpt-api/util/logger"
 
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
@@ -19,6 +20,7 @@ import (
 //goland:noinspection SpellCheckingInspection
 const (
 	ChatGPTApiPrefix    = "/chatgpt"
+	ImitateApiPrefix    = "/imitate/v1"
 	ChatGPTApiUrlPrefix = "https://chat.openai.com"
 
 	PlatformApiPrefix    = "/platform"
@@ -87,6 +89,8 @@ func Proxy(c *gin.Context) {
 	url := c.Request.URL.Path
 	if strings.Contains(url, ChatGPTApiPrefix) {
 		url = strings.ReplaceAll(url, ChatGPTApiPrefix, ChatGPTApiUrlPrefix)
+	} else if strings.Contains(url, ImitateApiPrefix) {
+		url = strings.ReplaceAll(url, ImitateApiPrefix, ChatGPTApiUrlPrefix+"/backend-api")
 	} else {
 		url = strings.ReplaceAll(url, PlatformApiPrefix, PlatformApiUrlPrefix)
 	}
@@ -127,6 +131,8 @@ func Proxy(c *gin.Context) {
 }
 
 func ReturnMessage(msg string) gin.H {
+	logger.Warn(msg)
+
 	return gin.H{
 		defaultErrorMessageKey: msg,
 	}

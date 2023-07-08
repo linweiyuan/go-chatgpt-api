@@ -11,7 +11,9 @@
 - `GPT-3.5` 和 `GPT-4` 对话增删改查及分享
 - https://platform.openai.com/playground 登录返回 `apiKey`
 - `apiKey` 余额查询
-- ...
+- 等等 ...
+- 支持 `ChatGPT` 转 `API`，接口 `/imitate/v1/chat/completions`，利用 `accessToken` 模拟 `apiKey`，实现伪免费使用 `API`
+  ，从而支持集成仅支持 `apiKey` 调用的第三方客户端项目
 
 范例（URL 和参数基本保持着和官网一致，部分接口有些许改动），部分例子，不是全部，**理论上**全部基于文本传输的接口都支持
 
@@ -46,7 +48,7 @@ Issue
 `GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `GO_CHATGPT_API_ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
 ，不设置或者留空则由程序内部自己生成（推荐优先使用这种）
 
-`GO_CHATGPT_API_ARKOSE_TOKEN_URL` 可选值：
+`GO_CHATGPT_API_ARKOSE_TOKEN_URL` 可选值：（目前全部已失效）
 
 - https://arkose-token.linweiyuan.com
 - https://arkose-token.tms.im
@@ -54,6 +56,7 @@ Issue
 - https://a-token.xiu.ee
 - https://tttoken.azurewebsites.net
 - https://arkosetoken.tsmai.top
+- https://api.tms.im/arkose-token-ap
 
 如果用以上方法还是 `403` 并且你的 `Plus`
 没有过期，则有一种可能就是你的账号被风控了，可以尝试用这个账号打开官网，看下会不会弹验证码，然后手动处理下，接着再回来看 `go-chatgpt-api`
@@ -89,7 +92,8 @@ Issue
       - GO_CHATGPT_API_PROXY=
       - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_ARKOSE_PUID=
+      - GO_CHATGPT_API_OPENAI_EMAIL=
+      - GO_CHATGPT_API_OPENAI_PASSWORD=
     restart: unless-stopped
 ```
 
@@ -110,7 +114,8 @@ Issue
       - GO_CHATGPT_API_PROXY=
       - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_ARKOSE_PUID=
+      - GO_CHATGPT_API_OPENAI_EMAIL=
+      - GO_CHATGPT_API_OPENAI_PASSWORD=
     restart: unless-stopped
 ```
 
@@ -133,7 +138,8 @@ Issue
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
       - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_ARKOSE_PUID=
+      - GO_CHATGPT_API_OPENAI_EMAIL=
+      - GO_CHATGPT_API_OPENAI_PASSWORD=
     depends_on:
       - chatgpt-proxy-server-warp
     restart: unless-stopped
@@ -233,6 +239,16 @@ proxy:
   url: https://go-chatgpt-api.linweiyuan.com
 ```
 
+---
+
+- [Yidadaa/ChatGPT-Next-Web](https://github.com/Yidadaa/ChatGPT-Next-Web)
+
+环境变量
+
+```
+BASE_URL=https://go-chatgpt-api.linweiyuan.com/imitate
+```
+
 ### 如何控制打包行为
 
 Fork 此项目后，可以在 `Settings-Secrets and variables-Actions` 下控制如下行为：
@@ -260,7 +276,7 @@ amd64）
 
 <!--suppress HtmlRequiredAltAttribute -->
 <a href="https://github.com/linweiyuan/go-chatgpt-api/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api"  alt=""/>
+  <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api&max=-1"  alt=""/>
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).

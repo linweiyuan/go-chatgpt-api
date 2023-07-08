@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+//goland:noinspection SpellCheckingInspection
 func ConvertToString(chatgptResponse *ChatGPTResponse, previousText *StringStruct, role bool) string {
 	translatedResponse := NewChatCompletionChunk(strings.ReplaceAll(chatgptResponse.Message.Content.Parts[0], *&previousText.Text, ""))
 	if role {
