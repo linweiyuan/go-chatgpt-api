@@ -48,19 +48,10 @@ Issue
 `GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `GO_CHATGPT_API_ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
 ，不设置或者留空则由程序内部自己生成（推荐优先使用这种）
 
-`GO_CHATGPT_API_ARKOSE_TOKEN_URL` 可选值：（目前全部已失效）
+如果还是 `403`，访问这个网站：http://stats.churchless.tech，在 `Arkose Labs` 中挑选其中一条绿色的链接即可
 
-- https://arkose-token.linweiyuan.com
-- https://arkose-token.tms.im
-- http://arkosetoken.52swap.cn
-- https://a-token.xiu.ee
-- https://tttoken.azurewebsites.net
-- https://arkosetoken.tsmai.top
-- https://api.tms.im/arkose-token-ap
-
-如果用以上方法还是 `403` 并且你的 `Plus`
-没有过期，则有一种可能就是你的账号被风控了，可以尝试用这个账号打开官网，看下会不会弹验证码，然后手动处理下，接着再回来看 `go-chatgpt-api`
-还会不会 `403`
+或者配置该程序一起使用：[chatgpt-arkose-token-api](https://github.com/linweiyuan/chatgpt-arkose-token-api)，按照 `README`
+的配置自行修改
 
 ---
 
