@@ -3,7 +3,6 @@ package platform
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/url"
 	"strings"
@@ -45,12 +44,16 @@ func (userLogin *UserLogin) GetState(authorizedUrl string) (string, int, error) 
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) CheckUsername(state string, username string) (int, error) {
-	formParams := fmt.Sprintf(
-		"state=%s&username=%s&js-available=true&webauthn-available=true&is-brave=false&webauthn-platform-available=false&action=default",
-		state,
-		username,
-	)
-	req, err := http.NewRequest(http.MethodPost, api.LoginUsernameUrl+state, strings.NewReader(formParams))
+	formParams := url.Values{
+		"state":                       {state},
+		"username":                    {username},
+		"js-available":                {"true"},
+		"webauthn-available":          {"true"},
+		"is-brave":                    {"false"},
+		"webauthn-platform-available": {"false"},
+		"action":                      {"default"},
+	}
+	req, err := http.NewRequest(http.MethodPost, api.LoginUsernameUrl+state, strings.NewReader(formParams.Encode()))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)
@@ -68,13 +71,13 @@ func (userLogin *UserLogin) CheckUsername(state string, username string) (int, e
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) CheckPassword(state string, username string, password string) (string, int, error) {
-	formParams := fmt.Sprintf(
-		"state=%s&username=%s&password=%s&action=default",
-		state,
-		username,
-		password,
-	)
-	req, err := http.NewRequest(http.MethodPost, api.LoginPasswordUrl+state, strings.NewReader(formParams))
+	formParams := url.Values{
+		"state":    {state},
+		"username": {username},
+		"password": {password},
+		"action":   {"default"},
+	}
+	req, err := http.NewRequest(http.MethodPost, api.LoginPasswordUrl+state, strings.NewReader(formParams.Encode()))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)
