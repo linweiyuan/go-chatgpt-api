@@ -48,7 +48,7 @@ Issue
 `GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `GO_CHATGPT_API_ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
 ，不设置或者留空则由程序内部自己生成（推荐优先使用这种）
 
-如果还是 `403`，访问这个网站：http://stats.churchless.tech，在 `Arkose Labs` 中挑选其中一条绿色的链接即可
+如果还是 `403`，访问这个网站：[Health Status](http://stats.churchless.tech)，在 `Arkose Labs` 中挑选其中一条绿色的链接即可
 
 或者配置该程序一起使用：[chatgpt-arkose-token-api](https://github.com/linweiyuan/chatgpt-arkose-token-api)，按照 `README`
 的配置自行修改
