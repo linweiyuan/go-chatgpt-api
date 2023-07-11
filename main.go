@@ -10,6 +10,7 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
 	"github.com/linweiyuan/go-chatgpt-api/api/imitate"
 	"github.com/linweiyuan/go-chatgpt-api/api/platform"
+	"github.com/linweiyuan/go-chatgpt-api/api/token"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
 
@@ -32,6 +33,7 @@ func main() {
 	setupPlatformAPIs(router)
 	setupPandoraAPIs(router)
 	setupImitateAPIs(router)
+	setupTokenAPIs(router)
 	router.NoRoute(api.Proxy)
 
 	router.GET("/", func(c *gin.Context) {
@@ -97,5 +99,12 @@ func setupImitateAPIs(router *gin.Engine) {
 		{
 			apiGroup.POST("/chat/completions", imitate.CreateChatCompletions)
 		}
+	}
+}
+
+func setupTokenAPIs(router *gin.Engine) {
+	tokenGroup := router.Group("/token")
+	{
+		tokenGroup.GET("/arkose", token.GetArkoseToken)
 	}
 }

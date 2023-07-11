@@ -54,13 +54,7 @@ func CreateConversation(c *gin.Context) {
 
 	if strings.HasPrefix(request.Model, gpt4Model) {
 		if arkoseTokenUrl == "" {
-			var arkoseToken string
-			var err error
-			if bx == "" {
-				arkoseToken, err = funcaptcha.GetOpenAIToken()
-			} else {
-				arkoseToken, err = funcaptcha.GetOpenAITokenWithBx(bx)
-			}
+			arkoseToken, err := funcaptcha.GetOpenAITokenWithBx(bx)
 			if err != nil {
 				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(getArkoseTokenErrorMessage))
 				return
@@ -83,8 +77,13 @@ func CreateConversation(c *gin.Context) {
 			defer resp.Body.Close()
 			responseMap := make(map[string]interface{})
 			json.NewDecoder(resp.Body).Decode(&responseMap)
-			arkoseToken := responseMap["token"].(string)
-			request.ArkoseToken = arkoseToken
+			token, ok := responseMap["token"]
+			if !ok || token == "" {
+				c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage(getArkoseTokenErrorMessage))
+				return
+			}
+
+			request.ArkoseToken = token.(string)
 		}
 	}
 

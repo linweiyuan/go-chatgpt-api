@@ -53,8 +53,8 @@ github.com/klauspost/cpuid/v2 v2.2.4 h1:acbojRNwl3o09bUq+yDCtZFc1aiwaAAxtcn8YkZX
 github.com/klauspost/cpuid/v2 v2.2.4/go.mod h1:RVVoqg1df56z8g3pUjL/3lE5UfnlrJX8tyFgg4nqhuY=
 github.com/leodido/go-urn v1.2.4 h1:XlAE/cm/ms7TE/VMVoduSpNBoyc2dOxHs5MZSwAN63Q=
 github.com/leodido/go-urn v1.2.4/go.mod h1:7ZrI8mTSeBSHl/UaRyKQW1qZeMgak41ANeCNaVckg+4=
-github.com/linweiyuan/funcaptcha v0.0.0-20230704212036-45a7d90e69e5 h1:eALnriDN2p7Z8QXT8AqVZ4kytd+Ob4Zcm/QjHX3u1HQ=
-github.com/linweiyuan/funcaptcha v0.0.0-20230704212036-45a7d90e69e5/go.mod h1:ecLx/KqJH1MqzbYwCTyFl8lXqHwGqyO/3ujhT/c/Pq4=
+github.com/linweiyuan/funcaptcha v0.0.0-20230711153901-3330bd4101dd h1:d1ouKWOYZcG4h+7v9ySusLg2tngbd1YH1+z3XKkfxj0=
+github.com/linweiyuan/funcaptcha v0.0.0-20230711153901-3330bd4101dd/go.mod h1:ecLx/KqJH1MqzbYwCTyFl8lXqHwGqyO/3ujhT/c/Pq4=
 github.com/linweiyuan/go-logger v0.0.0-20230709142852-da1f090a7d4c h1:KJqkWkepk+PGSCC3i+ANrLnthM/x9qyfG4uCTGg2B8E=
 github.com/linweiyuan/go-logger v0.0.0-20230709142852-da1f090a7d4c/go.mod h1:U37nbW0kovzaMnrX5sBmxOwidA7P4ymM3/K64oaTQJc=
 github.com/mattn/go-isatty v0.0.19 h1:JITubQf0MOLdlGRuRq+jtsDlekdYPia9ZFsB8h/APPA=
