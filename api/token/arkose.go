@@ -1,28 +1,17 @@
 package token
 
 import (
-	"os"
-
 	"github.com/gin-gonic/gin"
-	"github.com/linweiyuan/funcaptcha"
 	"github.com/linweiyuan/go-chatgpt-api/api"
+	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
 
 	http "github.com/bogdanfinn/fhttp"
 )
 
-var (
-	bx string
-)
-
-//goland:noinspection SpellCheckingInspection
-func init() {
-	bx = os.Getenv("GO_CHATGPT_API_BX")
-}
-
 func GetArkoseToken(c *gin.Context) {
-	token, err := funcaptcha.GetOpenAITokenWithBx(bx)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage("Failed to get arkose token."))
+	token, err := chatgpt.GetArkoseToken()
+	if err != nil || token == "" {
+		c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage("Failed to get arkose token."))
 		return
 	}
 

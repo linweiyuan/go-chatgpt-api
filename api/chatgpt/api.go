@@ -53,38 +53,13 @@ func CreateConversation(c *gin.Context) {
 	logger.Info(request.Model)
 
 	if strings.HasPrefix(request.Model, gpt4Model) {
-		if arkoseTokenUrl == "" {
-			arkoseToken, err := funcaptcha.GetOpenAITokenWithBx(bx)
-			if err != nil {
-				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(getArkoseTokenErrorMessage))
-				return
-			}
-
-			request.ArkoseToken = arkoseToken
-		} else {
-			req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
-			resp, err := api.Client.Do(req)
-			if err != nil {
-				c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(getArkoseTokenErrorMessage))
-				return
-			}
-
-			if resp.StatusCode != http.StatusOK {
-				c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getArkoseTokenErrorMessage))
-				return
-			}
-
-			defer resp.Body.Close()
-			responseMap := make(map[string]interface{})
-			json.NewDecoder(resp.Body).Decode(&responseMap)
-			token, ok := responseMap["token"]
-			if !ok || token == "" {
-				c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage(getArkoseTokenErrorMessage))
-				return
-			}
-
-			request.ArkoseToken = token.(string)
+		arkoseToken, err := GetArkoseToken()
+		if err != nil || arkoseToken == "" {
+			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage(err.Error()))
+			return
 		}
+
+		request.ArkoseToken = arkoseToken
 	}
 
 	resp, done := sendConversationRequest(c, request)
@@ -241,4 +216,31 @@ func setupPUID() {
 			}
 		}()
 	}
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func GetArkoseToken() (string, error) {
+	if arkoseTokenUrl == "" {
+		return funcaptcha.GetOpenAITokenWithBx(bx)
+	}
+
+	req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
+	resp, err := api.Client.Do(req)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", err
+	}
+
+	defer resp.Body.Close()
+	responseMap := make(map[string]interface{})
+	json.NewDecoder(resp.Body).Decode(&responseMap)
+	arkoseToken, ok := responseMap["token"]
+	if !ok || arkoseToken == "" {
+		return "", nil
+	}
+
+	return arkoseToken.(string), nil
 }
