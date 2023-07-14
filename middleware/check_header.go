@@ -11,7 +11,8 @@ import (
 //goland:noinspection SpellCheckingInspection
 func CheckHeaderMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if c.GetHeader(api.AuthorizationHeader) == "" &&
+		if c.GetHeader("X-Authorization") == "" &&
+		    c.GetHeader(api.AuthorizationHeader) == "" &&
 			!strings.HasSuffix(c.Request.URL.Path, "/login") &&
 			c.Request.URL.Path != "/" &&
 			!strings.HasPrefix(c.Request.URL.Path, "/chatgpt/public-api") {
