@@ -49,10 +49,6 @@ Issue
 ，不设置或者留空则由程序内部自己生成（推荐优先使用这种）
 
 如果还是 `403`，访问这个网站：[Health Status](http://stats.churchless.tech)，在 `Arkose Labs` 中挑选其中一条绿色的链接即可
-
-或者配置该程序一起使用：[chatgpt-arkose-token-api](https://github.com/linweiyuan/chatgpt-arkose-token-api)，按照 `README`
-的配置自行修改
-
 ---
 
 根据你的网络环境不同，可以展开查看对应配置
@@ -189,7 +185,7 @@ services:
 环境变量
 
 ```
-CHATGPT_BASE_URL=https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/
+CHATGPT_BASE_URL=http://go-chatgpt-api:8080/chatgpt/backend-api/
 ```
 
 - [lss233/chatgpt-mirai-qq-bot](https://github.com/lss233/chatgpt-mirai-qq-bot)
@@ -198,7 +194,7 @@ CHATGPT_BASE_URL=https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/
 
 ```
 [openai]
-browserless_endpoint = "https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/"
+browserless_endpoint = "http://go-chatgpt-api:8080/chatgpt/backend-api/"
 ```
 
 - [Kerwin1202/chatgpt-web](https://github.com/Kerwin1202/chatgpt-web) | [Chanzhaoyu/chatgpt-web](https://github.com/Chanzhaoyu/chatgpt-web)
@@ -206,7 +202,7 @@ browserless_endpoint = "https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-ap
 环境变量
 
 ```
-API_REVERSE_PROXY=https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/conversation
+API_REVERSE_PROXY=http://go-chatgpt-api:8080/chatgpt/backend-api/conversation
 ```
 
 - [pengzhile/pandora](https://github.com/pengzhile/pandora)（不完全兼容）
@@ -216,7 +212,7 @@ API_REVERSE_PROXY=https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/conv
 ```
 go-chatgpt-api: GO_CHATGPT_API_PANDORA=1
 
-pandora: CHATGPT_API_PREFIX=https://go-chatgpt-api.linweiyuan.com
+pandora: CHATGPT_API_PREFIX=http://go-chatgpt-api:8080
 ```
 
 ---
@@ -227,7 +223,7 @@ pandora: CHATGPT_API_PREFIX=https://go-chatgpt-api.linweiyuan.com
 
 ```yaml
 proxy:
-  url: https://go-chatgpt-api.linweiyuan.com
+  url: http://go-chatgpt-api:8080
 ```
 
 ---
@@ -237,7 +233,7 @@ proxy:
 环境变量
 
 ```
-BASE_URL=https://go-chatgpt-api.linweiyuan.com/imitate
+BASE_URL=http://go-chatgpt-api:8080/imitate
 ```
 
 ### 如何控制打包行为
