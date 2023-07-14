@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	nethttp "net/http"
 	"os"
 	"strings"
 
@@ -57,6 +58,7 @@ type AuthLogin interface {
 	CheckUsername(state string, username string) (int, error)
 	CheckPassword(state string, username string, password string) (string, int, error)
 	GetAccessToken(code string) (string, int, error)
+	GetAccessTokenFromHeader(c *gin.Context) (string, int, error)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -143,4 +145,15 @@ func GetAccessToken(accessToken string) string {
 		return "Bearer " + accessToken
 	}
 	return accessToken
+}
+
+func GetAccessTokenFromHeader(header nethttp.Header) string {
+	// pandora will pass X-Authorization header
+	// but maybe other project will use Authorization header to pass access token
+	xAuth := header.Get("X-Authorization")
+	if xAuth == "" {
+		return GetAccessToken(header.Get(AuthorizationHeader))
+	} else {
+		return GetAccessToken(xAuth)
+	}
 }
