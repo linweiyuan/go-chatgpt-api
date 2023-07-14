@@ -114,7 +114,7 @@ func Proxy(c *gin.Context) {
 		req, _ = http.NewRequest(method, url, bytes.NewReader(body))
 	}
 	req.Header.Set("User-Agent", UserAgent)
-	req.Header.Set("Authorization", GetAccessToken(c.GetHeader(AuthorizationHeader)))
+	req.Header.Set("Authorization", GetAccessTokenFromHeader(c.Request.Header))
 	resp, err := Client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, ReturnMessage(err.Error()))
