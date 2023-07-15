@@ -34,6 +34,7 @@ type AccessToken struct {
 	Scope string   `json:"scope"`
 }
 
+//goland:noinspection SpellCheckingInspection
 func Authorization() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authorization := c.GetHeader(api.AuthorizationHeader)

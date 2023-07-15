@@ -49,6 +49,7 @@ func NewChatCompletionChunk(text string) ChatCompletionChunk {
 	}
 }
 
+//goland:noinspection SpellCheckingInspection
 func StopChunk(reason string) ChatCompletionChunk {
 	return ChatCompletionChunk{
 		ID:      "chatcmpl-QXlha2FBbmROaXhpZUFyZUF3ZXNvbWUK",
@@ -122,6 +123,7 @@ type StringStruct struct {
 	Text string `json:"text"`
 }
 
+//goland:noinspection SpellCheckingInspection
 func newChatCompletion(fullTest string) ChatCompletion {
 	return ChatCompletion{
 		ID:      "chatcmpl-QXlha2FBbmROaXhpZUFyZUF3ZXNvbWUK",
