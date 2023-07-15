@@ -77,7 +77,6 @@ Issue
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
       - GO_CHATGPT_API_OPENAI_EMAIL=
       - GO_CHATGPT_API_OPENAI_PASSWORD=
@@ -99,7 +98,6 @@ Issue
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
       - GO_CHATGPT_API_OPENAI_EMAIL=
       - GO_CHATGPT_API_OPENAI_PASSWORD=
@@ -123,7 +121,6 @@ Issue
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
-      - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
       - GO_CHATGPT_API_OPENAI_EMAIL=
       - GO_CHATGPT_API_OPENAI_PASSWORD=
@@ -210,9 +207,7 @@ API_REVERSE_PROXY=http://go-chatgpt-api:8080/chatgpt/backend-api/conversation
 环境变量
 
 ```
-go-chatgpt-api: GO_CHATGPT_API_PANDORA=1
-
-pandora: CHATGPT_API_PREFIX=http://go-chatgpt-api:8080
+CHATGPT_API_PREFIX=http://go-chatgpt-api:8080
 ```
 
 ---
