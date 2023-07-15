@@ -8,7 +8,6 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_PANDORA=
       - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
       - GO_CHATGPT_API_OPENAI_EMAIL=
       - GO_CHATGPT_API_OPENAI_PASSWORD=
