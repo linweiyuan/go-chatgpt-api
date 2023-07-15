@@ -11,7 +11,7 @@ import (
 func GetArkoseToken(c *gin.Context) {
 	token, err := chatgpt.GetArkoseToken()
 	if err != nil || token == "" {
-		c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage("Failed to get arkose token."))
+		c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage(api.GetArkoseTokenErrorMessage))
 		return
 	}
 

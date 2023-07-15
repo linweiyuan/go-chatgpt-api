@@ -40,6 +40,7 @@ const (
 	EmailInvalidErrorMessage           = "Email is not valid."
 	EmailOrPasswordInvalidErrorMessage = "Email or password is not correct."
 	GetAccessTokenErrorMessage         = "Failed to get access token."
+	GetArkoseTokenErrorMessage         = "Failed to get arkose token."
 	defaultTimeoutSeconds              = 600 // 10 minutes
 
 	ReadyHint = "Service go-chatgpt-api is ready."

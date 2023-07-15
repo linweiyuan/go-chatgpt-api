@@ -55,7 +55,7 @@ func CreateConversation(c *gin.Context) {
 	if strings.HasPrefix(request.Model, gpt4Model) {
 		arkoseToken, err := GetArkoseToken()
 		if err != nil || arkoseToken == "" {
-			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage(err.Error()))
+			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage(api.GetArkoseTokenErrorMessage))
 			return
 		}
 
