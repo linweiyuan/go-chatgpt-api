@@ -43,7 +43,7 @@ func CreateChatCompletions(c *gin.Context) {
 		return
 	}
 
-	authHeader := c.GetHeader("Authorization")
+	authHeader := c.GetHeader(api.AuthorizationHeader)
 	token := os.Getenv("IMITATE_ACCESS_TOKEN")
 	if authHeader != "" {
 		customAccessToken := strings.Replace(authHeader, "Bearer ", "", 1)
@@ -199,12 +199,11 @@ func sendConversationRequest(c *gin.Context, request chatgpt.CreateConversationR
 	jsonBytes, _ := json.Marshal(request)
 	req, _ := http.NewRequest(http.MethodPost, api.ChatGPTApiUrlPrefix+"/backend-api/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", api.UserAgent)
-	req.Header.Set("Authorization", accessToken)
-	req.Header.Set("Accept", "text/event-stream")	
-	puid := os.Getenv("GO_CHATGPT_API_PUID")
-	if puid != "" {
+	req.Header.Set(api.AuthorizationHeader, accessToken)
+	req.Header.Set("Accept", "text/event-stream")
+	if chatgpt.PUID != "" {
 		//goland:noinspection SpellCheckingInspection
-		req.Header.Set("Cookie", "_puid="+puid)
+		req.Header.Set("Cookie", "_puid="+chatgpt.PUID)
 	}
 	resp, err := api.Client.Do(req)
 	if err != nil {

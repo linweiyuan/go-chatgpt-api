@@ -74,7 +74,7 @@ func handleCompletionsResponse(c *gin.Context, resp *http.Response) {
 
 func handlePost(c *gin.Context, url string, data []byte, stream bool) (*http.Response, error) {
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(data))
-	req.Header.Set("Authorization", api.GetAccessTokenFromHeader(c.Request.Header))
+	req.Header.Set(api.AuthorizationHeader, api.GetAccessToken(c))
 	if stream {
 		req.Header.Set("Accept", "text/event-stream")
 	}

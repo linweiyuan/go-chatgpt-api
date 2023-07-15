@@ -20,7 +20,7 @@ import (
 //goland:noinspection SpellCheckingInspection
 var (
 	arkoseTokenUrl string
-	puid           string
+	PUID           string
 	bx             string
 )
 
@@ -75,11 +75,11 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 	jsonBytes, _ := json.Marshal(request)
 	req, _ := http.NewRequest(http.MethodPost, api.ChatGPTApiUrlPrefix+"/backend-api/conversation", bytes.NewBuffer(jsonBytes))
 	req.Header.Set("User-Agent", api.UserAgent)
-	req.Header.Set("Authorization", api.GetAccessTokenFromHeader(c.Request.Header))
+	req.Header.Set(api.AuthorizationHeader, api.GetAccessToken(c))
 	req.Header.Set("Accept", "text/event-stream")
-	if puid != "" {
+	if PUID != "" {
 		//goland:noinspection SpellCheckingInspection
-		req.Header.Set("Cookie", "_puid="+puid)
+		req.Header.Set("Cookie", "_puid="+PUID)
 	}
 	resp, err := api.Client.Do(req)
 	if err != nil {
@@ -92,7 +92,7 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 
 		req, _ := http.NewRequest(http.MethodGet, api.ChatGPTApiUrlPrefix+"/backend-api/models?history_and_training_disabled=false", nil)
 		req.Header.Set("User-Agent", api.UserAgent)
-		req.Header.Set("Authorization", api.GetAccessTokenFromHeader(c.Request.Header))
+		req.Header.Set(api.AuthorizationHeader, api.GetAccessToken(c))
 		response, err := api.Client.Do(req)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
@@ -207,7 +207,7 @@ func setupPUID() {
 					break
 				}
 
-				puid, err = authenticator.GetPUID()
+				PUID, err = authenticator.GetPUID()
 				if err != nil {
 					logger.Error("Failed to get PUID.")
 					break

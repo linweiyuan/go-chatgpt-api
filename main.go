@@ -26,8 +26,8 @@ func init() {
 func main() {
 	router := gin.Default()
 
-	router.Use(middleware.CORSMiddleware())
-	router.Use(middleware.CheckHeaderMiddleware())
+	router.Use(middleware.CORS())
+	router.Use(middleware.Authorization())
 
 	setupChatGPTAPIs(router)
 	setupPlatformAPIs(router)
@@ -37,7 +37,6 @@ func main() {
 	router.NoRoute(api.Proxy)
 
 	router.GET("/", func(c *gin.Context) {
-		c.Header("Content-Type", "text/plain")
 		c.String(http.StatusOK, api.ReadyHint)
 	})
 

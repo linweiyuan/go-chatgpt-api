@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	nethttp "net/http"
 	"os"
 	"strings"
 
@@ -29,6 +28,7 @@ const (
 
 	defaultErrorMessageKey             = "errorMessage"
 	AuthorizationHeader                = "Authorization"
+	XAuthorizationHeader               = "X-Authorization"
 	ContentType                        = "application/x-www-form-urlencoded"
 	UserAgent                          = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
 	Auth0Url                           = "https://auth0.openai.com"
@@ -114,7 +114,7 @@ func Proxy(c *gin.Context) {
 		req, _ = http.NewRequest(method, url, bytes.NewReader(body))
 	}
 	req.Header.Set("User-Agent", UserAgent)
-	req.Header.Set("Authorization", GetAccessTokenFromHeader(c.Request.Header))
+	req.Header.Set(AuthorizationHeader, GetAccessToken(c))
 	resp, err := Client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, ReturnMessage(err.Error()))
@@ -140,20 +140,11 @@ func ReturnMessage(msg string) gin.H {
 	}
 }
 
-func GetAccessToken(accessToken string) string {
+func GetAccessToken(c *gin.Context) string {
+	accessToken := c.GetString(AuthorizationHeader)
 	if !strings.HasPrefix(accessToken, "Bearer") {
 		return "Bearer " + accessToken
 	}
-	return accessToken
-}
 
-func GetAccessTokenFromHeader(header nethttp.Header) string {
-	// pandora will pass X-Authorization header
-	// but maybe other project will use Authorization header to pass access token
-	xAuth := header.Get("X-Authorization")
-	if xAuth == "" {
-		return GetAccessToken(header.Get(AuthorizationHeader))
-	} else {
-		return GetAccessToken(xAuth)
-	}
+	return accessToken
 }
