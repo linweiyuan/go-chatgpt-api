@@ -45,10 +45,57 @@ Issue
 
 家庭网络无需跑 `warp` 服务，跑了也没用，会报错，仅在服务器需要
 
-`GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
-，不设置或者留空则由程序内部自己生成（推荐优先使用这种）
+---
 
-如果还是 `403`，访问这个网站：[Health Status](http://stats.churchless.tech)，在 `Arkose Labs` 中挑选其中一条绿色的链接即可
+`GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
+，不设置或者留空则由程序内部自己生成（推荐优先使用这种，减轻公共服务压力，或者自定义 `BX` 参数）
+
+如果还是 `403`：
+
+- 访问这个网站：[Health Status](http://stats.churchless.tech)，在 `Arkose Labs`
+  中挑选其中一条绿色的链接配置到 `ARKOSE_TOKEN_URL` 即可
+
+- 或者配合 [xyhelper/xyhelper-arkose](https://github.com/xyhelper/xyhelper-arkose) 一起使用，详情查看文档
+
+- 或者配合 [linweiyuan/chatgpt-arkose-token-api](https://github.com/linweiyuan/chatgpt-arkose-token-api)
+  一起使用，不一定能用，比较挑环境，原因未知
+  <details>
+
+  <summary>展开配置</summary>
+
+  ```yaml
+  services:
+    go-chatgpt-api:
+      container_name: go-chatgpt-api
+      image: linweiyuan/go-chatgpt-api
+      ports:
+        - 8080:8080
+      environment:
+        - TZ=Asia/Shanghai
+        - PROXY=socks5://chatgpt-proxy-server-warp:65535
+        - ARKOSE_TOKEN_URL=http://chatgpt-proxy-server-arkose:8081/token
+      depends_on:
+        - chatgpt-proxy-server-warp
+        - chatgpt-proxy-server-arkose
+      restart: unless-stopped
+  
+    chatgpt-proxy-server-arkose:
+      container_name: chatgpt-proxy-server-arkose
+      image: linweiyuan/chatgpt-proxy-server-arkose
+      environment:
+        - PROXY=socks5://chatgpt-proxy-server-warp:65535
+      depends_on:
+        - chatgpt-proxy-server-warp
+      restart: unless-stopped
+  
+    chatgpt-proxy-server-warp:
+      container_name: chatgpt-proxy-server-warp
+      image: linweiyuan/chatgpt-proxy-server-warp
+      restart: unless-stopped
+  ```
+
+  </details>
+
 ---
 
 根据你的网络环境不同，可以展开查看对应配置，下面例子是基本参数，更多参数查看 [compose.yaml](https://github.com/linweiyuan/go-chatgpt-api/blob/main/compose.yaml)
