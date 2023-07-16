@@ -69,7 +69,7 @@ func init() {
 		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
 		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
-	funcaptcha.SetTLSClient(&Client)
+	funcaptcha.SetTLSClient(Client)
 }
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection

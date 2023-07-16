@@ -10,7 +10,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.5.1
-	github.com/linweiyuan/funcaptcha v0.0.0-20230711153901-3330bd4101dd
+	github.com/linweiyuan/funcaptcha v0.0.0-20230716080642-faf9190605ce
 	github.com/linweiyuan/go-logger v0.0.0-20230709142852-da1f090a7d4c
 )
 

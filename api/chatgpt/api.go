@@ -24,10 +24,20 @@ var (
 	bx             string
 )
 
-//goland:noinspection SpellCheckingInspection
+//goland:noinspection SpellCheckingInspection,GoUnhandledErrorResult
 func init() {
 	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
-	bx = os.Getenv("GO_CHATGPT_API_BX")
+
+	bx = os.Getenv("BX")
+	if bx != "" {
+		// to fix first time 403
+		funcaptcha.GetOpenAITokenWithBx(bx)
+	} else {
+		bxUrl := os.Getenv("BX_URL")
+		if bxUrl != "" {
+			go getBX(bxUrl)
+		}
+	}
 
 	setupPUID()
 }
@@ -52,7 +62,7 @@ func CreateConversation(c *gin.Context) {
 
 	logger.Info(request.Model)
 
-	if strings.HasPrefix(request.Model, gpt4Model) {
+	if strings.HasPrefix(request.Model, gpt4Model) && request.ArkoseToken == "" {
 		arkoseToken, err := GetArkoseToken()
 		if err != nil || arkoseToken == "" {
 			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage(api.GetArkoseTokenErrorMessage))
@@ -243,4 +253,25 @@ func GetArkoseToken() (string, error) {
 	}
 
 	return arkoseToken.(string), nil
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func getBX(url string) {
+	// refresh bx hourly
+	for {
+		req, _ := http.NewRequest(http.MethodGet, url, nil)
+		resp, err := api.Client.Do(req)
+		if err != nil {
+			return
+		}
+
+		responseMap := make(map[string]interface{})
+		json.NewDecoder(resp.Body).Decode(&responseMap)
+		resp.Body.Close()
+
+		data, _ := json.Marshal(responseMap["bx"])
+		bx = string(data)
+
+		time.Sleep(time.Hour)
+	}
 }
