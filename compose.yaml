@@ -7,8 +7,10 @@ services:
       - 8080:8080
     environment:
       - TZ=Asia/Shanghai
-      - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_OPENAI_EMAIL=
-      - GO_CHATGPT_API_OPENAI_PASSWORD=
+      - PROXY=
+      - ARKOSE_TOKEN_URL=
+      - BX=
+      - BX_URL=
+      - OPENAI_EMAIL=
+      - OPENAI_PASSWORD=
     restart: unless-stopped

@@ -26,8 +26,8 @@ var (
 
 //goland:noinspection SpellCheckingInspection
 func init() {
-	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
-	bx = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_BX")
+	arkoseTokenUrl = os.Getenv("ARKOSE_TOKEN_URL")
+	bx = os.Getenv("BX")
 }
 
 func CreateChatCompletions(c *gin.Context) {

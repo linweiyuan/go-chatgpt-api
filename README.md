@@ -34,24 +34,24 @@ Issue
 
 ### 配置
 
-如需设置代理，可以设置环境变量 `GO_CHATGPT_API_PROXY`，比如 `GO_CHATGPT_API_PROXY=http://127.0.0.1:20171`
-或者 `GO_CHATGPT_API_PROXY=socks5://127.0.0.1:20170`，注释掉或者留空则不启用
+如需设置代理，可以设置环境变量 `PROXY`，比如 `PROXY=http://127.0.0.1:20171`
+或者 `PROXY=socks5://127.0.0.1:20170`，注释掉或者留空则不启用
 
 如果代理需账号密码验证，则 `http://username:password@ip:port` 或者 `socks5://username:password@ip:port`
 
-如需配合 `warp` 使用：`GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535`，因为需要设置 `warp`
+如需配合 `warp` 使用：`PROXY=socks5://chatgpt-proxy-server-warp:65535`，因为需要设置 `warp`
 的场景已经默认可以直接访问 `ChatGPT` 官网，因此共用一个变量不冲突（国内 `VPS` 不在讨论范围内，请自行配置网络环境，`warp`
 服务在魔法环境下才能正常工作）
 
 家庭网络无需跑 `warp` 服务，跑了也没用，会报错，仅在服务器需要
 
-`GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `GO_CHATGPT_API_ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
+`GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
 ，不设置或者留空则由程序内部自己生成（推荐优先使用这种）
 
 如果还是 `403`，访问这个网站：[Health Status](http://stats.churchless.tech)，在 `Arkose Labs` 中挑选其中一条绿色的链接即可
 ---
 
-根据你的网络环境不同，可以展开查看对应配置
+根据你的网络环境不同，可以展开查看对应配置，下面例子是基本参数，更多参数查看 [compose.yaml](https://github.com/linweiyuan/go-chatgpt-api/blob/main/compose.yaml)
 
 <details>
 
@@ -66,7 +66,7 @@ Issue
 
 <details>
 
-<summary>家庭网络</summary>
+<summary>网络在直连或者通过代理的情况下可以正常访问 ChatGPT</summary>
 
 ```yaml
   go-chatgpt-api:
@@ -76,31 +76,6 @@ Issue
       - 8080:8080
     environment:
       - TZ=Asia/Shanghai
-      - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_OPENAI_EMAIL=
-      - GO_CHATGPT_API_OPENAI_PASSWORD=
-    restart: unless-stopped
-```
-
-</details>
-
-<details>
-
-<summary>服务器在直连或者通过网络代理的情况下可以正常访问 ChatGPT</summary>
-
-```yaml
-  go-chatgpt-api:
-    container_name: go-chatgpt-api
-    image: linweiyuan/go-chatgpt-api
-    ports:
-      - 8080:8080
-    environment:
-      - TZ=Asia/Shanghai
-      - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_OPENAI_EMAIL=
-      - GO_CHATGPT_API_OPENAI_PASSWORD=
     restart: unless-stopped
 ```
 
@@ -120,10 +95,7 @@ Issue
       - 8080:8080
     environment:
       - TZ=Asia/Shanghai
-      - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_OPENAI_EMAIL=
-      - GO_CHATGPT_API_OPENAI_PASSWORD=
+      - PROXY=socks5://chatgpt-proxy-server-warp:65535
     depends_on:
       - chatgpt-proxy-server-warp
     restart: unless-stopped
@@ -131,8 +103,6 @@ Issue
   chatgpt-proxy-server-warp:
     container_name: chatgpt-proxy-server-warp
     image: linweiyuan/chatgpt-proxy-server-warp
-    environment:
-      - LOG_LEVEL=OFF
     restart: unless-stopped
 ```
 

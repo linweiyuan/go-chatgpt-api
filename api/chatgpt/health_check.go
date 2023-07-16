@@ -21,9 +21,9 @@ const (
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
 func init() {
-	proxyUrl := os.Getenv("GO_CHATGPT_API_PROXY")
+	proxyUrl := os.Getenv("PROXY")
 	if proxyUrl != "" {
-		logger.Info("GO_CHATGPT_API_PROXY: " + proxyUrl)
+		logger.Info("PROXY: " + proxyUrl)
 		api.Client.SetProxy(proxyUrl)
 
 		for {

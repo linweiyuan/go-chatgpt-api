@@ -79,7 +79,7 @@ func NewHttpClient() tls_client.HttpClient {
 		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
 
-	proxyUrl := os.Getenv("GO_CHATGPT_API_PROXY")
+	proxyUrl := os.Getenv("PROXY")
 	if proxyUrl != "" {
 		client.SetProxy(proxyUrl)
 	}

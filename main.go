@@ -40,7 +40,7 @@ func main() {
 		c.String(http.StatusOK, api.ReadyHint)
 	})
 
-	port := os.Getenv("GO_CHATGPT_API_PORT")
+	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}

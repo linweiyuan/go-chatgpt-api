@@ -26,7 +26,7 @@ var (
 
 //goland:noinspection SpellCheckingInspection,GoUnhandledErrorResult
 func init() {
-	arkoseTokenUrl = os.Getenv("GO_CHATGPT_API_ARKOSE_TOKEN_URL")
+	arkoseTokenUrl = os.Getenv("ARKOSE_TOKEN_URL")
 
 	bx = os.Getenv("BX")
 	if bx != "" {
@@ -205,12 +205,12 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 
 //goland:noinspection SpellCheckingInspection
 func setupPUID() {
-	username := os.Getenv("GO_CHATGPT_API_OPENAI_EMAIL")
-	password := os.Getenv("GO_CHATGPT_API_OPENAI_PASSWORD")
+	username := os.Getenv("OPENAI_EMAIL")
+	password := os.Getenv("OPENAI_PASSWORD")
 	if username != "" && password != "" {
 		go func() {
 			for {
-				authenticator := auth.NewAuthenticator(username, password, os.Getenv("GO_CHATGPT_API_PROXY"))
+				authenticator := auth.NewAuthenticator(username, password, os.Getenv("PROXY"))
 				err := authenticator.Begin()
 				if err != nil {
 					logger.Error("Failed to login to get PUID.")
