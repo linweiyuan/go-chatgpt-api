@@ -256,8 +256,7 @@ Fork 此项目后，可以在 `Settings-Secrets and variables-Actions` 下控制
 
 `Variables` 页添加 `USE_GHCR=1` 即可推送到个人的 GHCR
 仓库（[需要开启仓库的写入权限](https://stackoverflow.com/questions/75926611/github-workflow-to-push-docker-image-to-ghcr-io)）
-`Variables` 页添加 `PLATFORMS=linux/amd64,linux/arm64` 即可同时打包 amd64 和 arm64 的架构的镜像（缺省情况下只会打包
-amd64）
+`Variables` 页添加 `PLATFORMS=linux/amd64,linux/arm64` 即可同时打包 amd64 和 arm64 的架构的镜像
 
 ---
 
