@@ -130,7 +130,7 @@ Issue
 
 <details>
 
-<summary>服务器访问 ChatGPT 提示 "Sorry, you have been blocked"</summary>
+<summary>服务器访问 ChatGPT 提示 "Unable to load site"</summary>
 
 如何验证：`curl https://chat.openai.com | grep '<p>' | awk '{$1=$1;print}'`
 
