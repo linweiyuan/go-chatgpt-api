@@ -158,6 +158,7 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "event") ||
 			strings.HasPrefix(line, "data: 20") ||
+			strings.HasPrefix(line, `data: {"conversation_id"`) ||
 			line == "" {
 			continue
 		}
