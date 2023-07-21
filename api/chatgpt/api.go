@@ -120,9 +120,7 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 			}
 		}
 		if !modelAvailable {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"detail": noModelPermissionErrorMessage,
-			})
+			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage(noModelPermissionErrorMessage))
 			return nil, true
 		}
 
