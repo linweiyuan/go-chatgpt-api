@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -123,6 +124,9 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 			c.AbortWithStatusJSON(http.StatusForbidden, api.ReturnMessage(noModelPermissionErrorMessage))
 			return nil, true
 		}
+
+		data, _ := io.ReadAll(resp.Body)
+		logger.Warn(string(data))
 
 		responseMap := make(map[string]interface{})
 		json.NewDecoder(resp.Body).Decode(&responseMap)
