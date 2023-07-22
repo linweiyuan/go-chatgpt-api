@@ -275,6 +275,9 @@ func getBX(url string) {
 		data, _ := json.Marshal(responseMap["bx"])
 		bx = string(data)
 
+		// fix 403
+		funcaptcha.GetOpenAITokenWithBx(bx)
+
 		time.Sleep(time.Hour)
 	}
 }
