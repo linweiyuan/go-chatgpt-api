@@ -124,12 +124,12 @@ type StringStruct struct {
 }
 
 //goland:noinspection SpellCheckingInspection
-func newChatCompletion(fullTest string) ChatCompletion {
+func newChatCompletion(fullTest, model string) ChatCompletion {
 	return ChatCompletion{
 		ID:      "chatcmpl-QXlha2FBbmROaXhpZUFyZUF3ZXNvbWUK",
 		Object:  "chat.completion",
 		Created: int64(0),
-		Model:   "gpt-3.5-turbo-0301",
+		Model:   model,
 		Usage: usage{
 			PromptTokens:     0,
 			CompletionTokens: 0,

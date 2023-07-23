@@ -116,7 +116,7 @@ func CreateChatCompletions(c *gin.Context) {
 	}
 
 	if !originalRequest.Stream {
-		c.JSON(200, newChatCompletion(fullResponse))
+		c.JSON(200, newChatCompletion(fullResponse, translatedRequest.Model))
 	} else {
 		c.String(200, "data: [DONE]\n\n")
 	}
