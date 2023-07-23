@@ -49,7 +49,7 @@ Issue
 
 `GPT-4` 相关模型目前需要验证 `arkose_token`
 ，可以配合 [linweiyuan/chatgpt-arkose-token-api](https://github.com/linweiyuan/chatgpt-arkose-token-api)
-一起使用，详细用法进 `TG` 群查看 `2023-07-22 10:30` 的聊天记录
+一起使用（需要自己有一定的基础和动手能力，不提供技术支持）
 
 ---
 
