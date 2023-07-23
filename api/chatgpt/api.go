@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/acheong08/OpenAIAuth/auth"
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/funcaptcha"
 	"github.com/linweiyuan/go-chatgpt-api/api"
@@ -206,26 +205,50 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 	}
 }
 
-//goland:noinspection SpellCheckingInspection
+//goland:noinspection SpellCheckingInspection,GoUnhandledErrorResult
 func setupPUID() {
 	username := os.Getenv("OPENAI_EMAIL")
 	password := os.Getenv("OPENAI_PASSWORD")
 	if username != "" && password != "" {
 		go func() {
 			for {
-				authenticator := auth.NewAuthenticator(username, password, os.Getenv("PROXY"))
-				err := authenticator.Begin()
-				if err != nil {
-					logger.Error("Failed to login to get PUID.")
-					break
+				statusCode, errorMessage, accessTokenResponse := GetAccessToken(api.LoginInfo{
+					Username: username,
+					Password: password,
+				})
+				if statusCode != http.StatusOK {
+					logger.Error(errorMessage)
+					return
 				}
 
-				PUID, err = authenticator.GetPUID()
-				if err != nil {
-					logger.Error("Failed to get PUID.")
-					break
+				responseMap := make(map[string]string)
+				json.Unmarshal([]byte(accessTokenResponse), &responseMap)
+
+				accessToken, ok := responseMap["accessToken"]
+				if !ok {
+					logger.Error(refreshPuidErrorMessage)
+					return
 				}
-				time.Sleep(24 * time.Hour * 7)
+
+				req, _ := http.NewRequest(http.MethodGet, api.ChatGPTApiUrlPrefix+"/backend-api/models?history_and_training_disabled=false", nil)
+				req.Header.Set("User-Agent", api.UserAgent)
+				req.Header.Set(api.AuthorizationHeader, accessToken)
+				resp, err := api.Client.Do(req)
+				if err != nil || resp.StatusCode != http.StatusOK {
+					logger.Error(refreshPuidErrorMessage)
+					return
+				}
+
+				resp.Body.Close()
+				cookies := resp.Cookies()
+				for _, cookie := range cookies {
+					if cookie.Name == "_puid" {
+						PUID = cookie.Value
+						break
+					}
+				}
+
+				time.Sleep(time.Hour * 24 * 7)
 			}
 		}()
 	}

@@ -15,4 +15,6 @@ const (
 	responseTypeMaxTokens              = "max_tokens"
 	responseStatusFinishedSuccessfully = "finished_successfully"
 	noModelPermissionErrorMessage      = "You have no permission to use this model, maybe you Plus has expired, or this model is temporary disabled, or the arkoseToken is invalid."
+
+	refreshPuidErrorMessage = "Failed to refresh PUID."
 )
