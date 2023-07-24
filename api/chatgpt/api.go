@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -99,6 +100,14 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 
 	if resp.StatusCode != http.StatusOK {
 		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusUnauthorized {
+			logger.Error(fmt.Sprintf(api.AccountDeactivatedErrorMessage, c.GetString(api.EmailKey)))
+			responseMap := make(map[string]interface{})
+			json.NewDecoder(resp.Body).Decode(&responseMap)
+			c.AbortWithStatusJSON(resp.StatusCode, responseMap)
+			return nil, true
+		}
 
 		req, _ := http.NewRequest(http.MethodGet, api.ChatGPTApiUrlPrefix+"/backend-api/models?history_and_training_disabled=false", nil)
 		req.Header.Set("User-Agent", api.UserAgent)

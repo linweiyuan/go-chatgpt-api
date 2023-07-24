@@ -57,8 +57,8 @@ func Authorization() gin.HandlerFunc {
 
 			c.Next()
 		} else {
-			if expired, email := isExpired(authorization); expired {
-				c.AbortWithStatusJSON(http.StatusUnauthorized, api.ReturnMessage(fmt.Sprintf(accessTokenHasExpiredErrorMessage, email)))
+			if expired := isExpired(c); expired {
+				c.AbortWithStatusJSON(http.StatusUnauthorized, api.ReturnMessage(fmt.Sprintf(accessTokenHasExpiredErrorMessage, c.GetString(api.EmailKey))))
 				return
 			}
 
@@ -68,24 +68,26 @@ func Authorization() gin.HandlerFunc {
 }
 
 //goland:noinspection GoUnhandledErrorResult
-func isExpired(accessToken string) (bool, string) {
-	// accessToken
+func isExpired(c *gin.Context) bool {
+	accessToken := c.GetHeader(api.AuthorizationHeader)
 	split := strings.Split(accessToken, ".")
 	if len(split) == 3 {
 		rawDecodedText, _ := base64.RawStdEncoding.DecodeString(split[1])
 		var accessToken AccessToken
 		json.Unmarshal(rawDecodedText, &accessToken)
 
+		c.Set(api.EmailKey, accessToken.HTTPSAPIOpenaiComProfile.Email)
+
 		exp := int64(accessToken.Exp)
 		expTime := time.Unix(exp, 0)
 		now := time.Now()
 		if now.After(expTime) {
-			return true, accessToken.HTTPSAPIOpenaiComProfile.Email
+			return true
 		}
 
-		return false, ""
+		return false
 	}
 
 	// apiKey
-	return false, ""
+	return false
 }

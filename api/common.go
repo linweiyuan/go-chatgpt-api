@@ -4,6 +4,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -42,6 +43,9 @@ const (
 	GetAccessTokenErrorMessage         = "Failed to get access token."
 	GetArkoseTokenErrorMessage         = "Failed to get arkose token."
 	defaultTimeoutSeconds              = 600 // 10 minutes
+
+	EmailKey                       = "email"
+	AccountDeactivatedErrorMessage = "Account %s is deactivated."
 
 	ReadyHint = "Service go-chatgpt-api is ready."
 )
@@ -124,6 +128,10 @@ func Proxy(c *gin.Context) {
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusUnauthorized {
+			logger.Error(fmt.Sprintf(AccountDeactivatedErrorMessage, c.GetString(EmailKey)))
+		}
+
 		responseMap := make(map[string]interface{})
 		json.NewDecoder(resp.Body).Decode(&responseMap)
 		c.AbortWithStatusJSON(resp.StatusCode, responseMap)
