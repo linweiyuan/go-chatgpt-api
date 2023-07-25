@@ -13,4 +13,5 @@ services:
       - BX_URL=
       - OPENAI_EMAIL=
       - OPENAI_PASSWORD=
+      - CONTINUE_SIGNAL=
     restart: unless-stopped
