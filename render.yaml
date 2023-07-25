@@ -3,5 +3,5 @@ services:
     name: go-chatgpt-api
     runtime: go
     plan: free
-    buildCommand: go build
+    buildCommand: go build -ldflags="-w -s" -o go-chatgpt-api main.go
     startCommand: ./go-chatgpt-api
