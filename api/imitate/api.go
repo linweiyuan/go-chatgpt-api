@@ -83,7 +83,8 @@ func CreateChatCompletions(c *gin.Context) {
 		var responsePart string
 		responsePart, continueInfo = Handler(c, response, originalRequest.Stream)
 		fullResponse += responsePart
-		if continueInfo == nil {
+		continueSignal = os.Getenv("CONTINUE_SIGNAL")
+		if continueInfo == nil || continueSignal == "" {
 			break
 		}
 		println("Continuing conversation")
