@@ -50,7 +50,10 @@ const (
 	ReadyHint = "Service go-chatgpt-api is ready."
 )
 
-var Client tls_client.HttpClient
+var (
+	Client       tls_client.HttpClient
+	ArkoseClient tls_client.HttpClient
+)
 
 type LoginInfo struct {
 	Username string `json:"username"`
@@ -73,7 +76,8 @@ func init() {
 		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
 		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
-	funcaptcha.SetTLSClient(getHttpClient())
+	ArkoseClient = getHttpClient()
+	funcaptcha.SetTLSClient(Client)
 }
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection

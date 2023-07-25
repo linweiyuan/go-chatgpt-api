@@ -295,7 +295,7 @@ func getBX(url string) {
 	// refresh bx hourly
 	for {
 		req, _ := http.NewRequest(http.MethodGet, url, nil)
-		resp, err := api.Client.Do(req)
+		resp, err := api.ArkoseClient.Do(req)
 		if err != nil {
 			return
 		}
