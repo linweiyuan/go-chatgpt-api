@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: go-chatgpt-api
+    runtime: go
+    plan: free
+    buildCommand: go build
+    startCommand: ./go-chatgpt-api
