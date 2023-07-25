@@ -45,6 +45,8 @@ Issue
 
 家庭网络无需跑 `warp` 服务，跑了也没用，会报错，仅在服务器需要
 
+`CONTINUE_SIGNAL=1`，开启/imitate接口自动继续会话功能，留空关闭，默认关闭
+
 ---
 
 `GPT-4` 相关模型目前需要验证 `arkose_token`
