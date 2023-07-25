@@ -4,6 +4,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -11,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/funcaptcha"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
-	"github.com/linweiyuan/go-chatgpt-api/util/logger"
+	"github.com/linweiyuan/go-logger/logger"
 
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
@@ -28,6 +29,7 @@ const (
 
 	defaultErrorMessageKey             = "errorMessage"
 	AuthorizationHeader                = "Authorization"
+	XAuthorizationHeader               = "X-Authorization"
 	ContentType                        = "application/x-www-form-urlencoded"
 	UserAgent                          = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
 	Auth0Url                           = "https://auth0.openai.com"
@@ -39,7 +41,11 @@ const (
 	EmailInvalidErrorMessage           = "Email is not valid."
 	EmailOrPasswordInvalidErrorMessage = "Email or password is not correct."
 	GetAccessTokenErrorMessage         = "Failed to get access token."
+	GetArkoseTokenErrorMessage         = "Failed to get arkose token."
 	defaultTimeoutSeconds              = 600 // 10 minutes
+
+	EmailKey                       = "email"
+	AccountDeactivatedErrorMessage = "Account %s is deactivated."
 
 	ReadyHint = "Service go-chatgpt-api is ready."
 )
@@ -57,6 +63,7 @@ type AuthLogin interface {
 	CheckUsername(state string, username string) (int, error)
 	CheckPassword(state string, username string, password string) (string, int, error)
 	GetAccessToken(code string) (string, int, error)
+	GetAccessTokenFromHeader(c *gin.Context) (string, int, error)
 }
 
 //goland:noinspection GoUnhandledErrorResult
@@ -66,7 +73,7 @@ func init() {
 		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
 		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
-	funcaptcha.SetTLSClient(&Client)
+	funcaptcha.SetTLSClient(Client)
 }
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
@@ -76,7 +83,7 @@ func NewHttpClient() tls_client.HttpClient {
 		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
 
-	proxyUrl := os.Getenv("GO_CHATGPT_API_PROXY")
+	proxyUrl := os.Getenv("PROXY")
 	if proxyUrl != "" {
 		client.SetProxy(proxyUrl)
 	}
@@ -112,7 +119,7 @@ func Proxy(c *gin.Context) {
 		req, _ = http.NewRequest(method, url, bytes.NewReader(body))
 	}
 	req.Header.Set("User-Agent", UserAgent)
-	req.Header.Set("Authorization", GetAccessToken(c.GetHeader(AuthorizationHeader)))
+	req.Header.Set(AuthorizationHeader, GetAccessToken(c))
 	resp, err := Client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, ReturnMessage(err.Error()))
@@ -121,6 +128,10 @@ func Proxy(c *gin.Context) {
 
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusUnauthorized {
+			logger.Error(fmt.Sprintf(AccountDeactivatedErrorMessage, c.GetString(EmailKey)))
+		}
+
 		responseMap := make(map[string]interface{})
 		json.NewDecoder(resp.Body).Decode(&responseMap)
 		c.AbortWithStatusJSON(resp.StatusCode, responseMap)
@@ -138,9 +149,11 @@ func ReturnMessage(msg string) gin.H {
 	}
 }
 
-func GetAccessToken(accessToken string) string {
+func GetAccessToken(c *gin.Context) string {
+	accessToken := c.GetString(AuthorizationHeader)
 	if !strings.HasPrefix(accessToken, "Bearer") {
 		return "Bearer " + accessToken
 	}
+
 	return accessToken
 }

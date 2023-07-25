@@ -3,8 +3,8 @@ package chatgpt
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
+	"net/url"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -15,11 +15,12 @@ import (
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
-	params := fmt.Sprintf(
-		"callbackUrl=/&csrfToken=%s&json=true",
-		csrfToken,
-	)
-	req, err := http.NewRequest(http.MethodPost, promptLoginUrl, strings.NewReader(params))
+	form := url.Values{
+		"callbackUrl": {"/"},
+		"csrfToken":   {csrfToken},
+		"json":        {"true"},
+	}
+	req, err := http.NewRequest(http.MethodPost, promptLoginUrl, strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)
@@ -59,12 +60,16 @@ func (userLogin *UserLogin) GetState(authorizedUrl string) (string, int, error) 
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) CheckUsername(state string, username string) (int, error) {
-	formParams := fmt.Sprintf(
-		"state=%s&username=%s&js-available=true&webauthn-available=true&is-brave=false&webauthn-platform-available=false&action=default",
-		state,
-		username,
-	)
-	req, _ := http.NewRequest(http.MethodPost, api.LoginUsernameUrl+state, strings.NewReader(formParams))
+	formParams := url.Values{
+		"state":                       {state},
+		"username":                    {username},
+		"js-available":                {"true"},
+		"webauthn-available":          {"true"},
+		"is-brave":                    {"false"},
+		"webauthn-platform-available": {"false"},
+		"action":                      {"default"},
+	}
+	req, _ := http.NewRequest(http.MethodPost, api.LoginUsernameUrl+state, strings.NewReader(formParams.Encode()))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)
@@ -82,13 +87,13 @@ func (userLogin *UserLogin) CheckUsername(state string, username string) (int, e
 
 //goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) CheckPassword(state string, username string, password string) (string, int, error) {
-	formParams := fmt.Sprintf(
-		"state=%s&username=%s&password=%s&action=default",
-		state,
-		username,
-		password,
-	)
-	req, err := http.NewRequest(http.MethodPost, api.LoginPasswordUrl+state, strings.NewReader(formParams))
+	formParams := url.Values{
+		"state":    {state},
+		"username": {username},
+		"password": {password},
+		"action":   {"default"},
+	}
+	req, err := http.NewRequest(http.MethodPost, api.LoginPasswordUrl+state, strings.NewReader(formParams.Encode()))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	userLogin.client.SetFollowRedirect(false)

@@ -6,7 +6,7 @@ on:
       - 'main'
 
 env:
-  PLATFORMS: ${{ vars.PLATFORMS || 'linux/amd64' }}
+  PLATFORMS: ${{ vars.PLATFORMS || 'linux/amd64,linux/arm64' }}
 
 jobs:
   docker-build-push:

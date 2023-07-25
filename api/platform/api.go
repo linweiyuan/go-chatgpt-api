@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/linweiyuan/go-chatgpt-api/api"
+	"github.com/linweiyuan/go-logger/logger"
 
 	http "github.com/bogdanfinn/fhttp"
 )
@@ -34,6 +36,14 @@ func CreateChatCompletions(c *gin.Context) {
 	}
 
 	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusUnauthorized {
+		logger.Error(fmt.Sprintf(api.AccountDeactivatedErrorMessage, c.GetString(api.EmailKey)))
+		responseMap := make(map[string]interface{})
+		json.NewDecoder(resp.Body).Decode(&responseMap)
+		c.AbortWithStatusJSON(resp.StatusCode, responseMap)
+		return
+	}
+
 	if request.Stream {
 		handleCompletionsResponse(c, resp)
 	} else {
@@ -74,7 +84,7 @@ func handleCompletionsResponse(c *gin.Context, resp *http.Response) {
 
 func handlePost(c *gin.Context, url string, data []byte, stream bool) (*http.Response, error) {
 	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(data))
-	req.Header.Set("Authorization", api.GetAccessToken(c.GetHeader(api.AuthorizationHeader)))
+	req.Header.Set(api.AuthorizationHeader, api.GetAccessToken(c))
 	if stream {
 		req.Header.Set("Accept", "text/event-stream")
 	}

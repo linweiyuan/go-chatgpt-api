@@ -1,0 +1,19 @@
+### Create chat completion
+POST {{baseUrl}}/imitate/v1/chat/completions
+Content-Type: application/json
+Authorization: Bearer {{accessToken}}
+
+{
+  "model": "gpt-3.5-turbo",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful assistant."
+    },
+    {
+      "role": "user",
+      "content": "Hello!"
+    }
+  ],
+  "stream": true
+}

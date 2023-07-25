@@ -34,37 +34,26 @@ Issue
 
 ### 配置
 
-如需设置代理，可以设置环境变量 `GO_CHATGPT_API_PROXY`，比如 `GO_CHATGPT_API_PROXY=http://127.0.0.1:20171`
-或者 `GO_CHATGPT_API_PROXY=socks5://127.0.0.1:20170`，注释掉或者留空则不启用
+如需设置代理，可以设置环境变量 `PROXY`，比如 `PROXY=http://127.0.0.1:20171`
+或者 `PROXY=socks5://127.0.0.1:20170`，注释掉或者留空则不启用
 
 如果代理需账号密码验证，则 `http://username:password@ip:port` 或者 `socks5://username:password@ip:port`
 
-如需配合 `warp` 使用：`GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535`，因为需要设置 `warp`
+如需配合 `warp` 使用：`PROXY=socks5://chatgpt-proxy-server-warp:65535`，因为需要设置 `warp`
 的场景已经默认可以直接访问 `ChatGPT` 官网，因此共用一个变量不冲突（国内 `VPS` 不在讨论范围内，请自行配置网络环境，`warp`
 服务在魔法环境下才能正常工作）
 
 家庭网络无需跑 `warp` 服务，跑了也没用，会报错，仅在服务器需要
 
-`GPT-4` 相关模型目前需要验证 `arkose_token`，如果配置 `GO_CHATGPT_API_ARKOSE_TOKEN_URL` 则使用在线服务获取 `arkose_token`
-，不设置或者留空则由程序内部自己生成（推荐优先使用这种）
+---
 
-`GO_CHATGPT_API_ARKOSE_TOKEN_URL` 可选值：（目前全部已失效）
-
-- https://arkose-token.linweiyuan.com
-- https://arkose-token.tms.im
-- http://arkosetoken.52swap.cn
-- https://a-token.xiu.ee
-- https://tttoken.azurewebsites.net
-- https://arkosetoken.tsmai.top
-- https://api.tms.im/arkose-token-ap
-
-如果用以上方法还是 `403` 并且你的 `Plus`
-没有过期，则有一种可能就是你的账号被风控了，可以尝试用这个账号打开官网，看下会不会弹验证码，然后手动处理下，接着再回来看 `go-chatgpt-api`
-还会不会 `403`
+`GPT-4` 相关模型目前需要验证 `arkose_token`
+，可以配合 [linweiyuan/chatgpt-arkose-token-api](https://github.com/linweiyuan/chatgpt-arkose-token-api)
+一起使用（需要自己有一定的基础和动手能力，不提供技术支持）
 
 ---
 
-根据你的网络环境不同，可以展开查看对应配置
+根据你的网络环境不同，可以展开查看对应配置，下面例子是基本参数，更多参数查看 [compose.yaml](https://github.com/linweiyuan/go-chatgpt-api/blob/main/compose.yaml)
 
 <details>
 
@@ -79,7 +68,7 @@ Issue
 
 <details>
 
-<summary>家庭网络</summary>
+<summary>网络在直连或者通过代理的情况下可以正常访问 ChatGPT</summary>
 
 ```yaml
   go-chatgpt-api:
@@ -89,11 +78,6 @@ Issue
       - 8080:8080
     environment:
       - TZ=Asia/Shanghai
-      - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_PANDORA=
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_OPENAI_EMAIL=
-      - GO_CHATGPT_API_OPENAI_PASSWORD=
     restart: unless-stopped
 ```
 
@@ -101,29 +85,7 @@ Issue
 
 <details>
 
-<summary>服务器在直连或者通过网络代理的情况下可以正常访问 ChatGPT</summary>
-
-```yaml
-  go-chatgpt-api:
-    container_name: go-chatgpt-api
-    image: linweiyuan/go-chatgpt-api
-    ports:
-      - 8080:8080
-    environment:
-      - TZ=Asia/Shanghai
-      - GO_CHATGPT_API_PROXY=
-      - GO_CHATGPT_API_PANDORA=
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_OPENAI_EMAIL=
-      - GO_CHATGPT_API_OPENAI_PASSWORD=
-    restart: unless-stopped
-```
-
-</details>
-
-<details>
-
-<summary>服务器访问 ChatGPT 提示 "Sorry, you have been blocked"</summary>
+<summary>服务器访问 ChatGPT 提示 "Unable to load site"</summary>
 
 如何验证：`curl https://chat.openai.com | grep '<p>' | awk '{$1=$1;print}'`
 
@@ -135,11 +97,7 @@ Issue
       - 8080:8080
     environment:
       - TZ=Asia/Shanghai
-      - GO_CHATGPT_API_PROXY=socks5://chatgpt-proxy-server-warp:65535
-      - GO_CHATGPT_API_PANDORA=
-      - GO_CHATGPT_API_ARKOSE_TOKEN_URL=
-      - GO_CHATGPT_API_OPENAI_EMAIL=
-      - GO_CHATGPT_API_OPENAI_PASSWORD=
+      - PROXY=socks5://chatgpt-proxy-server-warp:65535
     depends_on:
       - chatgpt-proxy-server-warp
     restart: unless-stopped
@@ -147,8 +105,6 @@ Issue
   chatgpt-proxy-server-warp:
     container_name: chatgpt-proxy-server-warp
     image: linweiyuan/chatgpt-proxy-server-warp
-    environment:
-      - LOG_LEVEL=OFF
     restart: unless-stopped
 ```
 
@@ -198,7 +154,7 @@ services:
 环境变量
 
 ```
-CHATGPT_BASE_URL=https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/
+CHATGPT_BASE_URL=http://go-chatgpt-api:8080/chatgpt/backend-api/
 ```
 
 - [lss233/chatgpt-mirai-qq-bot](https://github.com/lss233/chatgpt-mirai-qq-bot)
@@ -207,7 +163,7 @@ CHATGPT_BASE_URL=https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/
 
 ```
 [openai]
-browserless_endpoint = "https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/"
+browserless_endpoint = "http://go-chatgpt-api:8080/chatgpt/backend-api/"
 ```
 
 - [Kerwin1202/chatgpt-web](https://github.com/Kerwin1202/chatgpt-web) | [Chanzhaoyu/chatgpt-web](https://github.com/Chanzhaoyu/chatgpt-web)
@@ -215,7 +171,7 @@ browserless_endpoint = "https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-ap
 环境变量
 
 ```
-API_REVERSE_PROXY=https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/conversation
+API_REVERSE_PROXY=http://go-chatgpt-api:8080/chatgpt/backend-api/conversation
 ```
 
 - [pengzhile/pandora](https://github.com/pengzhile/pandora)（不完全兼容）
@@ -223,9 +179,7 @@ API_REVERSE_PROXY=https://go-chatgpt-api.linweiyuan.com/chatgpt/backend-api/conv
 环境变量
 
 ```
-go-chatgpt-api: GO_CHATGPT_API_PANDORA=1
-
-pandora: CHATGPT_API_PREFIX=https://go-chatgpt-api.linweiyuan.com
+CHATGPT_API_PREFIX=http://go-chatgpt-api:8080
 ```
 
 ---
@@ -236,7 +190,7 @@ pandora: CHATGPT_API_PREFIX=https://go-chatgpt-api.linweiyuan.com
 
 ```yaml
 proxy:
-  url: https://go-chatgpt-api.linweiyuan.com
+  url: http://go-chatgpt-api:8080
 ```
 
 ---
@@ -246,7 +200,7 @@ proxy:
 环境变量
 
 ```
-BASE_URL=https://go-chatgpt-api.linweiyuan.com/imitate
+BASE_URL=http://go-chatgpt-api:8080/imitate
 ```
 
 ### 如何控制打包行为
@@ -257,8 +211,7 @@ Fork 此项目后，可以在 `Settings-Secrets and variables-Actions` 下控制
 
 `Variables` 页添加 `USE_GHCR=1` 即可推送到个人的 GHCR
 仓库（[需要开启仓库的写入权限](https://stackoverflow.com/questions/75926611/github-workflow-to-push-docker-image-to-ghcr-io)）
-`Variables` 页添加 `PLATFORMS=linux/amd64,linux/arm64` 即可同时打包 amd64 和 arm64 的架构的镜像（缺省情况下只会打包
-amd64）
+`Variables` 页添加 `PLATFORMS=linux/amd64,linux/arm64` 即可同时打包 amd64 和 arm64 的架构的镜像
 
 ---
 

@@ -64,7 +64,7 @@ func Login(c *gin.Context) {
 	req, _ := http.NewRequest(http.MethodPost, dashboardLoginUrl, strings.NewReader("{}"))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", api.UserAgent)
-	req.Header.Set("Authorization", api.GetAccessToken(getAccessTokenResponse.AccessToken))
+	req.Header.Set(api.AuthorizationHeader, "Bearer "+getAccessTokenResponse.AccessToken)
 	resp, err = userLogin.client.Do(req)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))

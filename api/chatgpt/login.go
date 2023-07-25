@@ -19,6 +19,17 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	statusCode, errorMessage, accessTokenResponse := GetAccessToken(loginInfo)
+	if statusCode != http.StatusOK {
+		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(errorMessage))
+		return
+	}
+
+	c.Writer.WriteString(accessTokenResponse)
+}
+
+//goland:noinspection GoUnhandledErrorResult
+func GetAccessToken(loginInfo api.LoginInfo) (int, string, string) {
 	userLogin := UserLogin{
 		client: api.NewHttpClient(),
 	}
@@ -28,8 +39,7 @@ func Login(c *gin.Context) {
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, api.ReturnMessage(err.Error()))
-		return
+		return http.StatusInternalServerError, err.Error(), ""
 	}
 
 	defer resp.Body.Close()
@@ -38,13 +48,11 @@ func Login(c *gin.Context) {
 			doc, _ := goquery.NewDocumentFromReader(resp.Body)
 			alert := doc.Find(".message").Text()
 			if alert != "" {
-				c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(strings.TrimSpace(alert)))
-				return
+				return resp.StatusCode, strings.TrimSpace(alert), ""
 			}
 		}
 
-		c.AbortWithStatusJSON(resp.StatusCode, api.ReturnMessage(getCsrfTokenErrorMessage))
-		return
+		return resp.StatusCode, getCsrfTokenErrorMessage, ""
 	}
 
 	// get authorized url
@@ -52,37 +60,32 @@ func Login(c *gin.Context) {
 	json.NewDecoder(resp.Body).Decode(&responseMap)
 	authorizedUrl, statusCode, err := userLogin.GetAuthorizedUrl(responseMap["csrfToken"])
 	if err != nil {
-		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
-		return
+		return statusCode, err.Error(), ""
 	}
 
 	// get state
 	state, statusCode, err := userLogin.GetState(authorizedUrl)
 	if err != nil {
-		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
-		return
+		return statusCode, err.Error(), ""
 	}
 
 	// check username
 	statusCode, err = userLogin.CheckUsername(state, loginInfo.Username)
 	if err != nil {
-		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
-		return
+		return statusCode, err.Error(), ""
 	}
 
 	// check password
 	_, statusCode, err = userLogin.CheckPassword(state, loginInfo.Username, loginInfo.Password)
 	if err != nil {
-		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
-		return
+		return statusCode, err.Error(), ""
 	}
 
 	// get access token
 	accessToken, statusCode, err := userLogin.GetAccessToken("")
 	if err != nil {
-		c.AbortWithStatusJSON(statusCode, api.ReturnMessage(err.Error()))
-		return
+		return statusCode, err.Error(), ""
 	}
 
-	c.Writer.WriteString(accessToken)
+	return http.StatusOK, "", accessToken
 }

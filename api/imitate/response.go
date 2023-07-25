@@ -49,6 +49,7 @@ func NewChatCompletionChunk(text string) ChatCompletionChunk {
 	}
 }
 
+//goland:noinspection SpellCheckingInspection
 func StopChunk(reason string) ChatCompletionChunk {
 	return ChatCompletionChunk{
 		ID:      "chatcmpl-QXlha2FBbmROaXhpZUFyZUF3ZXNvbWUK",
@@ -122,12 +123,13 @@ type StringStruct struct {
 	Text string `json:"text"`
 }
 
-func newChatCompletion(fullTest string) ChatCompletion {
+//goland:noinspection SpellCheckingInspection
+func newChatCompletion(fullTest, model string) ChatCompletion {
 	return ChatCompletion{
 		ID:      "chatcmpl-QXlha2FBbmROaXhpZUFyZUF3ZXNvbWUK",
 		Object:  "chat.completion",
 		Created: int64(0),
-		Model:   "gpt-3.5-turbo-0301",
+		Model:   model,
 		Usage: usage{
 			PromptTokens:     0,
 			CompletionTokens: 0,

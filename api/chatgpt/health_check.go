@@ -6,7 +6,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/linweiyuan/go-chatgpt-api/api"
-	"github.com/linweiyuan/go-chatgpt-api/util/logger"
+	"github.com/linweiyuan/go-logger/logger"
 
 	http "github.com/bogdanfinn/fhttp"
 )
@@ -21,9 +21,9 @@ const (
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
 func init() {
-	proxyUrl := os.Getenv("GO_CHATGPT_API_PROXY")
+	proxyUrl := os.Getenv("PROXY")
 	if proxyUrl != "" {
-		logger.Info("GO_CHATGPT_API_PROXY: " + proxyUrl)
+		logger.Info("PROXY: " + proxyUrl)
 		api.Client.SetProxy(proxyUrl)
 
 		for {
