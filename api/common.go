@@ -73,21 +73,26 @@ func init() {
 		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
 		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
-	funcaptcha.SetTLSClient(Client)
+	funcaptcha.SetTLSClient(getHttpClient())
 }
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
 func NewHttpClient() tls_client.HttpClient {
-	client, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
-		tls_client.WithCookieJar(tls_client.NewCookieJar()),
-		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
-	}...)
+	client := getHttpClient()
 
 	proxyUrl := os.Getenv("PROXY")
 	if proxyUrl != "" {
 		client.SetProxy(proxyUrl)
 	}
 
+	return client
+}
+
+func getHttpClient() tls_client.HttpClient {
+	client, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
+		tls_client.WithCookieJar(tls_client.NewCookieJar()),
+		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
+	}...)
 	return client
 }
 
