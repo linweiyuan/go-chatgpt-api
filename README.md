@@ -128,6 +128,14 @@ Account type: Team （设置正常）
 
 ---
 
+### Render部署
+
+点击下面的按钮一键部署，缺点是免费版本冷启动比较慢
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/linweiyuan/go-chatgpt-api)
+
+---
+
 如果要让运行的镜像总是保持最新，可以配合这个一起使用（[官方文档](https://containrrr.dev/watchtower/arguments/#without_updating_containers)
 可以设置哪些容器不更新，请自行查看）：
 
@@ -231,7 +239,7 @@ Fork 此项目后，可以在 `Settings-Secrets and variables-Actions` 下控制
 
 <!--suppress HtmlRequiredAltAttribute -->
 <a href="https://github.com/linweiyuan/go-chatgpt-api/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api&max=-1"  alt=""/>
+  <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api"  alt=""/>
 </a>
 
 Made with [contrib.rocks](https://contrib.rocks).
