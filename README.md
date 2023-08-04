@@ -4,6 +4,10 @@
 
 ---
 
+##### 本项目已进入生命末期，随时归档或者删库跑路
+
+---
+
 ### 支持接口
 
 - https://chat.openai.com/auth/login 登录返回 `accessToken`（谷歌和微软账号暂不支持登录，但可正常使用其他接口）
@@ -88,8 +92,6 @@ Issue
 <details>
 
 <summary>服务器访问 ChatGPT 提示 "Unable to load site"</summary>
-
-如何验证：`curl https://chat.openai.com | grep '<p>' | awk '{$1=$1;print}'`
 
 ```yaml
   go-chatgpt-api:
@@ -246,20 +248,4 @@ Made with [contrib.rocks](https://contrib.rocks).
 
 ---
 
-<details>
-
-<summary>广告位</summary>
-
----
-
-[Vultr 推荐注册](https://www.vultr.com/?ref=7372562)
-
-通过这条链接进去注册登录，并充值 `$10`，然后创建服务器用至少一个月，我可以得到佣金
-
----
-
-微信赞赏码（经济条件允许的可以考虑支持下）：
-
 ![](https://linweiyuan.github.io/about/mm_reward_qrcode.png)
-
-</details>
