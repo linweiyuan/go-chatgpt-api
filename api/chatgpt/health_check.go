@@ -13,10 +13,10 @@ import (
 
 //goland:noinspection SpellCheckingInspection
 const (
-	healthCheckUrl = "https://chat.openai.com/backend-api/accounts/check"
-	errorHintBlock = "Looks like you have bean blocked -> curl https://chat.openai.com | grep '<p>' | awk '{$1=$1;print}'"
-	errorHint403   = "Failed to handle 403, have a look at https://github.com/linweiyuan/java-chatgpt-api or use other more powerful alternatives (do not raise new issue about 403)."
-	sleepHours     = 8760 // 365 days
+	healthCheckUrl         = "https://chat.openai.com/backend-api/accounts/check"
+	errorHintBlock         = "Looks like you have bean blocked by OpenAI, please change to a new IP or have a try with WARP."
+	errorHintFailedToStart = "Failed to start, please try again later."
+	sleepHours             = 8760 // 365 days
 )
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
@@ -66,7 +66,7 @@ func checkHealthCheckStatus(resp *http.Response) {
 		if alert != "" {
 			logger.Error(errorHintBlock)
 		} else {
-			logger.Error(errorHint403)
+			logger.Error(errorHintFailedToStart)
 		}
 		time.Sleep(time.Hour * sleepHours)
 		os.Exit(1)
