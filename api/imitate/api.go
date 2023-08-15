@@ -13,10 +13,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/linweiyuan/funcaptcha"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
 	"github.com/linweiyuan/go-logger/logger"
+	"github.com/xqdoo00o/funcaptcha"
 
 	http "github.com/bogdanfinn/fhttp"
 )
@@ -184,9 +184,9 @@ func GetOpenAIToken() (string, error) {
 	var err error
 	if arkoseTokenUrl == "" {
 		if bx == "" {
-			arkoseToken, err = funcaptcha.GetOpenAIToken()
+			arkoseToken, err = funcaptcha.GetOpenAIToken("", "")
 		} else {
-			arkoseToken, err = funcaptcha.GetOpenAITokenWithBx(bx)
+			arkoseToken, err = funcaptcha.GetOpenAITokenWithBx(bx, "", "")
 		}
 		if err != nil {
 			return "", err
