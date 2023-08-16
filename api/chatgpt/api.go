@@ -32,11 +32,14 @@ func init() {
 	bx = os.Getenv("BX")
 	if bx != "" {
 		// to fix first time 403
-		funcaptcha.GetOpenAIToken("", "")
+		funcaptcha.GetOpenAITokenWithBx(bx, "", "")
 	} else {
 		bxUrl := os.Getenv("BX_URL")
 		if bxUrl != "" {
 			go getBX(bxUrl)
+		} else {
+			// to fix first time 403
+			funcaptcha.GetOpenAIToken("", "")
 		}
 	}
 
