@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -45,7 +46,9 @@ func Authorization() gin.HandlerFunc {
 		if authorization == "" {
 			if c.Request.URL.Path == "/" {
 				c.Header("Content-Type", "text/plain")
-			} else if strings.HasSuffix(c.Request.URL.Path, "/login") || strings.HasPrefix(c.Request.URL.Path, "/chatgpt/public-api") {
+			} else if strings.HasSuffix(c.Request.URL.Path, "/login") ||
+				strings.HasPrefix(c.Request.URL.Path, "/chatgpt/public-api") ||
+				(strings.HasPrefix(c.Request.URL.Path, "/imitate") && os.Getenv("IMITATE_ACCESS_TOKEN") != "") {
 				c.Header("Content-Type", "application/json")
 			} else if c.Request.URL.Path == "/favicon.ico" {
 				c.Abort()

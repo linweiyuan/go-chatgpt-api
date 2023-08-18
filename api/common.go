@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/linweiyuan/funcaptcha"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 	"github.com/linweiyuan/go-logger/logger"
+	"github.com/xqdoo00o/funcaptcha"
 
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
@@ -77,7 +77,7 @@ func init() {
 		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
 	}...)
 	ArkoseClient = getHttpClient()
-	funcaptcha.SetTLSClient(Client)
+	funcaptcha.SetTLSClient(&Client)
 }
 
 //goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection

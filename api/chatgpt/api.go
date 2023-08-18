@@ -11,9 +11,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/linweiyuan/funcaptcha"
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-logger/logger"
+	"github.com/xqdoo00o/funcaptcha"
 
 	http "github.com/bogdanfinn/fhttp"
 )
@@ -32,11 +32,14 @@ func init() {
 	bx = os.Getenv("BX")
 	if bx != "" {
 		// to fix first time 403
-		funcaptcha.GetOpenAITokenWithBx(bx)
+		funcaptcha.GetOpenAITokenWithBx(bx, "", "")
 	} else {
 		bxUrl := os.Getenv("BX_URL")
 		if bxUrl != "" {
 			go getBX(bxUrl)
+		} else {
+			// to fix first time 403
+			funcaptcha.GetOpenAIToken("", "")
 		}
 	}
 
@@ -266,7 +269,7 @@ func setupPUID() {
 //goland:noinspection GoUnhandledErrorResult
 func GetArkoseToken() (string, error) {
 	if arkoseTokenUrl == "" {
-		return funcaptcha.GetOpenAITokenWithBx(bx)
+		return funcaptcha.GetOpenAIToken("", "")
 	}
 
 	req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
@@ -308,7 +311,7 @@ func getBX(url string) {
 		bx = string(data)
 
 		// fix 403
-		funcaptcha.GetOpenAITokenWithBx(bx)
+		funcaptcha.GetOpenAITokenWithBx(bx, "", "")
 
 		time.Sleep(time.Hour)
 	}
