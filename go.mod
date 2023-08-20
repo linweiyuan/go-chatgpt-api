@@ -9,8 +9,8 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.5.1
-	github.com/linweiyuan/funcaptcha v0.0.0-20230720175126-c720855db995
 	github.com/linweiyuan/go-logger v0.0.0-20230709142852-da1f090a7d4c
+	github.com/xqdoo00o/funcaptcha v0.0.0-20230815082332-abc44cfb3fb7
 )
 
 require (
@@ -37,7 +37,6 @@ require (
 	github.com/tam7t/hpkp v0.0.0-20160821193359-2b70b4024ed5 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.11 // indirect
-	github.com/xqdoo00o/funcaptcha v0.0.0-20230815082332-abc44cfb3fb7 // indirect
 	golang.org/x/arch v0.3.0 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
 	golang.org/x/net v0.14.0 // indirect
