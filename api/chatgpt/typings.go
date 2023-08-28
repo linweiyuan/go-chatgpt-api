@@ -22,6 +22,7 @@ type CreateConversationRequest struct {
 	ArkoseToken                string    `json:"arkose_token"`
 	HistoryAndTrainingDisabled bool      `json:"history_and_training_disabled"`
 	AutoContinue               bool      `json:"auto_continue"`
+	Suggestions                []string  `json:"suggestions"`
 }
 
 func (c *CreateConversationRequest) AddMessage(role string, content string) {

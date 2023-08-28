@@ -53,9 +53,7 @@ Issue
 
 ---
 
-`GPT-4` 相关模型目前需要验证 `arkose_token`
-，可以配合 [xyhelper/xyhelper-arkose](https://github.com/xyhelper/xyhelper-arkose)
-一起使用（需要有一定的知识储备和动手能力，零基础请自行找 `ChatGPT` 补相关知识）
+`GPT-4` 相关模型目前需要验证 `arkose_token`，社区已经有很多解决方案，请自行查找
 
 ---
 
