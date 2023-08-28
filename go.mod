@@ -10,7 +10,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/joho/godotenv v1.5.1
 	github.com/linweiyuan/go-logger v0.0.0-20230709142852-da1f090a7d4c
-	github.com/xqdoo00o/funcaptcha v0.0.0-20230815082332-abc44cfb3fb7
+	github.com/xqdoo00o/funcaptcha v0.0.0-20230824022540-522e3fe68268
 )
 
 require (
