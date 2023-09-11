@@ -17,7 +17,29 @@
 - `apiKey` 余额查询
 - 等等 ...
 - 支持 `ChatGPT` 转 `API`，接口 `/imitate/v1/chat/completions`，利用 `accessToken` 模拟 `apiKey`，实现伪免费使用 `API`
-  ，从而支持集成仅支持 `apiKey` 调用的第三方客户端项目
+  ，从而支持集成仅支持 `apiKey` 调用的第三方客户端项目，分享一个好用的脚本测试 `web-to-api` (#251)
+
+```python
+import openai
+
+openai.api_key = "这里填 access token，不是 api key"
+openai.api_base = "http://127.0.0.1:8080/imitate/v1"
+
+while True:
+    text = input("请输入问题：")
+    response = openai.ChatCompletion.create(
+        model='gpt-3.5-turbo',
+        messages=[
+            {'role': 'user', 'content': text},
+        ],
+        stream=True,
+        allow_fallback=True
+    )
+
+    for chunk in response:
+        print(chunk.choices[0].delta.get("content", ""), end="", flush=True)
+    print("\n")
+```
 
 范例（URL 和参数基本保持着和官网一致，部分接口有些许改动），部分例子，不是全部，**理论上**全部基于文本传输的接口都支持
 
