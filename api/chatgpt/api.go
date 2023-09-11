@@ -273,7 +273,7 @@ func GetArkoseToken() (string, error) {
 	}
 
 	req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
-	resp, err := api.Client.Do(req)
+	resp, err := api.ArkoseClient.Do(req)
 	if err != nil {
 		return "", err
 	}
