@@ -17,7 +17,7 @@
 - `apiKey` 余额查询
 - 等等 ...
 - 支持 `ChatGPT` 转 `API`，接口 `/imitate/v1/chat/completions`，利用 `accessToken` 模拟 `apiKey`，实现伪免费使用 `API`
-  ，从而支持集成仅支持 `apiKey` 调用的第三方客户端项目，分享一个好用的脚本测试 `web-to-api` (#251)
+  ，从而支持集成仅支持 `apiKey` 调用的第三方客户端项目，分享一个好用的脚本测试 `web-to-api` (https://github.com/linweiyuan/go-chatgpt-api/issues/251)
 
 ```python
 import openai
@@ -55,6 +55,8 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTT
 Issue
 
 群聊：https://github.com/linweiyuan/go-chatgpt-api/discussions/197
+
+再说一遍，不要来 `Issues` 提问题（再提不回复直接关闭），有讨论区，有群，不要提脑残问题，反面教材：https://github.com/linweiyuan/go-chatgpt-api/issues/255
 
 ---
 
