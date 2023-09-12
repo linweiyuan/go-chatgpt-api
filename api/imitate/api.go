@@ -67,9 +67,6 @@ func CreateChatCompletions(c *gin.Context) {
 
 	response, done := sendConversationRequest(c, translatedRequest, token)
 	if done {
-		c.JSON(500, gin.H{
-			"error": "error sending request",
-		})
 		return
 	}
 
@@ -106,9 +103,6 @@ func CreateChatCompletions(c *gin.Context) {
 		response, done = sendConversationRequest(c, translatedRequest, token)
 
 		if done {
-			c.JSON(500, gin.H{
-				"error": "error sending request",
-			})
 			return
 		}
 
