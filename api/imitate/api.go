@@ -293,6 +293,9 @@ func Handler(c *gin.Context, response *http.Response, stream bool, id string, mo
 			if originalResponse.Message.Metadata.MessageType != "next" && originalResponse.Message.Metadata.MessageType != "continue" || originalResponse.Message.EndTurn != nil {
 				continue
 			}
+			if (len(originalResponse.Message.Content.Parts) == 0 || originalResponse.Message.Content.Parts[0] == "") && !isRole {
+				continue
+			}
 			responseString := ConvertToString(&originalResponse, &previousText, isRole, id, model)
 			isRole = false
 			if stream {
@@ -313,6 +316,9 @@ func Handler(c *gin.Context, response *http.Response, stream bool, id string, mo
 
 		} else {
 			if stream {
+				if finishReason == "" {
+					finishReason = "stop"
+				}
 				finalLine := StopChunk(finishReason, id, model)
 				_, err := c.Writer.WriteString("data: " + finalLine.String() + "\n\n")
 				if err != nil {
