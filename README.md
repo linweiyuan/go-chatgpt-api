@@ -2,9 +2,7 @@
 
 ## 一个尝试绕过 `Cloudflare` 来使用 `ChatGPT` 接口的程序
 
----
-
-##### 本项目已进入生命末期，随时归档或者删库跑路（没有这么严重，只是不会有什么大的更新了，够用了）
+（本项目没什么问题的话，基本不会有什么大的更新了，够用了，同时欢迎 PR）
 
 ---
 
@@ -32,8 +30,7 @@ while True:
         messages=[
             {'role': 'user', 'content': text},
         ],
-        stream=True,
-        allow_fallback=True
+        stream=True
     )
 
     for chunk in response:
@@ -43,7 +40,7 @@ while True:
 
 范例（URL 和参数基本保持着和官网一致，部分接口有些许改动），部分例子，不是全部，**理论上**全部基于文本传输的接口都支持
 
-https://github.com/linweiyuan/go-chatgpt-api/tree/main/example （需安装 `HTTP Client` 插件）
+https://github.com/linweiyuan/go-chatgpt-api/tree/main/example
 
 ---
 
@@ -56,7 +53,7 @@ Issue
 
 群聊：https://github.com/linweiyuan/go-chatgpt-api/discussions/197
 
-再说一遍，不要来 `Issues` 提问题（再提不回复直接关闭），有讨论区，有群，不要提脑残问题，反面教材：https://github.com/linweiyuan/go-chatgpt-api/issues/255
+再说一遍，不要来 `Issues` 提你的疑问（再提不回复直接关闭），有讨论区，有群，不要提脑残问题，反面教材：https://github.com/linweiyuan/go-chatgpt-api/issues/255
 
 ---
 
@@ -77,7 +74,7 @@ Issue
 
 ---
 
-`GPT-4` 相关模型目前需要验证 `arkose_token`，社区已经有很多解决方案，请自行查找
+`GPT-4` 相关模型目前需要验证 `arkose_token`，社区已经有很多解决方案，请自行查找，其中一个能用的：https://github.com/linweiyuan/go-chatgpt-api/issues/252
 
 ---
 
@@ -113,7 +110,7 @@ Issue
 
 <details>
 
-<summary>服务器访问 ChatGPT 提示 "Unable to load site"</summary>
+<summary>服务器无法正常访问 ChatGPT</summary>
 
 ```yaml
   go-chatgpt-api:
@@ -160,28 +157,7 @@ Account type: Team （设置正常）
 
 ---
 
-如果要让运行的镜像总是保持最新，可以配合这个一起使用（[官方文档](https://containrrr.dev/watchtower/arguments/#without_updating_containers)
-可以设置哪些容器不更新，请自行查看）：
-
-```yaml
-services:
-  watchtower:
-    container_name: watchtower
-    image: containrrr/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 3600
-    restart: unless-stopped
-```
-
-这个只会更新新镜像，旧的镜像如果没手动删除还会在本地，如果新镜像不适用，将 `<none>` 镜像重新打 `tag`
-即可，比如：`docker tag <IMAGE_ID> linweiyuan/go-chatgpt-api`，这样就完成了回滚
-
-（本项目没有计划写更新日志和做历史版本管理）
-
----
-
-### 如何集成其他第三方客户端
+### 如何集成其他第三方客户端（下面的内容不一定是最新，有问题请去各自项目查看）
 
 - [moeakwak/chatgpt-web-share](https://github.com/moeakwak/chatgpt-web-share)
 
@@ -236,16 +212,6 @@ proxy:
 ```
 BASE_URL=http://go-chatgpt-api:8080/imitate
 ```
-
-### 如何控制打包行为
-
-Fork 此项目后，可以在 `Settings-Secrets and variables-Actions` 下控制如下行为：
-`Secrets` 页添加 `DOCKER_HUB_TOKEN` 即可自行打包推送到个人的 Dockerhub
-账户下（[如何申请 token](https://docs.docker.com/docker-hub/access-tokens/)）
-
-`Variables` 页添加 `USE_GHCR=1` 即可推送到个人的 GHCR
-仓库（[需要开启仓库的写入权限](https://stackoverflow.com/questions/75926611/github-workflow-to-push-docker-image-to-ghcr-io)）
-`Variables` 页添加 `PLATFORMS=linux/amd64,linux/arm64` 即可同时打包 amd64 和 arm64 的架构的镜像
 
 ---
 
