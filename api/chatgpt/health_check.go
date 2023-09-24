@@ -67,6 +67,7 @@ func checkHealthCheckStatus(resp *http.Response) {
 			logger.Error(errorHintBlock)
 		} else {
 			logger.Error(errorHintFailedToStart)
+			logger.Warn(doc.Text())
 		}
 		time.Sleep(time.Hour * sleepHours)
 		os.Exit(1)
