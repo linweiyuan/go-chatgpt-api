@@ -1,5 +1,3 @@
-.idea
 .env
 go-chatgpt-api
-undetected_chromedriver
-example/idea/http-client.private.env.json
+__debug*

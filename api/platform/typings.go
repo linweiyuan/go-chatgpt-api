@@ -1,6 +1,5 @@
 package platform
 
-//goland:noinspection GoSnakeCaseUsage
 import tls_client "github.com/bogdanfinn/tls-client"
 
 type UserLogin struct {

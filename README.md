@@ -14,8 +14,7 @@
 - https://platform.openai.com/playground 登录返回 `apiKey`
 - `apiKey` 余额查询
 - 等等 ...
-- 支持 `ChatGPT` 转 `API`，接口 `/imitate/v1/chat/completions`，利用 `accessToken` 模拟 `apiKey`，实现伪免费使用 `API`
-  ，从而支持集成仅支持 `apiKey` 调用的第三方客户端项目，分享一个好用的脚本测试 `web-to-api` (https://github.com/linweiyuan/go-chatgpt-api/issues/251)
+- 支持 `ChatGPT` 转 `API`，接口 `/imitate/v1/chat/completions`，利用 `accessToken` 模拟 `apiKey`，实现伪免费使用 `API`，从而支持集成仅支持 `apiKey` 调用的第三方客户端项目，分享一个好用的脚本测试 `web-to-api` (https://github.com/linweiyuan/go-chatgpt-api/issues/251)
 
 ```python
 import openai
@@ -48,8 +47,7 @@ https://github.com/linweiyuan/go-chatgpt-api/tree/main/example
 
 汇总贴：https://github.com/linweiyuan/go-chatgpt-api/issues/74
 
-如果有疑问而不是什么程序出错其实可以在 [Discussions](https://github.com/linweiyuan/go-chatgpt-api/discussions) 里发而不是新增
-Issue
+如果有疑问而不是什么程序出错其实可以在 [Discussions](https://github.com/linweiyuan/go-chatgpt-api/discussions) 里发而不是新增 Issue
 
 群聊：https://github.com/linweiyuan/go-chatgpt-api/discussions/197
 
@@ -59,18 +57,15 @@ Issue
 
 ### 配置
 
-如需设置代理，可以设置环境变量 `PROXY`，比如 `PROXY=http://127.0.0.1:20171`
-或者 `PROXY=socks5://127.0.0.1:20170`，注释掉或者留空则不启用
+如需设置代理，可以设置环境变量 `PROXY`，比如 `PROXY=http://127.0.0.1:20171` 或者 `PROXY=socks5://127.0.0.1:20170`，注释掉或者留空则不启用
 
 如果代理需账号密码验证，则 `http://username:password@ip:port` 或者 `socks5://username:password@ip:port`
 
-如需配合 `warp` 使用：`PROXY=socks5://chatgpt-proxy-server-warp:65535`，因为需要设置 `warp`
-的场景已经默认可以直接访问 `ChatGPT` 官网，因此共用一个变量不冲突（国内 `VPS` 不在讨论范围内，请自行配置网络环境，`warp`
-服务在魔法环境下才能正常工作）
+如需配合 `warp` 使用：`PROXY=socks5://chatgpt-proxy-server-warp:65535`，因为需要设置 `warp` 的场景已经默认可以直接访问 `ChatGPT` 官网，因此共用一个变量不冲突（国内 `VPS` 不在讨论范围内，请自行配置网络环境，`warp` 服务在魔法环境下才能正常工作）
 
 家庭网络无需跑 `warp` 服务，跑了也没用，会报错，仅在服务器需要
 
-`CONTINUE_SIGNAL=1`，开启/imitate接口自动继续会话功能，留空关闭，默认关闭
+`CONTINUE_SIGNAL=1`，开启 `/imitate` 接口自动继续会话功能，留空关闭，默认关闭
 
 ---
 
@@ -89,7 +84,6 @@ Issue
 服务器不定时维护，不保证高可用，利用这些服务导致的账号安全问题，与本项目无关
 
 - https://go-chatgpt-api.linweiyuan.com
-- https://api.tms.im
 
 </details>
 
@@ -98,6 +92,7 @@ Issue
 <summary>网络在直连或者通过代理的情况下可以正常访问 ChatGPT</summary>
 
 ```yaml
+services:
   go-chatgpt-api:
     container_name: go-chatgpt-api
     image: linweiyuan/go-chatgpt-api
@@ -115,6 +110,7 @@ Issue
 <summary>服务器无法正常访问 ChatGPT</summary>
 
 ```yaml
+services:
   go-chatgpt-api:
     container_name: go-chatgpt-api
     image: linweiyuan/go-chatgpt-api
@@ -137,9 +133,7 @@ Issue
 
 ---
 
-目前 `warp` 容器检测到流量超过 1G 会自动重启，如果你知道什么是 `teams-enroll-token`
-（不知道就跳过），可以通过环境变量 `TEAMS_ENROLL_TOKEN`
-设置它的值，然后利用这条命令来检查是否生效
+目前 `warp` 容器检测到流量超过 1G 会自动重启，如果你知道什么是 `teams-enroll-token` （不知道就跳过），可以通过环境变量 `TEAMS_ENROLL_TOKEN` 设置它的值，然后利用这条命令来检查是否生效
 
 `docker-compose exec chatgpt-proxy-server-warp warp-cli --accept-tos account | awk 'NR==1'`
 
@@ -229,12 +223,9 @@ BASE_URL=http://go-chatgpt-api:8080/imitate
 
 ### 最后感谢各位同学
 
-<!--suppress HtmlRequiredAltAttribute -->
 <a href="https://github.com/linweiyuan/go-chatgpt-api/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=linweiyuan/go-chatgpt-api"  alt=""/>
 </a>
-
-Made with [contrib.rocks](https://contrib.rocks).
 
 ---
 

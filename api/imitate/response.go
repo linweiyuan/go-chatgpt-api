@@ -31,7 +31,6 @@ type Delta struct {
 	Role    string `json:"role,omitempty"`
 }
 
-//goland:noinspection SpellCheckingInspection
 func NewChatCompletionChunk(text string, id string, model string) ChatCompletionChunk {
 	return ChatCompletionChunk{
 		ID:      id,
@@ -50,7 +49,6 @@ func NewChatCompletionChunk(text string, id string, model string) ChatCompletion
 	}
 }
 
-//goland:noinspection SpellCheckingInspection
 func StopChunk(reason string, id string, model string) ChatCompletionChunk {
 	return ChatCompletionChunk{
 		ID:      id,
@@ -124,7 +122,6 @@ type StringStruct struct {
 	Text string `json:"text"`
 }
 
-//goland:noinspection SpellCheckingInspection
 func newChatCompletion(fullTest, model string, id string) ChatCompletion {
 	return ChatCompletion{
 		ID:      id,

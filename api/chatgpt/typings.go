@@ -1,10 +1,8 @@
 package chatgpt
 
-//goland:noinspection GoSnakeCaseUsage
 import (
-	"github.com/google/uuid"
-
 	tls_client "github.com/bogdanfinn/tls-client"
+	"github.com/google/uuid"
 )
 
 type UserLogin struct {

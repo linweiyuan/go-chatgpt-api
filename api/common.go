@@ -1,24 +1,22 @@
 package api
 
-//goland:noinspection GoSnakeCaseUsage
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-	_ "github.com/linweiyuan/go-chatgpt-api/env"
-	"github.com/linweiyuan/go-logger/logger"
-	"github.com/xqdoo00o/funcaptcha"
-
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
+	"github.com/bogdanfinn/tls-client/profiles"
+	"github.com/gin-gonic/gin"
+
+	"github.com/linweiyuan/go-logger/logger"
 )
 
-//goland:noinspection SpellCheckingInspection
 const (
 	ChatGPTApiPrefix    = "/chatgpt"
 	ImitateApiPrefix    = "/imitate/v1"
@@ -31,28 +29,29 @@ const (
 	AuthorizationHeader                = "Authorization"
 	XAuthorizationHeader               = "X-Authorization"
 	ContentType                        = "application/x-www-form-urlencoded"
-	UserAgent                          = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+	UserAgent                          = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
 	Auth0Url                           = "https://auth0.openai.com"
 	LoginUsernameUrl                   = Auth0Url + "/u/login/identifier?state="
 	LoginPasswordUrl                   = Auth0Url + "/u/login/password?state="
-	ParseUserInfoErrorMessage          = "Failed to parse user login info."
-	GetAuthorizedUrlErrorMessage       = "Failed to get authorized url."
-	GetStateErrorMessage               = "Failed to get state."
-	EmailInvalidErrorMessage           = "Email is not valid."
-	EmailOrPasswordInvalidErrorMessage = "Email or password is not correct."
-	GetAccessTokenErrorMessage         = "Failed to get access token."
-	GetArkoseTokenErrorMessage         = "Failed to get arkose token."
+	ParseUserInfoErrorMessage          = "failed to parse user login info"
+	GetAuthorizedUrlErrorMessage       = "failed to get authorized url"
+	GetStateErrorMessage               = "failed to get state"
+	EmailInvalidErrorMessage           = "email is not valid"
+	EmailOrPasswordInvalidErrorMessage = "email or password is not correct"
+	GetAccessTokenErrorMessage         = "failed to get access token"
+	GetArkoseTokenErrorMessage         = `you must set ARKOSE_TOKEN_URL first to use GPT-4 (https://linweiyuan.github.io/2023/06/24/%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90-GPT-4-arkose-token.html)`
 	defaultTimeoutSeconds              = 600 // 10 minutes
 
 	EmailKey                       = "email"
-	AccountDeactivatedErrorMessage = "Account %s is deactivated."
+	AccountDeactivatedErrorMessage = "account %s is deactivated"
 
-	ReadyHint = "Service go-chatgpt-api is ready."
+	ReadyHint = "service go-chatgpt-api is ready"
 )
 
 var (
-	Client       tls_client.HttpClient
-	ArkoseClient tls_client.HttpClient
+	Client         tls_client.HttpClient
+	arkoseTokenUrl string
+	ArkoseClient   tls_client.HttpClient
 )
 
 type LoginInfo struct {
@@ -69,18 +68,16 @@ type AuthLogin interface {
 	GetAccessTokenFromHeader(c *gin.Context) (string, int, error)
 }
 
-//goland:noinspection GoUnhandledErrorResult
 func init() {
-	Client, _ = tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
+	Client, _ = tls_client.NewHttpClient(tls_client.NewLogger(), []tls_client.HttpClientOption{
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
 		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
-		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
+		tls_client.WithClientProfile(profiles.Chrome_117),
 	}...)
+	arkoseTokenUrl = os.Getenv("ARKOSE_TOKEN_URL")
 	ArkoseClient = getHttpClient()
-	funcaptcha.SetTLSClient(&Client)
 }
 
-//goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
 func NewHttpClient() tls_client.HttpClient {
 	client := getHttpClient()
 
@@ -95,12 +92,11 @@ func NewHttpClient() tls_client.HttpClient {
 func getHttpClient() tls_client.HttpClient {
 	client, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
-		tls_client.WithClientProfile(tls_client.Okhttp4Android13),
+		tls_client.WithClientProfile(profiles.Chrome_117),
 	}...)
 	return client
 }
 
-//goland:noinspection GoUnhandledErrorResult
 func Proxy(c *gin.Context) {
 	url := c.Request.URL.Path
 	if strings.Contains(url, ChatGPTApiPrefix) {
@@ -165,4 +161,25 @@ func GetAccessToken(c *gin.Context) string {
 	}
 
 	return accessToken
+}
+
+func GetArkoseToken() (string, error) {
+	var arkoseToken string
+	var err error
+	if arkoseTokenUrl == "" {
+		return "", errors.New(GetArkoseTokenErrorMessage)
+	}
+
+	req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
+	resp, err := ArkoseClient.Do(req)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return "", err
+	}
+	responseMap := make(map[string]interface{})
+	err = json.NewDecoder(resp.Body).Decode(&responseMap)
+	if err != nil {
+		return "", err
+	}
+	arkoseToken = responseMap["token"].(string)
+	return arkoseToken, err
 }

@@ -5,16 +5,15 @@ import (
 	"os"
 	"strings"
 
+	http "github.com/bogdanfinn/fhttp"
 	"github.com/gin-gonic/gin"
+
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-chatgpt-api/api/chatgpt"
 	"github.com/linweiyuan/go-chatgpt-api/api/imitate"
 	"github.com/linweiyuan/go-chatgpt-api/api/platform"
-	"github.com/linweiyuan/go-chatgpt-api/api/token"
 	_ "github.com/linweiyuan/go-chatgpt-api/env"
 	"github.com/linweiyuan/go-chatgpt-api/middleware"
-
-	http "github.com/bogdanfinn/fhttp"
 )
 
 func init() {
@@ -22,7 +21,6 @@ func init() {
 	gin.SetMode(gin.ReleaseMode)
 }
 
-//goland:noinspection SpellCheckingInspection
 func main() {
 	router := gin.Default()
 
@@ -33,7 +31,6 @@ func main() {
 	setupPlatformAPIs(router)
 	setupPandoraAPIs(router)
 	setupImitateAPIs(router)
-	setupTokenAPIs(router)
 	router.NoRoute(api.Proxy)
 
 	router.GET("/", func(c *gin.Context) {
@@ -46,11 +43,10 @@ func main() {
 	}
 	err := router.Run(":" + port)
 	if err != nil {
-		log.Fatal("Failed to start server: " + err.Error())
+		log.Fatal("failed to start server: " + err.Error())
 	}
 }
 
-//goland:noinspection SpellCheckingInspection
 func setupChatGPTAPIs(router *gin.Engine) {
 	chatgptGroup := router.Group("/chatgpt")
 	{
@@ -78,7 +74,6 @@ func setupPlatformAPIs(router *gin.Engine) {
 	}
 }
 
-//goland:noinspection SpellCheckingInspection
 func setupPandoraAPIs(router *gin.Engine) {
 	router.Any("/api/*path", func(c *gin.Context) {
 		c.Request.URL.Path = strings.ReplaceAll(c.Request.URL.Path, "/api", "/chatgpt/backend-api")
@@ -95,12 +90,5 @@ func setupImitateAPIs(router *gin.Engine) {
 		{
 			apiGroup.POST("/chat/completions", imitate.CreateChatCompletions)
 		}
-	}
-}
-
-func setupTokenAPIs(router *gin.Engine) {
-	tokenGroup := router.Group("/token")
-	{
-		tokenGroup.GET("/arkose", token.GetArkoseToken)
 	}
 }

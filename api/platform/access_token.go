@@ -7,12 +7,11 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/linweiyuan/go-chatgpt-api/api"
-
 	http "github.com/bogdanfinn/fhttp"
+
+	"github.com/linweiyuan/go-chatgpt-api/api"
 )
 
-//goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat,GoUnusedParameter
 func (userLogin *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
 	urlParams := url.Values{
 		"client_id":     {platformAuthClientID},
@@ -42,7 +41,6 @@ func (userLogin *UserLogin) GetState(authorizedUrl string) (string, int, error) 
 	return split[1], http.StatusOK, nil
 }
 
-//goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) CheckUsername(state string, username string) (int, error) {
 	formParams := url.Values{
 		"state":                       {state},
@@ -53,7 +51,7 @@ func (userLogin *UserLogin) CheckUsername(state string, username string) (int, e
 		"webauthn-platform-available": {"false"},
 		"action":                      {"default"},
 	}
-	req, err := http.NewRequest(http.MethodPost, api.LoginUsernameUrl+state, strings.NewReader(formParams.Encode()))
+	req, _ := http.NewRequest(http.MethodPost, api.LoginUsernameUrl+state, strings.NewReader(formParams.Encode()))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)
@@ -69,7 +67,6 @@ func (userLogin *UserLogin) CheckUsername(state string, username string) (int, e
 	return http.StatusOK, nil
 }
 
-//goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) CheckPassword(state string, username string, password string) (string, int, error) {
 	formParams := url.Values{
 		"state":    {state},
@@ -77,7 +74,7 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 		"password": {password},
 		"action":   {"default"},
 	}
-	req, err := http.NewRequest(http.MethodPost, api.LoginPasswordUrl+state, strings.NewReader(formParams.Encode()))
+	req, _ := http.NewRequest(http.MethodPost, api.LoginPasswordUrl+state, strings.NewReader(formParams.Encode()))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)
@@ -93,7 +90,6 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 	return resp.Request.URL.Query().Get("code"), http.StatusOK, nil
 }
 
-//goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) GetAccessToken(code string) (string, int, error) {
 	jsonBytes, _ := json.Marshal(GetAccessTokenRequest{
 		ClientID:    platformAuthClientID,
@@ -101,7 +97,7 @@ func (userLogin *UserLogin) GetAccessToken(code string) (string, int, error) {
 		GrantType:   platformAuthGrantType,
 		RedirectURI: platformAuthRedirectURL,
 	})
-	req, err := http.NewRequest(http.MethodPost, getTokenUrl, strings.NewReader(string(jsonBytes)))
+	req, _ := http.NewRequest(http.MethodPost, getTokenUrl, strings.NewReader(string(jsonBytes)))
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)

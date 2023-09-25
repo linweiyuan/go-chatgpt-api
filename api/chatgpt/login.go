@@ -5,13 +5,12 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/gin-gonic/gin"
-	"github.com/linweiyuan/go-chatgpt-api/api"
-
 	http "github.com/bogdanfinn/fhttp"
+	"github.com/gin-gonic/gin"
+
+	"github.com/linweiyuan/go-chatgpt-api/api"
 )
 
-//goland:noinspection GoUnhandledErrorResult
 func Login(c *gin.Context) {
 	var loginInfo api.LoginInfo
 	if err := c.ShouldBindJSON(&loginInfo); err != nil {
@@ -28,7 +27,6 @@ func Login(c *gin.Context) {
 	c.Writer.WriteString(accessTokenResponse)
 }
 
-//goland:noinspection GoUnhandledErrorResult
 func GetAccessToken(loginInfo api.LoginInfo) (int, string, string) {
 	userLogin := UserLogin{
 		client: api.NewHttpClient(),

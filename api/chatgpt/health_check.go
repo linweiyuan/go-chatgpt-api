@@ -1,30 +1,34 @@
 package chatgpt
 
 import (
+	"fmt"
+	"log"
 	"os"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	http "github.com/bogdanfinn/fhttp"
+
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-logger/logger"
-
-	http "github.com/bogdanfinn/fhttp"
 )
 
-//goland:noinspection SpellCheckingInspection
 const (
 	healthCheckUrl         = "https://chat.openai.com/backend-api/accounts/check"
-	errorHintBlock         = "Looks like you have bean blocked by OpenAI, please change to a new IP or have a try with WARP."
-	errorHintFailedToStart = "Failed to start, please try again later."
+	errorHintBlock         = "looks like you have bean blocked by OpenAI, please change to a new IP or have a try with WARP"
+	errorHintFailedToStart = "failed to start, please try again later: %s"
 	sleepHours             = 8760 // 365 days
 )
 
-//goland:noinspection GoUnhandledErrorResult,SpellCheckingInspection
 func init() {
 	proxyUrl := os.Getenv("PROXY")
 	if proxyUrl != "" {
 		logger.Info("PROXY: " + proxyUrl)
-		api.Client.SetProxy(proxyUrl)
+		err1 := api.Client.SetProxy(proxyUrl)
+		fmt.Println(err1)
+		if err := api.Client.SetProxy(proxyUrl); err != nil {
+			log.Fatal(err)
+		}
 
 		for {
 			resp, err := healthCheck()
@@ -40,7 +44,7 @@ func init() {
 	} else {
 		resp, err := healthCheck()
 		if err != nil {
-			logger.Error("Health check failed: " + err.Error())
+			logger.Error("failed to health check: " + err.Error())
 			os.Exit(1)
 		}
 
@@ -55,21 +59,22 @@ func healthCheck() (resp *http.Response, err error) {
 	return
 }
 
-//goland:noinspection GoUnhandledErrorResult
 func checkHealthCheckStatus(resp *http.Response) {
-	defer resp.Body.Close()
-	if resp != nil && resp.StatusCode == http.StatusUnauthorized {
-		logger.Info(api.ReadyHint)
-	} else {
-		doc, _ := goquery.NewDocumentFromReader(resp.Body)
-		alert := doc.Find(".message").Text()
-		if alert != "" {
-			logger.Error(errorHintBlock)
+	if resp != nil {
+		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusUnauthorized {
+			logger.Info(api.ReadyHint)
 		} else {
-			logger.Error(errorHintFailedToStart)
-			logger.Warn(doc.Text())
+			doc, _ := goquery.NewDocumentFromReader(resp.Body)
+			alert := doc.Find(".message").Text()
+			if alert != "" {
+				logger.Error(errorHintBlock)
+			} else {
+				logger.Error(fmt.Sprintf(errorHintFailedToStart, resp.Status))
+			}
+			time.Sleep(time.Hour * sleepHours)
+			os.Exit(1)
 		}
-		time.Sleep(time.Hour * sleepHours)
-		os.Exit(1)
 	}
 }

@@ -1,16 +1,15 @@
 module github.com/linweiyuan/go-chatgpt-api
 
-go 1.20
+go 1.21.1
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/bogdanfinn/fhttp v0.5.23
-	github.com/bogdanfinn/tls-client v1.5.0
+	github.com/bogdanfinn/fhttp v0.5.24
+	github.com/bogdanfinn/tls-client v1.6.1
 	github.com/gin-gonic/gin v1.9.1
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/joho/godotenv v1.5.1
 	github.com/linweiyuan/go-logger v0.0.0-20230709142852-da1f090a7d4c
-	github.com/xqdoo00o/funcaptcha v0.0.0-20230824022540-522e3fe68268
 )
 
 require (
@@ -42,7 +41,6 @@ require (
 	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
 	golang.org/x/text v0.12.0 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

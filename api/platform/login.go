@@ -5,13 +5,12 @@ import (
 	"io"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-	"github.com/linweiyuan/go-chatgpt-api/api"
-
 	http "github.com/bogdanfinn/fhttp"
+	"github.com/gin-gonic/gin"
+
+	"github.com/linweiyuan/go-chatgpt-api/api"
 )
 
-//goland:noinspection GoUnhandledErrorResult
 func Login(c *gin.Context) {
 	var loginInfo api.LoginInfo
 	if err := c.ShouldBindJSON(&loginInfo); err != nil {

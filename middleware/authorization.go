@@ -10,12 +10,13 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/linweiyuan/go-chatgpt-api/api"
 )
 
 const (
-	emptyAccessTokenErrorMessage      = "Please provide a valid access token or api key in 'Authorization' header."
-	accessTokenHasExpiredErrorMessage = "The accessToken for account %s has expired."
+	emptyAccessTokenErrorMessage      = "please provide a valid access token or api key in 'Authorization' header"
+	accessTokenHasExpiredErrorMessage = "the accessToken for account %s has expired"
 )
 
 type AccessToken struct {
@@ -35,7 +36,6 @@ type AccessToken struct {
 	Scope string   `json:"scope"`
 }
 
-//goland:noinspection SpellCheckingInspection
 func Authorization() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authorization := c.GetHeader(api.AuthorizationHeader)
@@ -70,7 +70,6 @@ func Authorization() gin.HandlerFunc {
 	}
 }
 
-//goland:noinspection GoUnhandledErrorResult
 func isExpired(c *gin.Context) bool {
 	accessToken := c.GetHeader(api.AuthorizationHeader)
 	split := strings.Split(accessToken, ".")
@@ -84,11 +83,8 @@ func isExpired(c *gin.Context) bool {
 		exp := int64(accessToken.Exp)
 		expTime := time.Unix(exp, 0)
 		now := time.Now()
-		if now.After(expTime) {
-			return true
-		}
 
-		return false
+		return now.After(expTime)
 	}
 
 	// apiKey

@@ -8,14 +8,13 @@ import (
 	"io"
 	"strings"
 
+	http "github.com/bogdanfinn/fhttp"
 	"github.com/gin-gonic/gin"
+
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-logger/logger"
-
-	http "github.com/bogdanfinn/fhttp"
 )
 
-//goland:noinspection GoUnhandledErrorResult
 func CreateChatCompletions(c *gin.Context) {
 	body, _ := io.ReadAll(c.Request.Body)
 	var request struct {
@@ -55,7 +54,6 @@ func CreateCompletions(c *gin.Context) {
 	CreateChatCompletions(c)
 }
 
-//goland:noinspection GoUnhandledErrorResult
 func handleCompletionsResponse(c *gin.Context, resp *http.Response) {
 	c.Writer.Header().Set("Content-Type", "text/event-stream; charset=utf-8")
 

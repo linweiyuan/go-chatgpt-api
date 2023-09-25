@@ -8,19 +8,18 @@ import (
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/linweiyuan/go-chatgpt-api/api"
-
 	http "github.com/bogdanfinn/fhttp"
+
+	"github.com/linweiyuan/go-chatgpt-api/api"
 )
 
-//goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, error) {
 	form := url.Values{
 		"callbackUrl": {"/"},
 		"csrfToken":   {csrfToken},
 		"json":        {"true"},
 	}
-	req, err := http.NewRequest(http.MethodPost, promptLoginUrl, strings.NewReader(form.Encode()))
+	req, _ := http.NewRequest(http.MethodPost, promptLoginUrl, strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)
@@ -38,9 +37,8 @@ func (userLogin *UserLogin) GetAuthorizedUrl(csrfToken string) (string, int, err
 	return responseMap["url"], http.StatusOK, nil
 }
 
-//goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) GetState(authorizedUrl string) (string, int, error) {
-	req, err := http.NewRequest(http.MethodGet, authorizedUrl, nil)
+	req, _ := http.NewRequest(http.MethodGet, authorizedUrl, nil)
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)
@@ -58,7 +56,6 @@ func (userLogin *UserLogin) GetState(authorizedUrl string) (string, int, error) 
 	return state, http.StatusOK, nil
 }
 
-//goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) CheckUsername(state string, username string) (int, error) {
 	formParams := url.Values{
 		"state":                       {state},
@@ -85,7 +82,6 @@ func (userLogin *UserLogin) CheckUsername(state string, username string) (int, e
 	return http.StatusOK, nil
 }
 
-//goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat
 func (userLogin *UserLogin) CheckPassword(state string, username string, password string) (string, int, error) {
 	formParams := url.Values{
 		"state":    {state},
@@ -93,7 +89,7 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 		"password": {password},
 		"action":   {"default"},
 	}
-	req, err := http.NewRequest(http.MethodPost, api.LoginPasswordUrl+state, strings.NewReader(formParams.Encode()))
+	req, _ := http.NewRequest(http.MethodPost, api.LoginPasswordUrl+state, strings.NewReader(formParams.Encode()))
 	req.Header.Set("Content-Type", api.ContentType)
 	req.Header.Set("User-Agent", api.UserAgent)
 	userLogin.client.SetFollowRedirect(false)
@@ -125,7 +121,7 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 		if resp.StatusCode == http.StatusFound {
 			location := resp.Header.Get("Location")
 			if strings.HasPrefix(location, "/u/mfa-otp-challenge") {
-				return "", http.StatusBadRequest, errors.New("Login with two-factor authentication enabled is not supported currently.")
+				return "", http.StatusBadRequest, errors.New("login with two-factor authentication enabled is not supported currently")
 			}
 
 			req, _ := http.NewRequest(http.MethodGet, location, nil)
@@ -156,9 +152,8 @@ func (userLogin *UserLogin) CheckPassword(state string, username string, passwor
 	return "", resp.StatusCode, nil
 }
 
-//goland:noinspection GoUnhandledErrorResult,GoErrorStringFormat,GoUnusedParameter
 func (userLogin *UserLogin) GetAccessToken(code string) (string, int, error) {
-	req, err := http.NewRequest(http.MethodGet, authSessionUrl, nil)
+	req, _ := http.NewRequest(http.MethodGet, authSessionUrl, nil)
 	req.Header.Set("User-Agent", api.UserAgent)
 	resp, err := userLogin.client.Do(req)
 	if err != nil {

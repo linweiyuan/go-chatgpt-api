@@ -9,9 +9,8 @@ services:
       - TZ=Asia/Shanghai
       - PROXY=
       - ARKOSE_TOKEN_URL=
-      - BX=
-      - BX_URL=
       - OPENAI_EMAIL=
       - OPENAI_PASSWORD=
       - CONTINUE_SIGNAL=
+      - ENABLE_HISTORY=
     restart: unless-stopped
