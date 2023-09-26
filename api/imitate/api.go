@@ -24,6 +24,10 @@ var (
 	reg *regexp.Regexp
 )
 
+func init() {
+	reg, _ = regexp.Compile("[^a-zA-Z0-9]+")
+}
+
 func CreateChatCompletions(c *gin.Context) {
 	var originalRequest APIRequest
 	err := c.BindJSON(&originalRequest)
