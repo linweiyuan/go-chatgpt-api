@@ -6,11 +6,12 @@ services:
     ports:
       - 8080:8080
     environment:
+      - PORT=
       - TZ=Asia/Shanghai
       - PROXY=
-      - ARKOSE_TOKEN_URL=
       - OPENAI_EMAIL=
       - OPENAI_PASSWORD=
       - CONTINUE_SIGNAL=
       - ENABLE_HISTORY=
+      - IMITATE_ACCESS_TOKEN=
     restart: unless-stopped

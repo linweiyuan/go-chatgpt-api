@@ -14,6 +14,4 @@ const (
 	responseTypeMaxTokens              = "max_tokens"
 	responseStatusFinishedSuccessfully = "finished_successfully"
 	noModelPermissionErrorMessage      = "you have no permission to use this model"
-
-	refreshPuidErrorMessage = "failed to refresh PUID"
 )

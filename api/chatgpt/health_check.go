@@ -2,7 +2,6 @@ package chatgpt
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -24,11 +23,7 @@ func init() {
 	proxyUrl := os.Getenv("PROXY")
 	if proxyUrl != "" {
 		logger.Info("PROXY: " + proxyUrl)
-		err1 := api.Client.SetProxy(proxyUrl)
-		fmt.Println(err1)
-		if err := api.Client.SetProxy(proxyUrl); err != nil {
-			log.Fatal(err)
-		}
+		api.Client.SetProxy(proxyUrl)
 
 		for {
 			resp, err := healthCheck()

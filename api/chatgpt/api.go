@@ -6,9 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"strings"
-	"time"
 
 	http "github.com/bogdanfinn/fhttp"
 	"github.com/gin-gonic/gin"
@@ -16,14 +14,6 @@ import (
 	"github.com/linweiyuan/go-chatgpt-api/api"
 	"github.com/linweiyuan/go-logger/logger"
 )
-
-var (
-	PUID string
-)
-
-func init() {
-	setupPUID()
-}
 
 func CreateConversation(c *gin.Context) {
 	var request CreateConversationRequest
@@ -66,8 +56,8 @@ func sendConversationRequest(c *gin.Context, request CreateConversationRequest) 
 	req.Header.Set("User-Agent", api.UserAgent)
 	req.Header.Set(api.AuthorizationHeader, api.GetAccessToken(c))
 	req.Header.Set("Accept", "text/event-stream")
-	if PUID != "" {
-		req.Header.Set("Cookie", "_puid="+PUID)
+	if api.PUID != "" {
+		req.Header.Set("Cookie", "_puid="+api.PUID)
 	}
 	resp, err := api.Client.Do(req)
 	if err != nil {
@@ -187,53 +177,5 @@ func handleConversationResponse(c *gin.Context, resp *http.Response, request Cre
 		}
 
 		handleConversationResponse(c, resp, continueConversationRequest)
-	}
-}
-
-func setupPUID() {
-	username := os.Getenv("OPENAI_EMAIL")
-	password := os.Getenv("OPENAI_PASSWORD")
-	if username != "" && password != "" {
-		go func() {
-			for {
-				statusCode, errorMessage, accessTokenResponse := GetAccessToken(api.LoginInfo{
-					Username: username,
-					Password: password,
-				})
-				if statusCode != http.StatusOK {
-					logger.Error(errorMessage)
-					return
-				}
-
-				responseMap := make(map[string]string)
-				json.Unmarshal([]byte(accessTokenResponse), &responseMap)
-
-				accessToken, ok := responseMap["accessToken"]
-				if !ok {
-					logger.Error(refreshPuidErrorMessage)
-					return
-				}
-
-				req, _ := http.NewRequest(http.MethodGet, api.ChatGPTApiUrlPrefix+"/backend-api/models?history_and_training_disabled=false", nil)
-				req.Header.Set("User-Agent", api.UserAgent)
-				req.Header.Set(api.AuthorizationHeader, accessToken)
-				resp, err := api.NewHttpClient().Do(req)
-				if err != nil || resp.StatusCode != http.StatusOK {
-					logger.Error(refreshPuidErrorMessage)
-					return
-				}
-
-				resp.Body.Close()
-				cookies := resp.Cookies()
-				for _, cookie := range cookies {
-					if cookie.Name == "_puid" {
-						PUID = cookie.Value
-						break
-					}
-				}
-
-				time.Sleep(time.Hour * 24 * 7)
-			}
-		}()
 	}
 }

@@ -3,16 +3,18 @@ package api
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
 	"github.com/bogdanfinn/tls-client/profiles"
 	"github.com/gin-gonic/gin"
+	"github.com/xqdoo00o/OpenAIAuth/auth"
+	"github.com/xqdoo00o/funcaptcha"
 
 	"github.com/linweiyuan/go-logger/logger"
 )
@@ -39,19 +41,21 @@ const (
 	EmailInvalidErrorMessage           = "email is not valid"
 	EmailOrPasswordInvalidErrorMessage = "email or password is not correct"
 	GetAccessTokenErrorMessage         = "failed to get access token"
-	GetArkoseTokenErrorMessage         = `you must set ARKOSE_TOKEN_URL first to use GPT-4 (https://linweiyuan.github.io/2023/06/24/%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90-GPT-4-arkose-token.html)`
 	defaultTimeoutSeconds              = 600 // 10 minutes
 
 	EmailKey                       = "email"
 	AccountDeactivatedErrorMessage = "account %s is deactivated"
 
 	ReadyHint = "service go-chatgpt-api is ready"
+
+	refreshPuidErrorMessage = "failed to refresh PUID"
 )
 
 var (
-	Client         tls_client.HttpClient
-	arkoseTokenUrl string
-	ArkoseClient   tls_client.HttpClient
+	Client       tls_client.HttpClient
+	ArkoseClient tls_client.HttpClient
+	PUID         string
+	proxyUrl     string
 )
 
 type LoginInfo struct {
@@ -69,19 +73,20 @@ type AuthLogin interface {
 }
 
 func init() {
-	Client, _ = tls_client.NewHttpClient(tls_client.NewLogger(), []tls_client.HttpClientOption{
+	Client, _ = tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
 		tls_client.WithTimeoutSeconds(defaultTimeoutSeconds),
-		tls_client.WithClientProfile(profiles.Chrome_117),
+		tls_client.WithClientProfile(profiles.Okhttp4Android13),
 	}...)
-	arkoseTokenUrl = os.Getenv("ARKOSE_TOKEN_URL")
 	ArkoseClient = getHttpClient()
+
+	setupPUID()
 }
 
 func NewHttpClient() tls_client.HttpClient {
 	client := getHttpClient()
 
-	proxyUrl := os.Getenv("PROXY")
+	proxyUrl = os.Getenv("PROXY")
 	if proxyUrl != "" {
 		client.SetProxy(proxyUrl)
 	}
@@ -92,7 +97,7 @@ func NewHttpClient() tls_client.HttpClient {
 func getHttpClient() tls_client.HttpClient {
 	client, _ := tls_client.NewHttpClient(tls_client.NewNoopLogger(), []tls_client.HttpClientOption{
 		tls_client.WithCookieJar(tls_client.NewCookieJar()),
-		tls_client.WithClientProfile(profiles.Chrome_117),
+		tls_client.WithClientProfile(profiles.Okhttp4Android13),
 	}...)
 	return client
 }
@@ -164,22 +169,47 @@ func GetAccessToken(c *gin.Context) string {
 }
 
 func GetArkoseToken() (string, error) {
-	var arkoseToken string
-	var err error
-	if arkoseTokenUrl == "" {
-		return "", errors.New(GetArkoseTokenErrorMessage)
-	}
+	return funcaptcha.GetOpenAIToken(PUID, proxyUrl)
+}
 
-	req, _ := http.NewRequest(http.MethodGet, arkoseTokenUrl, nil)
-	resp, err := ArkoseClient.Do(req)
-	if err != nil || resp.StatusCode != http.StatusOK {
-		return "", err
+func setupPUID() {
+	username := os.Getenv("OPENAI_EMAIL")
+	password := os.Getenv("OPENAI_PASSWORD")
+	if username != "" && password != "" {
+		go func() {
+			for {
+				authenticator := auth.NewAuthenticator(username, password, proxyUrl)
+				if err := authenticator.Begin(); err != nil {
+					logger.Warn(fmt.Sprintf("%s: %s", refreshPuidErrorMessage, err.Details))
+					return
+				}
+
+				accessToken := authenticator.GetAccessToken()
+				if accessToken == "" {
+					logger.Error(refreshPuidErrorMessage)
+					return
+				}
+
+				req, _ := http.NewRequest(http.MethodGet, ChatGPTApiUrlPrefix+"/backend-api/models?history_and_training_disabled=false", nil)
+				req.Header.Set("User-Agent", UserAgent)
+				req.Header.Set(AuthorizationHeader, accessToken)
+				resp, err := NewHttpClient().Do(req)
+				if err != nil || resp.StatusCode != http.StatusOK {
+					logger.Error(refreshPuidErrorMessage)
+					return
+				}
+
+				resp.Body.Close()
+				cookies := resp.Cookies()
+				for _, cookie := range cookies {
+					if cookie.Name == "_puid" {
+						PUID = cookie.Value
+						break
+					}
+				}
+
+				time.Sleep(time.Hour * 24 * 7)
+			}
+		}()
 	}
-	responseMap := make(map[string]interface{})
-	err = json.NewDecoder(resp.Body).Decode(&responseMap)
-	if err != nil {
-		return "", err
-	}
-	arkoseToken = responseMap["token"].(string)
-	return arkoseToken, err
 }
