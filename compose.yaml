@@ -14,4 +14,6 @@ services:
       - CONTINUE_SIGNAL=
       - ENABLE_HISTORY=
       - IMITATE_ACCESS_TOKEN=
+    volumes:
+      - ./chat.openai.com.har:/app/chat.openai.com.har
     restart: unless-stopped
