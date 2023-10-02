@@ -37,7 +37,6 @@ const (
 	LoginPasswordUrl                   = Auth0Url + "/u/login/password?state="
 	ParseUserInfoErrorMessage          = "failed to parse user login info"
 	GetAuthorizedUrlErrorMessage       = "failed to get authorized url"
-	GetStateErrorMessage               = "failed to get state"
 	EmailInvalidErrorMessage           = "email is not valid"
 	EmailOrPasswordInvalidErrorMessage = "email or password is not correct"
 	GetAccessTokenErrorMessage         = "failed to get access token"
@@ -55,7 +54,7 @@ var (
 	Client       tls_client.HttpClient
 	ArkoseClient tls_client.HttpClient
 	PUID         string
-	proxyUrl     string
+	ProxyUrl     string
 )
 
 type LoginInfo struct {
@@ -86,9 +85,9 @@ func init() {
 func NewHttpClient() tls_client.HttpClient {
 	client := getHttpClient()
 
-	proxyUrl = os.Getenv("PROXY")
-	if proxyUrl != "" {
-		client.SetProxy(proxyUrl)
+	ProxyUrl = os.Getenv("PROXY")
+	if ProxyUrl != "" {
+		client.SetProxy(ProxyUrl)
 	}
 
 	return client
@@ -169,7 +168,7 @@ func GetAccessToken(c *gin.Context) string {
 }
 
 func GetArkoseToken() (string, error) {
-	return funcaptcha.GetOpenAIToken(PUID, proxyUrl)
+	return funcaptcha.GetOpenAIToken(PUID, ProxyUrl)
 }
 
 func setupPUID() {
@@ -178,7 +177,7 @@ func setupPUID() {
 	if username != "" && password != "" {
 		go func() {
 			for {
-				authenticator := auth.NewAuthenticator(username, password, proxyUrl)
+				authenticator := auth.NewAuthenticator(username, password, ProxyUrl)
 				if err := authenticator.Begin(); err != nil {
 					logger.Warn(fmt.Sprintf("%s: %s", refreshPuidErrorMessage, err.Details))
 					return
@@ -190,23 +189,13 @@ func setupPUID() {
 					return
 				}
 
-				req, _ := http.NewRequest(http.MethodGet, ChatGPTApiUrlPrefix+"/backend-api/models?history_and_training_disabled=false", nil)
-				req.Header.Set("User-Agent", UserAgent)
-				req.Header.Set(AuthorizationHeader, accessToken)
-				resp, err := NewHttpClient().Do(req)
-				if err != nil || resp.StatusCode != http.StatusOK {
+				puid, err := authenticator.GetPUID()
+				if err != nil {
 					logger.Error(refreshPuidErrorMessage)
 					return
 				}
 
-				resp.Body.Close()
-				cookies := resp.Cookies()
-				for _, cookie := range cookies {
-					if cookie.Name == "_puid" {
-						PUID = cookie.Value
-						break
-					}
-				}
+				PUID = puid
 
 				time.Sleep(time.Hour * 24 * 7)
 			}
