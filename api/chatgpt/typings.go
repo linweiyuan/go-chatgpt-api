@@ -1,13 +1,8 @@
 package chatgpt
 
 import (
-	tls_client "github.com/bogdanfinn/tls-client"
 	"github.com/google/uuid"
 )
-
-type UserLogin struct {
-	client tls_client.HttpClient
-}
 
 type CreateConversationRequest struct {
 	Action                     string    `json:"action"`
