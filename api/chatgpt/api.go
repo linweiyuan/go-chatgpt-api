@@ -27,9 +27,16 @@ func CreateConversation(c *gin.Context) {
 	}
 
 	if len(request.Messages) != 0 {
-		if request.Messages[0].Author.Role == "" {
-			request.Messages[0].Author.Role = defaultRole
+		message := request.Messages[0]
+		if message.Author.Role == "" {
+			message.Author.Role = defaultRole
 		}
+
+		if message.Metadata == nil {
+			message.Metadata = map[string]string{}
+		}
+
+		request.Messages[0] = message
 	}
 
 	if strings.HasPrefix(request.Model, gpt4Model) && request.ArkoseToken == "" {
