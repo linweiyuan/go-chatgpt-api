@@ -20,9 +20,10 @@ type CreateConversationRequest struct {
 
 func (c *CreateConversationRequest) AddMessage(role string, content string) {
 	c.Messages = append(c.Messages, Message{
-		ID:      uuid.New().String(),
-		Author:  Author{Role: role},
-		Content: Content{ContentType: "text", Parts: []interface{}{content}},
+		ID:       uuid.New().String(),
+		Author:   Author{Role: role},
+		Content:  Content{ContentType: "text", Parts: []interface{}{content}},
+		Metadata: map[string]string{},
 	})
 }
 
