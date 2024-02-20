@@ -2,7 +2,7 @@
 
 ## 一个尝试绕过 `Cloudflare` 来使用 `ChatGPT` 接口的程序
 
-项目已弃坑，但可以聊点别的
+项目已弃坑，但可以聊点别的（扫码点添加就会自动通过验证加为好友，可以直接发消息了，不用打招呼，打招呼不回）
 
 ![](https://linweiyuan.github.io/about/mmqrcode.png)
 
